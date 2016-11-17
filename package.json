@@ -1,0 +1,29 @@
+{
+  "name": "abus",
+  "version": "0.0.1",
+  "scripts": {
+    "test": "jest"
+  },
+  "jest": {
+    "scriptPreprocessor": "<rootDir>/node_modules/ts-jest/preprocessor.js",
+    "testRegex": "(/__tests__/.*|\\.(test|spec)|Spec)\\.(ts|tsx)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "verbose": true,
+    "globals": {
+      "__TS_CONFIG__": {
+        "module": "commonjs",
+        "jsx": "react"
+      }
+    }
+  },
+  "devDependencies": {
+    "jest": "^15.1.1",
+    "jest-cli": "^15.1.1",
+    "ts-jest": "^0.1.8"
+  },
+  "dependencies": {}
+}

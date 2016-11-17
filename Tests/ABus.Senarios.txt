@@ -1,0 +1,63 @@
+subscribing to a message type
+    should register subscriber for the message type
+    should throw Invalid subscription exception for null messageHandler
+    should throw exception for invalid handler
+    should throw exception for invalid message type
+*   should publish a subscription created message
+
+    subscribing to a message sub type prefix
+       should recieve messages where message type begins with prefix
+    *  should recieve messages where message type begins with suffix
+
+    subscribing to a message with throttling
+    *   should only forward messages once per throttle period
+
+unsubscribing to a message type
+    removes handler from subscription
+    handler no longer recieves messages
+
+publishing a message outside of a handler
+    should send message to all registered subscribers
+    should add a messageHandlerContext to the handler recieving message being sent
+    should add messageType to messageHandlerContext
+    should add messageId to messageHandlerContext
+    should add create new conversationId to messageHandlerContext if none exists
+    should set the correlationId on messageHandlerContext to undefined
+*   should not throw an exception if subscriber throws an exception
+    should be fully async and return before subscribers have processed the message
+*   should call any beforeExecuteHandler before sending message
+*   should call any afterExecuteHandler after sending message
+
+publishing a message inside of a handler using messageHandlerContext
+    should send message to all registered subscribers
+    should add a messageHandlerContext to the handler recieving message being sent
+    should add messageId to messageHandlerContext which differs from original message
+    should set the conversationId on messageHandlerContext to the same as the original message
+    should set the correlationId on messageHandlerContext to the messageId of the original message
+*   should call any beforeExecuteHandler before sending message
+*   should call any afterExecuteHandler after sending message
+
+sending a message with reply
+    should verify there is only one subscriber for message type
+    should throw SubscriberNotFound exception if no subscriber has registerd for message type
+    should send to registered subscriber
+    should add a messageHandlerContext to the handler recieving message being sent
+    should add messageId to messageHandlerContext which differs from original message
+    should set the conversationId on messageHandlerContext to the same as the original message
+    should set the correlationId on messageHandlerContext to the messageId of the original message
+    should add messageId to bus instance passed in message handler
+    should add replyTo to messageHandlerContext
+*   should invoke reply handler after executing message handler
+*   should throw NamingViolationException if name not suffixed with Command and useConventions enabled
+
+** work out how to make bus.Send handle multiple returned messages. This will allow support for progress messages to be returned.
+
+await bus.Send("Service.GetPosts", {PostId = 124}, (progressMessage) => {...});
+
+bus.Reply({....});
+bus.ReplyProgress({...});
+
+
+
+
+

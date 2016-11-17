@@ -1,0 +1,19 @@
+Adding an item to a hashtable
+    should increase the count by 1
+    should allow the retrieval of the value by key
+    should contain the key
+    should include the new item in keys collection
+    should throw duplicate exception if key already exists
+    should be returned by for .. in
+    should support generics
+
+Removing an item from a hashtable
+    should decrease the count by 1
+    should disallow the retrieval of the value by key
+    should not contain the key
+    should not contain item in keys collection
+
+Clearing the hashtable
+    should have a count of 0
+    should have no values for the keys collection
+
