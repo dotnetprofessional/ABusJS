@@ -1,0 +1,63 @@
+ PASS  Tests\ABus.Publish.Spec.ts
+  publishing a message outside of a handler
+    √ should send message to all registered subscribers
+    √ should add a messageHandlerContext to the handler recieving message being sent
+    √ should add messageType to messageHandlerContext
+    √ should add messageId to messageHandlerContext
+    √ should set the conversationId on messageHandlerContext
+    √ should set the correlationId on messageHandlerContext to undefined
+    √ should not throw an exception if subscriber throws an exception (78ms)
+    √ should be fully async and return before subscribers have processed the message (109ms)
+  publishing a message inside of a handler
+    √ should send message to all registered subscribers (110ms)
+    √ should add a messageHandlerContext to the handler recieving message being sent
+    √ should add messageId to messageHandlerContext which differs from original message
+    √ should set the conversationId on messageHandlerContext to the same as the original message
+    √ should set the correlationId on messageHandlerContext to the messageId of the original message
+
+ PASS  Tests\hashtable.spec.ts
+  Creating instance
+    √ should support generic types
+  Adding an item to a hashtable
+    √ should increase the count by 1
+    √ should allow the retrieval of the value by key
+    √ should contain the key (16ms)
+    √ should throw duplicate exception if key already exists
+    √ should include the new item in keys collection
+    √ should be returned in for .. in
+  Removing an item from a hashtable
+    √ should decrease the count by 1
+    √ should disallow the retrieval of the value by key
+    √ should not contain the key
+    √ should not contain item in keys collection
+  Clearing the hashtable
+    √ should have a count of 0
+    √ should have no values for the keys collection
+  Updaing an item to a hashtable
+    √ should add the item if not found
+    √ should update the item if already exist
+
+ PASS  Tests\ABus.Subscription.Spec.ts
+  subscribing to a message type
+    √ should register subscriber for the message type
+    √ should throw Invalid subscription exception for null messageHandler
+    √ should throw exception for invalid handler
+    √ should throw exception for invalid message type
+    √ * should publish a subscription created message
+  unsubscribing to a message type
+    √ removes handler from subscription
+    √ *   handler no longer recieves messages
+  subscribing to a message sub type
+    √ should receive messages for all message types currently registered with supplied type prefix
+    √ * should receive messages for all message types currently registered with supplied type suffix
+  subscribing to a message with throttling
+    √ * should only forward messages once per throttle period
+    √ * should receive messages for all message types currently registered with supplied type suffix
+
+ PASS  Tests\ABus.RequestResponse.Spec.ts
+  publishing a message outside of a handler
+    √ should invoke reply handler after executing message handler (16ms)
+
+Test Summary
+ › Ran all tests.
+ › 40 tests passed (40 total in 4 test suites, run time 2.11s)
