@@ -400,16 +400,16 @@ export class MessagePipeline {
     // TODO: Need to wrap pipeline in async call
     ExecuteMessageTasks(message: IMessage<any>, context: MessageHandlerContext, tasks: MessageTasks, subscription: SubscriptionInstance) {
         let task = tasks.next;
-        task.invoke(message, context, async () => {
+        task.invoke(message, context,  async () => {
             if (tasks.next != null && !context.shouldTerminatePipeline) {
                 this.ExecuteMessageTasks(message, context, tasks, subscription);
             }
             else {
+                let result = subscription.messageSubscription.handler(message.message, context);
+
                 // determine if the handler is using a promise and if so wait for it to complete
-                if ('then' in subscription.messageSubscription.handler) {
-                    await subscription.messageSubscription.handler(message.message, context);
-                } else {
-                    subscription.messageSubscription.handler(message.message, context);
+                if (result && 'then' in result) {
+                    await result;
                 }
             }
         });
