@@ -344,29 +344,6 @@ export class MessagePipeline {
         this.publishInternal(message, context);
     }
 
-    private executeAsync(f: any, message: IMessage<any>) {
-        /*
-        var fPromise = new Promise((resolve, reject) => {
-            setTimeout(() => {
-                f();
-            }, 1);
-        });
-
-        fPromise.then((result) => {
-            return;
-        }).catch((error) => {
-            throw new MessageException(error, message);
-        });
-        */
-
-        if ('then' in f) {
-            f.catch(error => {
-                throw new MessageException(error, message);
-            })
-        } else {
-
-        }
-    }
     // Typescript doesn't support internal methods yet
     publishInternal<T>(message: IMessage<T>, context: IMessageHandlerContext) {
         // Find any subscribers for this message
@@ -423,17 +400,14 @@ export class MessagePipeline {
     // TODO: Need to wrap pipeline in async call
     ExecuteMessageTasks(message: IMessage<any>, context: MessageHandlerContext, tasks: MessageTasks, subscription: SubscriptionInstance) {
         let task = tasks.next;
-        task.invoke(message, context, () => {
+        task.invoke(message, context, async () => {
             if (tasks.next != null && !context.shouldTerminatePipeline) {
                 this.ExecuteMessageTasks(message, context, tasks, subscription);
             }
             else {
                 // determine if the handler is using a promise and if so wait for it to complete
                 if ('then' in subscription.messageSubscription.handler) {
-                    subscription.messageSubscription.handler(message.message, context)
-                        .catch(error => {
-                            throw new MessageException(error, message);
-                        });
+                    await subscription.messageSubscription.handler(message.message, context);
                 } else {
                     subscription.messageSubscription.handler(message.message, context);
                 }
