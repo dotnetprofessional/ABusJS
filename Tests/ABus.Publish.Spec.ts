@@ -27,13 +27,12 @@ describe("publishing a message outside of a handler", () => {
 
     pipeline.subscribe({
         messageType: testData.TestMessage2.TYPE,
-        handler: (message: testData.CustomerData, context: MessageHandlerContext):Promise<any> => {
+        handler: async (message: testData.CustomerData, context: MessageHandlerContext) => {
             returnedMessage = message;
             currentHandlerContext = context;
-            return Utils.sleep(5).then(()=>{
-                // Now set the counter
-                counter = 10;
-            });
+            await Utils.sleep(5);
+            // Now set the counter
+            counter = 10;
         }
     });
 
@@ -81,15 +80,12 @@ describe("publishing a message outside of a handler", () => {
             })
     });
 
-    it("should be fully async and return before subscribers have processed the message", () => {
+    it("should be fully async and return before subscribers have processed the message", async () => {
         counter = 0;
-        debugger;
-
         pipeline.publish(new testData.TestMessage2("test"));
         expect(counter).toBe(0);
-        return Utils.sleep(30).then(() => {
-            expect(counter).toBe(10);
-        });
+        await Utils.sleep(30);
+        expect(counter).toBe(10);
     });
 });
 
