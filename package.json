@@ -25,5 +25,7 @@
     "jest-cli": "^15.1.1",
     "ts-jest": "^0.1.8"
   },
-  "dependencies": {}
+  "dependencies": {
+    "typescript": "^2.1.1"
+  }
 }
