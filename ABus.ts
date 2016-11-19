@@ -1,4 +1,5 @@
 import Hashtable from './hashtable';
+import * as fs from 'fs'
 
 export class MessageException<T> {
     readonly errorKey = "ABus.Error";
@@ -177,11 +178,11 @@ class Guid {
 }
 
 export interface IMessageTask {
-    invokeAsync(message: IMessage<any>, context: MessageHandlerContext, next): Promise<void> | void;
+    invoke(message: IMessage<any>, context: MessageHandlerContext, next): void;
 }
 
 export class MessageExceptionTask implements IMessageTask {
-    invokeAsync(message: IMessage<any>, context: MessageHandlerContext, next: any) {
+    invoke(message: IMessage<any>, context: MessageHandlerContext, next: any) {
         try {
             next();
         } catch (error) {
@@ -307,7 +308,7 @@ export class MessagePipeline {
             var retry = () => {
                 let msg = this._replyToMessages.item(replyTo);
                 if (msg) {
-                    resolve(msg);
+                    resolve(msg.message);
                 } else if (retries <= 0) {
                     reject("Reply for message: " + message.type + " did not return in time.");
                 } else {
@@ -397,6 +398,15 @@ export class MessagePipeline {
         newContext.messageId = Guid.newGuid();
         newContext.messageType = message.type;
         for (let subscription of subscribers) {
+            // Determine if handler is async
+            /*
+            let handler = subscription.messageSubscription.handler;
+            if(handler && 'then' in handler) {
+                this.ExecuteMessageTasksAsync(message, newContext, this.messageTasks.localInstance, subscription);
+            } else {
+                this.ExecuteMessageTasks(message, newContext, this.messageTasks.localInstance, subscription);
+            }
+            */
             this.ExecuteMessageTasksAsync(message, newContext, this.messageTasks.localInstance, subscription);
         }
 
@@ -404,25 +414,32 @@ export class MessagePipeline {
     // TODO: Need to wrap pipeline in async call
     async ExecuteMessageTasksAsync(message: IMessage<any>, context: MessageHandlerContext, tasks: MessageTasks, subscription: SubscriptionInstance) {
         let task = tasks.next;
-        let taskResult = task.invokeAsync(message, context, async () =>  {
+
+        // determine if the task is using a promise and if so wait for it to complete
+        await task.invoke(message, context, async () => {
             if (tasks.next != null && !context.shouldTerminatePipeline) {
                 await this.ExecuteMessageTasksAsync(message, context, tasks, subscription);
             }
             else {
-                let result = subscription.messageSubscription.handler(message.message, context);
-
-                // determine if the handler is using a promise and if so wait for it to complete
-                if (result && 'then' in result) {
-                    debugger;
-                    await result;
-                }
+                let handler = subscription.messageSubscription.handler;
+                await handler(message, context);
             }
         });
+    }
+
+    ExecuteMessageTasks(message: IMessage<any>, context: MessageHandlerContext, tasks: MessageTasks, subscription: SubscriptionInstance) {
+        let task = tasks.next;
 
         // determine if the task is using a promise and if so wait for it to complete
-        if (taskResult && 'then' in taskResult) {
-            await taskResult;
-        }
+        task.invoke(message, context, () => {
+            if (tasks.next != null && !context.shouldTerminatePipeline) {
+                this.ExecuteMessageTasks(message, context, tasks, subscription);
+            }
+            else {
+                let handler = subscription.messageSubscription.handler;
+                handler(message, context);
+            }
+        });
     }
 
     unregisterAll(): void {
@@ -434,5 +451,11 @@ export class Utils {
     static sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     };
+
+    static async log(text: string) {
+        fs.appendFile("log.txt", text, error => {
+            debugger;
+        });
+    }
 }
 
