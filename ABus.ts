@@ -41,6 +41,10 @@ class MessageTasks {
         this._tasks.push(task);
     }
 
+    clear() {
+        this._tasks = [];
+    }
+
     get first(): IMessageTask {
         this._iterationCount = 0;
         return this.next;
@@ -173,11 +177,11 @@ class Guid {
 }
 
 export interface IMessageTask {
-    invoke(message: IMessage<any>, context: MessageHandlerContext, next: any);
+    invokeAsync(message: IMessage<any>, context: MessageHandlerContext, next): Promise<void> | void;
 }
 
 export class MessageExceptionTask implements IMessageTask {
-    invoke(message: IMessage<any>, context: MessageHandlerContext, next: any) {
+    invokeAsync(message: IMessage<any>, context: MessageHandlerContext, next: any) {
         try {
             next();
         } catch (error) {
@@ -393,26 +397,32 @@ export class MessagePipeline {
         newContext.messageId = Guid.newGuid();
         newContext.messageType = message.type;
         for (let subscription of subscribers) {
-            this.ExecuteMessageTasks(message, newContext, this.messageTasks.localInstance, subscription);
+            this.ExecuteMessageTasksAsync(message, newContext, this.messageTasks.localInstance, subscription);
         }
 
     }
     // TODO: Need to wrap pipeline in async call
-    ExecuteMessageTasks(message: IMessage<any>, context: MessageHandlerContext, tasks: MessageTasks, subscription: SubscriptionInstance) {
+    async ExecuteMessageTasksAsync(message: IMessage<any>, context: MessageHandlerContext, tasks: MessageTasks, subscription: SubscriptionInstance) {
         let task = tasks.next;
-        task.invoke(message, context,  async () => {
+        let taskResult = task.invokeAsync(message, context, async () =>  {
             if (tasks.next != null && !context.shouldTerminatePipeline) {
-                this.ExecuteMessageTasks(message, context, tasks, subscription);
+                await this.ExecuteMessageTasksAsync(message, context, tasks, subscription);
             }
             else {
                 let result = subscription.messageSubscription.handler(message.message, context);
 
                 // determine if the handler is using a promise and if so wait for it to complete
                 if (result && 'then' in result) {
+                    debugger;
                     await result;
                 }
             }
         });
+
+        // determine if the task is using a promise and if so wait for it to complete
+        if (taskResult && 'then' in taskResult) {
+            await taskResult;
+        }
     }
 
     unregisterAll(): void {

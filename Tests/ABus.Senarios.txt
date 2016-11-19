@@ -58,6 +58,15 @@ bus.Reply({....});
 bus.ReplyProgress({...});
 
 
+***********
+** MessageTasks
+***********
 
+Adding a message task to pipeline with Sync handlers
+*    should execute code before calling next() 
+*    should execute code after calling next()
 
+Adding a message task to pipeline with Async handlers
+*    should execute code before calling next() 
+*    should execute code after calling next()
 
