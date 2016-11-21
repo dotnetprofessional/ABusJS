@@ -6,9 +6,12 @@ import {
     IMessageHandlerContext,
     MessageHandlerOptions,
     ThreadingOptions,
-    IMessageTask,
     Utils
 } from '../ABus';
+
+import {
+        IMessageTask,
+} from '../messageTasks' 
 
 import * as testData from './ABus.Sample.Messages'
 

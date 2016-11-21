@@ -1,29 +1,7 @@
 import Hashtable from './hashtable';
-import * as fs from 'fs'
+import { IMessageTask, MessageExceptionTask } from './MessageTasks'
+import TimeSpan from './TimeSpan'
 
-export class MessageException<T> {
-    readonly errorKey = "ABus.Error";
-    readonly errorCount = "ABus.Error.Count";
-
-    constructor(public error: string, public message: IMessage<T>) {
-        // Add the error to the message and update the error count
-        message.metaData.update(this.errorKey, error);
-        var count = message.metaData.item(this.errorCount);
-        message.metaData.update(this.errorCount, count ? (count + 1).toString() : "1");
-    }
-
-    name: string = MessageException.typeName;
-
-    public static typeName = "ABus.MessageException";
-}
-
-export class UnhandledMessageException<T> extends MessageException<T> {
-    constructor(public error: string, public message: IMessage<T>) {
-        super(error, message);
-    }
-
-    public description: string = "Unhandled exception";
-}
 
 // Class to manage the message task handlers executed for each message
 class MessageTasks {
@@ -95,18 +73,11 @@ export interface IMessageContext {
 }
 
 export class MessageHandlerOptions {
-    threading: ThreadingOptions = ThreadingOptions.Async;
-
-    static Synchronous(): MessageHandlerOptions {
-        var syncHandlerOptions = new MessageHandlerOptions();
-        syncHandlerOptions.threading = ThreadingOptions.Sync;
-        return syncHandlerOptions;
-    }
+    threading?: ThreadingOptions = ThreadingOptions.Single;
 }
 
 export enum ThreadingOptions {
-    Async,
-    Sync,
+    Single,
     Pool
 }
 
@@ -122,7 +93,12 @@ export interface IMessageHandlerContext {
     pipeline: MessagePipeline
 
     publish<T>(message: IMessage<T>): void;
-    send<T>(message: IMessage<T>): void
+    send<T>(message: IMessage<T>, options: SendOptions): void
+}
+
+export class SendOptions {
+    deliverIn?: TimeSpan;
+    // deliverAt?: Date; // Enable when able to persist messages
 }
 
 export class MessageHandlerContext implements IMessageHandlerContext {
@@ -159,7 +135,7 @@ export class MessageHandlerContext implements IMessageHandlerContext {
         this.pipeline.publishInternal(message, new MessageHandlerContext(this.pipeline, this.metaData));
     }
 
-    send<T>(message: IMessage<T>): void {
+    send<T>(message: IMessage<T>, options?: SendOptions): void {
 
     }
 
@@ -169,7 +145,7 @@ export class MessageHandlerContext implements IMessageHandlerContext {
     }
 }
 
-class Guid {
+export class Guid {
     private static sUniqueIdCount = 0;
     static newGuid(): string {
         Guid.sUniqueIdCount++;
@@ -177,25 +153,10 @@ class Guid {
     }
 }
 
-export interface IMessageTask {
-    invoke(message: IMessage<any>, context: MessageHandlerContext, next): void;
-}
-
-export class MessageExceptionTask implements IMessageTask {
-    invoke(message: IMessage<any>, context: MessageHandlerContext, next: any) {
-        try {
-            next();
-        } catch (error) {
-            message.metaData = context.metaData;
-            context.publish({ type: MessageException.typeName, message: new MessageException(error, message) });
-        }
-    }
-}
-
 export class MessagePipeline {
     private _messageTypes = new Hashtable<Array<SubscriptionInstance>>();
     private _messageTasks = new MessageTasks([]);
-    private _replyToMessages = new Hashtable<IMessage<any>>();
+    private _replyToMessages = new Hashtable<ReplyHandler>();
 
     private _config = {
         tracking: false,
@@ -205,6 +166,7 @@ export class MessagePipeline {
 
     constructor() {
         this.messageTasks.add(new MessageExceptionTask());
+        this.addSystemSubscriptions();
     }
 
     private get messageTypes() {
@@ -223,6 +185,9 @@ export class MessagePipeline {
     }
 
     subscribe<T>(subscription: IMessageSubscription<T>, options: MessageHandlerOptions = new MessageHandlerOptions()): RegisteredSubscription {
+
+        let userOptions = Utils.assign(new MessageHandlerOptions(), options);
+
         if (!subscription) {
             throw new TypeError("Invalid subscription.");
         }
@@ -276,7 +241,7 @@ export class MessagePipeline {
         }
     }
 
-    send<T>(message: IMessage<T>): Promise<any> {
+    send<T>(message: IMessage<T>, options?: SendOptions): Promise<any> {
         // Find any subscribers for this message
         var subscribers = this.messageTypes.item(message.type) || [];
 
@@ -293,57 +258,21 @@ export class MessagePipeline {
         let replyTo = Guid.newGuid();
         message.metaData.update("replyTo", replyTo);
 
-        // **** THIS IS A BIT OF A HACK AND SHOULD BE REFACTORED
-        // **** FOR A BETTER SOLUTION USING YIELD
-        // Subscribe to the result of this message
-        this.subscribe({
-            messageType: message.type + ".reply", handler: (message: any, context: MessageHandlerContext) => {
-                this._replyToMessages.update(context.replyTo, message);
-            }
+        let replyHandler = new ReplyHandler();
+        let replyHandlerPromise = new Promise((resolve, reject) => {
+            replyHandler.resolve = resolve;
+            replyHandler.reject = reject;
+            replyHandler.replyTo = replyTo;
+            this._replyToMessages.add(replyTo, replyHandler);
+            // Add a timeout here too. This can be a default but also supplied as part of the sendOptions
         });
 
+        // Delivery the message to be sent to the command subscriber
         this.dispatchMessageToSubscribers(message, context, subscribers);
-        let promise = new Promise<any>((resolve, reject) => {
-            let retries = 100;
-            var retry = () => {
-                let msg = this._replyToMessages.item(replyTo);
-                if (msg) {
-                    resolve(msg.message);
-                } else if (retries <= 0) {
-                    reject("Reply for message: " + message.type + " did not return in time.");
-                } else {
-                    retries--;
-                    setTimeout(retry, 5);
-                }
-            }
-            retry();
-        });
 
-        return promise;
+        return replyHandlerPromise;
     }
 
-    /*
-    
-            let promise = new Promise<any>((resolve, reject) => {
-                let retries = 100;
-                var retry = () => {
-                    let msg = this._replyToMessages.item(replyTo);
-                    if (msg) {
-                        resolve(msg);
-                    } else if (retries <= 0) {
-                        reject("Reply for message: " + message.type + " did not return in time.");
-                    } else {
-                        retries--;
-                        setTimeout(retry, 5);
-                    }
-                }
-                retry();
-            });
-    
-            return promise;
-    
-    
-    */
     publish<T>(message: IMessage<T>): void {
         let context = new MessageHandlerContext(this);
         this.publishInternal(message, context);
@@ -377,7 +306,15 @@ export class MessagePipeline {
     }
 
     private getEndsWithSubscribers(messageType: string): SubscriptionInstance[] {
-        return null;
+        var subTypes = messageType.split('.');
+        var subscribers = [] as SubscriptionInstance[];
+        var searchType = '';
+        for (let i = subTypes.length - 1; i >= 0; i--) {
+            searchType += '.' + subTypes[i];
+            subscribers = subscribers.concat(this.messageTypes.item("*" + searchType) || []);
+        }
+
+        return subscribers;
     }
 
     public dispatchMessageToSubscribers(message: IMessage<any>, context: IMessageHandlerContext, subscribers: SubscriptionInstance[]) {
@@ -397,21 +334,13 @@ export class MessagePipeline {
         newContext.correlationId = context.messageId;
         newContext.messageId = Guid.newGuid();
         newContext.messageType = message.type;
+
         for (let subscription of subscribers) {
-            // Determine if handler is async
-            /*
-            let handler = subscription.messageSubscription.handler;
-            if(handler && 'then' in handler) {
-                this.ExecuteMessageTasksAsync(message, newContext, this.messageTasks.localInstance, subscription);
-            } else {
-                this.ExecuteMessageTasks(message, newContext, this.messageTasks.localInstance, subscription);
-            }
-            */
             this.ExecuteMessageTasksAsync(message, newContext, this.messageTasks.localInstance, subscription);
         }
 
     }
-    // TODO: Need to wrap pipeline in async call
+
     async ExecuteMessageTasksAsync(message: IMessage<any>, context: MessageHandlerContext, tasks: MessageTasks, subscription: SubscriptionInstance) {
         let task = tasks.next;
 
@@ -427,24 +356,34 @@ export class MessagePipeline {
         });
     }
 
-    ExecuteMessageTasks(message: IMessage<any>, context: MessageHandlerContext, tasks: MessageTasks, subscription: SubscriptionInstance) {
-        let task = tasks.next;
+    unregisterAll(): void {
+        this.messageTypes.clear();
+        this.addSystemSubscriptions();
+    }
 
-        // determine if the task is using a promise and if so wait for it to complete
-        task.invoke(message, context, () => {
-            if (tasks.next != null && !context.shouldTerminatePipeline) {
-                this.ExecuteMessageTasks(message, context, tasks, subscription);
-            }
-            else {
-                let handler = subscription.messageSubscription.handler;
-                handler(message, context);
+    private addSystemSubscriptions() {
+        // Subscribe for all .reply messages so they can be returned to their callers        
+        this.subscribe({
+            messageType: "*.reply", handler: (message: IMessage<any>, context: MessageHandlerContext) => {
+                var replyToHandler = this._replyToMessages.item(context.replyTo);
+                if (replyToHandler) {
+                    replyToHandler.resolve(message.message);
+
+                    // Remove the handler
+                    this._replyToMessages.remove(context.replyTo);
+                }
             }
         });
     }
+}
 
-    unregisterAll(): void {
-        this.messageTypes.clear();
+export class ReplyHandler {
+    constructor() {
+
     }
+    resolve: any;
+    reject: any;
+    replyTo: string;
 }
 
 export class Utils {
@@ -452,10 +391,12 @@ export class Utils {
         return new Promise(resolve => setTimeout(resolve, ms));
     };
 
-    static async log(text: string) {
-        fs.appendFile("log.txt", text, error => {
-            debugger;
-        });
+    static assign<T, U>(target: T, source: U): T {
+        for (let attr in source) {
+            target[attr] = source[attr];
+        }
+
+        return target;
     }
 }
 

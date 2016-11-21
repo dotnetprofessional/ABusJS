@@ -22,6 +22,22 @@ export class TestMessage2 extends TestMessage {
     static TYPE:string ="test.message2";
 }
 
+export class TestMessage1Reply extends TestMessage {
+    constructor(name: string) {
+        super(name);
+        this.type = TestMessage1Reply.TYPE;
+    }
+    static TYPE:string ="test.message1.reply";
+}
+
+export class TestMessage2Reply extends TestMessage {
+    constructor(name: string) {
+        super(name);
+        this.type = TestMessage2Reply.TYPE;
+    }
+    static TYPE:string ="test.message2.reply";
+}
+
 export class CustomerData {
     name: string;
 }
