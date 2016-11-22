@@ -13,6 +13,9 @@
       "js"
     ],
     "verbose": true,
+    "collectCoverage": true,
+    "collectCoverageFrom": ["**/*.{ts,tsx}", "!**/node_modules/**", "!**/vendor/**", "!**/typings/**"],
+    "coverageDirectory": "<rootDir>/coverage",
     "globals": {
       "__TS_CONFIG__": {
         "module": "commonjs",

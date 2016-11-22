@@ -68,9 +68,6 @@ export interface IMessageSubscription<T> {
     messageType: string;
     handler: IMessageHandler<T>;
 }
-export interface IMessageContext {
-    id: string;
-}
 
 export class MessageHandlerOptions {
     threading?: ThreadingOptions = ThreadingOptions.Single;
@@ -82,13 +79,21 @@ export enum ThreadingOptions {
 }
 
 
+/**
+ * Provides additional information about the current state
+ * of the message being processed. The metaData property
+ * can be used to pass additional data through the pipeline
+ * 
+ * @export
+ * @interface IMessageHandlerContext
+ */
 export interface IMessageHandlerContext {
-    messageType: string;
-    messageId: string;
-    conversationId: string;
-    correlationId: string
+    readonly messageType: string;
+    readonly messageId: string;
+    readonly conversationId: string;
+    readonly correlationId: string
     metaData: Hashtable<string>;
-    replyTo: string;
+    readonly replyTo: string;
 
     pipeline: MessagePipeline
 
