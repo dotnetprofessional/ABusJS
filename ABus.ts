@@ -48,7 +48,7 @@ export interface IMessage<T> {
 }
 
 export interface IMessageHandler<T> {
-    (message: T, bus: MessageHandlerContext): any
+    (message: T, bus: MessageHandlerContext): void
 }
 
 // Internal interface to track instances of subscriptions
