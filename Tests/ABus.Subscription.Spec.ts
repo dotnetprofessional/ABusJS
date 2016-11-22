@@ -61,7 +61,7 @@ describe("unsubscribing to a message type", () => {
     it("removes handler from subscription", () => {
         expect(pipeline.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
         // Add another subscriber
-        let subscription = pipeline.subscribe({ messageType: testData.TestMessage.TYPE, handler: IMessag => { } });
+        let subscription = pipeline.subscribe({ messageType: testData.TestMessage.TYPE, handler: () => { } });
         expect(pipeline.subscriberCount(testData.TestMessage.TYPE)).toBe(2);
 
         // Remove the last subscriber 
