@@ -1,5 +1,6 @@
 /node_modules
 /lib
 /typings
+/coverage
 *.user
 npm-debug.log
