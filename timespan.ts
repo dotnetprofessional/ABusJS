@@ -93,6 +93,6 @@ export default class TimeSpan {
      * @memberOf TimeSpan
      */
     static getTimeSpan(date: number): TimeSpan {
-        return new TimeSpan(Date.now() - date); 
+        return new TimeSpan(date - Date.now()); 
     }
 }

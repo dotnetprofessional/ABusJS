@@ -15,7 +15,7 @@
       "tsx",
       "js"
     ],
-    "verbose": true,
+    "verbose": false,
     "collectCoverage": false,
     "collectCoverageFrom": [
       "**/*.{ts,tsx}",
