@@ -9,14 +9,13 @@ import HashTable from './HashTable'
  * @class TimeoutManager
  */
 export class TimeoutManager {
-    private _deferedMessages: HashTable<DeferedMessage>;
+    private _deferedMessages: HashTable<DeferedMessage> = new HashTable<DeferedMessage>();
 
     constructor(private pipeline: MessagePipeline) {
-
     }
     deferMessage(message: IMessage<any>, context: IMessageHandlerContext, options: DeferMessageOptions) {
         // Schedule the message for execution
-        let deferFor = TimeSpan.getTimeSpan(options.deliverAt.getTime()).totalMilliseconds;
+        let deferFor = TimeSpan.getTimeSpan(options.deliverAt).totalMilliseconds;
         let timeoutKey = setTimeout(()=> {
             this._deferedMessages.remove(context.messageId);
             this.pipeline.send(message, context);
@@ -48,9 +47,9 @@ export class TimeoutManager {
  * @class DeferMessageOptions
  */
 export class DeferMessageOptions {
-    deliverAt: Date;
-    timeout: Date;
-    isPersistant: boolean;
+    deliverAt: number;
+    timeout?: number;
+    isPersistant?: boolean = false;
 }
 
 class DeferedMessage {
