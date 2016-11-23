@@ -5,7 +5,10 @@
     "test": "jest"
   },
   "jest": {
-    "scriptPreprocessor": "<rootDir>/node_modules/ts-jest/preprocessor.js",
+    "transform": {
+      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testResultsProcessor": "<rootDir>/node_modules/ts-jest/coverageprocessor.js",
     "testRegex": "(/__tests__/.*|\\.(test|spec)|Spec)\\.(ts|tsx)$",
     "moduleFileExtensions": [
       "ts",
@@ -13,8 +16,13 @@
       "js"
     ],
     "verbose": true,
-    "collectCoverage": true,
-    "collectCoverageFrom": ["**/*.{ts,tsx}", "!**/node_modules/**", "!**/vendor/**", "!**/typings/**"],
+    "collectCoverage": false,
+    "collectCoverageFrom": [
+      "**/*.{ts,tsx}",
+      "!**/node_modules/**",
+      "!**/vendor/**",
+      "!**/typings/**"
+    ],
     "coverageDirectory": "<rootDir>/coverage",
     "globals": {
       "__TS_CONFIG__": {
@@ -24,9 +32,9 @@
     }
   },
   "devDependencies": {
-    "jest": "^15.1.1",
-    "jest-cli": "^15.1.1",
-    "ts-jest": "^0.1.8"
+    "jest": "^17.0.3",
+    "jest-cli": "^17.0.3",
+    "ts-jest": "^17.0.0"
   },
   "dependencies": {
     "typescript": "^2.1.1"

@@ -49,7 +49,7 @@ describe("subscribing to a message type", () => {
         expect(badMessageHandler).toThrowError('Invalid messageType');
     });
 
-    it("* should publish a subscription created message", () => {
+    it.skip("should publish a subscription created message", () => {
     });
 });
 
@@ -69,7 +69,7 @@ describe("unsubscribing to a message type", () => {
         expect(pipeline.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
     });
 
-    it("*   handler no longer recieves messages", () => {
+    it.skip("handler no longer recieves messages", () => {
     });
 });
 
@@ -126,12 +126,12 @@ describe("subscribing to a message sub type", () => {
 describe("subscribing to a message with throttling", () => {
     var pipeline = new MessagePipeline();
 
-    it("* should only forward messages once per throttle period ", () => {
+    it.skip("should only forward messages once per throttle period ", () => {
         // Ie throttle 1 sec should only receive messages every 1 second even if more have arrived
 
     });
 
-    it("* should receive messages for all message types currently registered with supplied type suffix", () => {
+    it.skip("should receive messages for all message types currently registered with supplied type suffix", () => {
         //pipeline.subscribe("*.message1", (message: any) => { });
     });
 
