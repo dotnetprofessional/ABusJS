@@ -7,6 +7,8 @@ describe("Deferring a message", () => {
     let pipeline = new ABus.MessagePipeline();
     let counter = 0;
     let timeoutManager = new TimeoutManager(pipeline);
+    let messageHandlerContext = new ABus.MessageHandlerContext(pipeline);
+    messageHandlerContext.messageId = ABus.Guid.newGuid();
 
     jest.useFakeTimers();
 
@@ -16,17 +18,21 @@ describe("Deferring a message", () => {
     }});
 
     it("should send the message at the specified time", () => {
-        timeoutManager.deferMessage(new testData.TestMessage("test"), null, {deliverAt: TimeSpan.FromSeconds(5).getDateTime()})
+        timeoutManager.deferMessage(new testData.TestMessage("test"), messageHandlerContext, 
+            {deliverAt: TimeSpan.FromSeconds(4).getDateTime()});
+
         expect(counter).toBe(0);
 
-        jest.runTimersToTime(3000);
+        // Wait awhile and check the message still hasn't been sent
+        jest.runTimersToTime(TimeSpan.FromSeconds(3).totalMilliseconds);
         expect(counter).toBe(0);
-        jest.runAllTimers();
+        // Now wait enough time to fire the send
+        jest.runTimersToTime(TimeSpan.FromSeconds(1).totalMilliseconds);
         expect(counter).toBe(100);
     });
 
-    it.skip("should not send the message if the timeout has been reached", () => {
-        //expect(TimeSpan.totalHours).toBe(24);
+    it.skip("should not send the message if the timeout has been reached for a persisted message", () => {
+        // This test only makes sense once persistent timers have been implemented.
     });
 
 })
