@@ -17,7 +17,7 @@ export class Saga<T> {
     }
     
     markAsComplete(): void {
-
+        this.storage.Complete();
     }
 
     /**
@@ -27,11 +27,12 @@ export class Saga<T> {
     requestTimeout(message: abus.IMessage<T>, delay: TimeSpan | Date) {
 
     }
+    
+    
 }
 
 export interface IPersistSagaData<T> {
     Save(key: string): Promise<void>;
-    Update(key: string, data: T): Promise<void>;
     Get<T>(key: string): Promise<T>;
     Complete(key:string): Promise<void>;
 }
@@ -40,16 +41,10 @@ export interface IPersistSagaData<T> {
 export class InMemorySagaStorage<T> implements IPersistSagaData<T> {
     private _data: HashTable<T> = new HashTable<T>();
 
-    Save(key: string): Promise<void> {
+    Save(key:string): Promise<void> {
         // No Op
         return new Promise<void>(resolve => {
             resolve();
-        });
-    }
-
-    Update(key: string, data: T): Promise<void> {
-        return new Promise<void>(resolve => {
-            this._data.update(key,  data);
         });
     }
 
@@ -65,3 +60,11 @@ export class InMemorySagaStorage<T> implements IPersistSagaData<T> {
         });
     }
 }
+
+/*
+    Notes:
+        Saga storage should have a ETag to handle concurrency issues. Simple example, HandlerA is waiting for a service call
+        then HandlerB receives a message and updates state. HandlerA should fail as the state has changed since the handler started.
+        This would typically be handled automatically via a retry, though this would require isolated state to perform a rollback.
+        This can be handled by the Get<T> method and can have multiple implementations that both cater for this and not.
+*/

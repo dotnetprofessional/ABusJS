@@ -158,6 +158,7 @@ export class Guid {
     }
 }
 
+
 export class MessagePipeline {
     private _messageTypes = new Hashtable<Array<SubscriptionInstance>>();
     private _messageTasks = new MessageTasks([]);
