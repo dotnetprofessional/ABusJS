@@ -4,16 +4,16 @@ import * as testData from './ABus.Sample.Messages'
 import * as ABus from '../ABus';
 
 describe("Deferring a message", () => {
-    let pipeline = new ABus.MessagePipeline();
+    let bus = new ABus.Bus();
     let counter = 0;
-    let timeoutManager = new TimeoutManager(pipeline);
-    let messageHandlerContext = new ABus.MessageHandlerContext(pipeline);
+    let timeoutManager = new TimeoutManager(bus);
+    let messageHandlerContext = new ABus.MessageHandlerContext(bus);
     messageHandlerContext.messageId = ABus.Guid.newGuid();
 
     jest.useFakeTimers();
 
-    pipeline.subscribe({messageType: testData.TestMessage.TYPE, 
-            handler: (message: testData.TestMessage, bus: ABus.MessageHandlerContext)=>{
+    bus.subscribe({messageType: testData.TestMessage.TYPE, 
+            handler: (message: testData.TestMessage, context: ABus.MessageHandlerContext)=>{
         counter = 100;
     }});
 

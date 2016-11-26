@@ -1,5 +1,5 @@
 import {
-    MessagePipeline,
+    Bus,
     MessageHandlerContext,
     IMessageHandlerContext,
     ThreadingOptions,
@@ -8,7 +8,7 @@ import {
 import * as testData from './ABus.Sample.Messages'
 
 describe("subscribing to a message type", () => {
-    var pipeline = new MessagePipeline();
+    var pipeline = new Bus();
 
     it("should register subscriber for the message type", () => {
         pipeline.unregisterAll();
@@ -54,7 +54,7 @@ describe("subscribing to a message type", () => {
 });
 
 describe("unsubscribing to a message type", () => {
-    var pipeline = new MessagePipeline();
+    var pipeline = new Bus();
 
     pipeline.subscribe({ messageType: testData.TestMessage.TYPE, handler: (message: any) => { } });
 
@@ -74,7 +74,7 @@ describe("unsubscribing to a message type", () => {
 });
 
 describe("subscribing to a message sub type", () => {
-    var pipeline = new MessagePipeline();
+    var pipeline = new Bus();
 
     it("should receive messages for all message types currently registered with supplied type prefix", () => {
         let counter = 0;
@@ -124,7 +124,7 @@ describe("subscribing to a message sub type", () => {
 });
 
 describe("subscribing to a message with throttling", () => {
-    var pipeline = new MessagePipeline();
+    var pipeline = new Bus();
 
     it.skip("should only forward messages once per throttle period ", () => {
         // Ie throttle 1 sec should only receive messages every 1 second even if more have arrived

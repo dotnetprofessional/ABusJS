@@ -1,5 +1,5 @@
 import {
-    MessagePipeline,
+    Bus,
     MessageHandlerContext,
     IMessage,
     IMessageSubscription,
@@ -11,7 +11,7 @@ import {
 import * as testData from './ABus.Sample.Messages'
 
 describe("publishing a message outside of a handler", () => {
-    var pipeline = new MessagePipeline();
+    var pipeline = new Bus();
     var currentHandlerContext: MessageHandlerContext;
 
     pipeline.config.useConventions = false;
