@@ -1,5 +1,5 @@
 import {
-    MessagePipeline,
+    Bus,
     MessageHandlerContext,
     IMessage,
     IMessageSubscription,
@@ -44,7 +44,7 @@ class TestMessageTask implements IMessageTask {
 }
 
 describe("Adding a message task to pipeline with Sync handlers", () => {
-    var pipeline = new MessagePipeline();
+    var pipeline = new Bus();
     var returnedMessage: testData.CustomerData;
     var currentHandlerContext: IMessageHandlerContext;
     var counter = 0;
@@ -75,7 +75,7 @@ describe("Adding a message task to pipeline with Sync handlers", () => {
 });
 
 describe("Adding a message task to pipeline with Async handlers", () => {
-    var pipeline = new MessagePipeline();
+    var pipeline = new Bus();
     var returnedMessage: testData.CustomerData;
     var currentHandlerContext: IMessageHandlerContext;
     var counter = 0;

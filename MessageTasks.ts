@@ -27,6 +27,7 @@ export class MessageException<T> {
         message.metaData.update(this.errorCount, count ? (count + 1).toString() : "1");
     }
 
+    // [GM]: See if we can use species to get child class
     name: string = MessageException.typeName;
 
     public static typeName = "ABus.MessageException";

@@ -1,4 +1,4 @@
-import {IMessage, IMessageHandlerContext, MessagePipeline} from './Abus'
+import {IMessage, IMessageHandlerContext, Bus} from './Abus'
 import TimeSpan from './TimeSpan'
 import HashTable from './HashTable'
 
@@ -11,7 +11,7 @@ import HashTable from './HashTable'
 export class TimeoutManager {
     private _deferedMessages: HashTable<DeferedMessage> = new HashTable<DeferedMessage>();
 
-    constructor(private pipeline: MessagePipeline) {
+    constructor(private pipeline: Bus) {
     }
     deferMessage(message: IMessage<any>, context: IMessageHandlerContext, options: DeferMessageOptions) {
         // Schedule the message for execution

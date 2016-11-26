@@ -1,5 +1,5 @@
 import {
-    MessagePipeline,
+    Bus,
     MessageHandlerContext,
     IMessage,
     IMessageSubscription,
@@ -12,12 +12,12 @@ import {
 import * as testData from './ABus.Sample.Messages'
 
 describe("publishing a message outside of a handler", () => {
-    var pipeline = new MessagePipeline();
+    var bus = new Bus();
     var returnedMessage: testData.CustomerData;
     var currentHandlerContext: IMessageHandlerContext;
     var counter = 0;
 
-    pipeline.subscribe({
+    bus.subscribe({
         messageType: testData.TestMessage.TYPE,
         handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
             returnedMessage = message;
@@ -25,7 +25,7 @@ describe("publishing a message outside of a handler", () => {
         }
     }, {threading: ThreadingOptions.Single});
 
-    pipeline.subscribe({
+    bus.subscribe({
         messageType: testData.TestMessage2.TYPE,
         handler: async (message: testData.CustomerData, context: MessageHandlerContext) => {
             returnedMessage = message;
@@ -37,12 +37,12 @@ describe("publishing a message outside of a handler", () => {
     });
 
     it("should send message to all registered subscribers", () => {
-        pipeline.publish(new testData.TestMessage("Johhny Smith"));
+        bus.publish(new testData.TestMessage("Johhny Smith"));
         expect(returnedMessage.name).toBe("Johhny Smith");
     });
 
     it("should add a messageHandlerContext to the handler recieving message being sent", () => {
-        pipeline.publish(new testData.TestMessage("Johhny Smith"));
+        bus.publish(new testData.TestMessage("Johhny Smith"));
         expect(currentHandlerContext).toBeDefined();
     });
 
@@ -65,14 +65,14 @@ describe("publishing a message outside of a handler", () => {
 
     it("should not throw an exception if subscriber throws an exception", () => {
         // subscribe to a msg that will then fail during its processing.
-        pipeline.subscribe({
+        bus.subscribe({
             messageType: testData.TestMessage.TYPE,
             handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
                 throw new TypeError("Boom!!");
             }
         });
 
-        pipeline.publish({ type: testData.TestMessage.TYPE, message: new testData.TestMessage("") });
+        bus.publish({ type: testData.TestMessage.TYPE, message: new testData.TestMessage("") });
         return Utils.sleep(10)
             .then(() => { expect(true) })
             .catch(() => {
@@ -82,7 +82,7 @@ describe("publishing a message outside of a handler", () => {
 
     it("should be fully async and return before subscribers have processed the message", async () => {
         counter = 0;
-        pipeline.publish(new testData.TestMessage2("test"));
+        bus.publish(new testData.TestMessage2("test"));
         expect(counter).toBe(0);
         await Utils.sleep(30);
         expect(counter).toBe(10);
@@ -91,14 +91,14 @@ describe("publishing a message outside of a handler", () => {
 
 
 describe("publishing a message inside of a handler", () => {
-    var pipeline = new MessagePipeline();
+    var bus = new Bus();
     var firstMessage: testData.CustomerData;
     var firstHandlerContext: IMessageHandlerContext;
 
     var secondMessage: testData.CustomerData;
     var secondHandlerContext: IMessageHandlerContext;
 
-    pipeline.subscribe({
+    bus.subscribe({
         messageType: testData.TestMessage.TYPE,
         handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
             firstMessage = message;
@@ -107,7 +107,7 @@ describe("publishing a message inside of a handler", () => {
         }
     });
 
-    pipeline.subscribe({
+    bus.subscribe({
         messageType: testData.TestMessage2.TYPE,
         handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
             secondMessage = message;
@@ -115,7 +115,7 @@ describe("publishing a message inside of a handler", () => {
         }
     });
 
-    pipeline.publish(new testData.TestMessage("Johhny Smith"));
+    bus.publish(new testData.TestMessage("Johhny Smith"));
 
     it("should send message to all registered subscribers", () => {
         return Utils.sleep(10)
@@ -150,12 +150,12 @@ describe("publishing a message inside of a handler", () => {
 });
 
 describe("publishing a message outside of a handler with ", () => {
-    var pipeline = new MessagePipeline();
+    var bus = new Bus();
     var returnedMessage: testData.CustomerData;
     var currentHandlerContext: IMessageHandlerContext;
     var counter = 0;
 
-    pipeline.subscribe({
+    bus.subscribe({
         messageType: testData.TestMessage.TYPE,
         handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
             returnedMessage = message;
@@ -163,7 +163,7 @@ describe("publishing a message outside of a handler with ", () => {
         }
     }, {threading: ThreadingOptions.Single});
 
-    pipeline.subscribe({
+    bus.subscribe({
         messageType: testData.TestMessage2.TYPE,
         handler: async (message: testData.CustomerData, context: MessageHandlerContext) => {
             returnedMessage = message;
@@ -175,7 +175,7 @@ describe("publishing a message outside of a handler with ", () => {
     });
 
     it("should send message to all registered subscribers", () => {
-        pipeline.publish(new testData.TestMessage("Johhny Smith"));
+        bus.publish(new testData.TestMessage("Johhny Smith"));
         expect(returnedMessage.name).toBe("Johhny Smith");
     });
 
