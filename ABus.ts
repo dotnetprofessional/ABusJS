@@ -1,7 +1,8 @@
 import Hashtable from './hashtable';
 import { IMessageTask, MessageExceptionTask } from './MessageTasks'
 import TimeSpan from './TimeSpan'
-import {Saga} from './Saga'
+import { Saga } from './Saga'
+import { TimeoutManager } from './TimeoutManager'
 
 // Class to manage the message task handlers executed for each message
 class MessageTasks {
@@ -104,7 +105,7 @@ export interface IMessageHandlerContext {
     bus: Bus
 
     publish<T>(message: IMessage<T>): void;
-    send<T>(message: IMessage<T>, options: SendOptions): void
+    send<T>(message: IMessage<T>, options?: SendOptions): void
 }
 
 export class SendOptions {
@@ -148,8 +149,8 @@ export class MessageHandlerContext implements IMessageHandlerContext {
         this.bus.publishInternal(message, new MessageHandlerContext(this.bus, this.metaData));
     }
 
-    send<T>(message: IMessage<T>, options?: SendOptions): void {
-        this.bus.sendInternal(message, options, new MessageHandlerContext(this.bus, this.metaData));
+    send<T>(message: IMessage<T>, options?: SendOptions): Promise<any> {
+        return this.bus.sendInternal(message, options, new MessageHandlerContext(this.bus, this.metaData));
     }
 
     reply<T>(reply: T): void {
@@ -171,6 +172,7 @@ export class Bus {
     private _messageTypes = new Hashtable<Array<SubscriptionInstance>>();
     private _messageTasks = new MessageTasks([]);
     private _replyToMessages = new Hashtable<ReplyHandler>();
+    private _timeoutManager = new TimeoutManager(this);
 
     private _config = {
         tracking: false,
@@ -262,13 +264,20 @@ export class Bus {
     sendInternal<T>(message: IMessage<T>, options: SendOptions, context: IMessageHandlerContext): Promise<any> {
         // Find any subscribers for this message
         var subscribers = this.messageTypes.item(message.type) || [];
+        options = Utils.assign(new SendOptions(), options);
 
         if (subscribers.length > 1) {
-            throw new TypeError("Commands must have only one subscriber.")
+            throw new TypeError(`The command ${message.type} must have only one subscriber.`);
         } else if (subscribers.length === 0) {
-            throw new TypeError("No subscriber defined for this command.");
+            throw new TypeError(`No subscriber defined for the command ${message.type}`);
         }
 
+        // If the message should be deferred then let the TimeoutManager handle the message
+        if (options.deliverIn) {
+            // Need to also handle timeout of timeouts!?
+            this._timeoutManager.deferMessage(message, context, { deliverAt: options.deliverIn.getDateTime() });
+            return;
+        }
         if (!message.metaData) {
             message.metaData = new Hashtable<any>();
         }
@@ -422,5 +431,12 @@ export class Utils {
 
         return target;
     }
+
+    static fromJsonFile<T>(filename: string): T {
+        var fs = require('fs');
+        var obj = JSON.parse(fs.readFileSync(filename, 'utf8'));
+
+        return obj as T;
+    };
 }
 

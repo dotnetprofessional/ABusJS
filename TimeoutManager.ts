@@ -11,14 +11,14 @@ import HashTable from './HashTable'
 export class TimeoutManager {
     private _deferedMessages: HashTable<DeferedMessage> = new HashTable<DeferedMessage>();
 
-    constructor(private pipeline: Bus) {
+    constructor(private bus: Bus) {
     }
     deferMessage(message: IMessage<any>, context: IMessageHandlerContext, options: DeferMessageOptions) {
         // Schedule the message for execution
         let deferFor = TimeSpan.getTimeSpan(options.deliverAt).totalMilliseconds;
         let timeoutKey = setTimeout(()=> {
             this._deferedMessages.remove(context.messageId);
-            this.pipeline.send(message, context);
+            context.send(message);
         }, deferFor);
         
         this._deferedMessages.add(context.messageId, {timeoutKey, message, context, options});
