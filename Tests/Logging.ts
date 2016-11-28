@@ -10,11 +10,6 @@ export default class Log {
     }
 
     toString() {
-        var text = "";
-        this.events.forEach(element => {
-            text += element + "\n";
-        });
-
-        return text;
+        return JSON.stringify(this.events);
     }
 }

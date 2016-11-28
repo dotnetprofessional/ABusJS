@@ -71,6 +71,10 @@ export default class TimeSpan {
         return new TimeSpan(0,0,seconds);
     }
 
+    static FromMilliseconds(milliseconds: number): TimeSpan {
+        return new TimeSpan(milliseconds);
+    }
+
     /**
      * 
      * Converts the TimeSpan to a point in time based on the current

@@ -1,0 +1,6 @@
+[
+    "Saga with OrderId XXX received StartOrder with OrderId XXX",
+    "Transaction with Id 8 completed for order id XXX",
+    "Saga with OrderId XXX has timed out so will be cancelled",
+    "Saga with OrderId XXX received CancelOrder with OrderId undefined"
+]

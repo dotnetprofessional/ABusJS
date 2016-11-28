@@ -70,7 +70,7 @@ describe("publishing a message outside of a handler", () => {
             pipeline.send({ type: testData.TestMessage.TYPE, message: new testData.TestMessage("") });
         }
 
-        expect(badMessageHandler).toThrowError('Commands must have only one subscriber.');
+        expect(badMessageHandler).toThrowError('The command test.message must have only one subscriber.');
 
     });
 
@@ -80,7 +80,7 @@ describe("publishing a message outside of a handler", () => {
             pipeline.send({ type: testData.TestMessage2.TYPE, message: new testData.TestMessage("") });
         }
 
-        expect(badMessageHandler).toThrowError('No subscriber defined for this command.');
+        expect(badMessageHandler).toThrowError('No subscriber defined for the command test.message2');
     });
 
     it("should send to registered subscriber", () => {
