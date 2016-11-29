@@ -83,5 +83,7 @@ export default class Hashtable<T> {
     contains(key: string): boolean {
         return this._hash[key] !== undefined;
     }
+
+    
 }
 
