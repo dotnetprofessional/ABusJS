@@ -160,10 +160,11 @@ export class MessageHandlerContext implements IMessageHandlerContext {
 }
 
 export class Guid {
-    private static sUniqueIdCount = 0;
     static newGuid(): string {
-        Guid.sUniqueIdCount++;
-        return Guid.sUniqueIdCount.toString();
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                    var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+            });
     }
 }
 
