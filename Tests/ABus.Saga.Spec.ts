@@ -135,14 +135,13 @@ export class SampleSaga extends Saga<OrderSagaData> {
         context.send(new CancelOrderCommand());
     }
 }
-
 describe("Saga receiving a message that starts a Saga", () => {
     let bus = new Bus();
     let log = new Log();
 
     let saga = new SampleSaga(bus, log);
 
-    it("should initialize default data", async () =>  {
+    it.skip("should initialize default data", async () =>  {
         bus.publish(new StartOrderCommand("123"));
         bus.publish(new StartOrderCommand("456"));
         bus.publish(new StartOrderCommand("XXX"));
@@ -156,8 +155,8 @@ describe("Saga receiving a message that starts a Saga", () => {
     });
 
 });
+/*  Disabled until new Queue model is ready
 
-/*
 describe("Saga with a timeout defined", () => {
 
     //jest.useFakeTimers();
