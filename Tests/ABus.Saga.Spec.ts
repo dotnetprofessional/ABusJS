@@ -172,8 +172,8 @@ describe("Saga with a timeout defined", () => {
         await Utils.sleep(110);
 
         var actual = log.toString();
-        expect(saga.data).toBeFalsy;
-        expect(saga.storage.get(orderId)).toBeFalsy;
+        expect(saga.data).toBeFalsy();
+        expect(saga.storage.get(orderId)).toBeFalsy();
         var expected = Utils.fromJsonFile('./Tests/TestData/Saga.TimeoutFired.json');
         expect(log.events).toEqual(expected);
         saga.dispose();
@@ -189,8 +189,8 @@ describe("Saga with a timeout defined", () => {
         // Wait long enough for Saga to complete and timer to have expired
         await Utils.sleep(110);
 
-        expect(saga.data).toBeFalsy;
-        expect(saga.storage.get(orderId)).toBeFalsy;
+        expect(saga.data).toBeFalsy();
+        expect(saga.storage.get(orderId)).toBeFalsy();
         var actual = log.toString();
         var expected = Utils.fromJsonFile('./Tests/TestData/Saga.WithTimeoutCompletes.json');
         expect(log.events).toEqual(expected);

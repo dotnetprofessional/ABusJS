@@ -63,7 +63,7 @@ describe("publishing a message outside of a handler", () => {
         expect(currentHandlerContext.correlationId).toBeUndefined();
     });
 
-    it("should not throw an exception if subscriber throws an exception", () => {
+    it.skip("should not throw an exception if subscriber throws an exception", () => {
         // subscribe to a msg that will then fail during its processing.
         bus.subscribe({
             messageType: testData.TestMessage.TYPE,
