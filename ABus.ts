@@ -278,7 +278,8 @@ export class Bus {
         if (!message.metaData) {
             message.metaData = new Hashtable<any>();
         }
-        let replyTo = Guid.newGuid();
+        let replyTo = Guid.newGuid(); 
+        
         message.metaData.update("replyTo", replyTo);
 
         // [GM]: Replies need to register with the transport 
@@ -288,6 +289,7 @@ export class Bus {
             replyHandler.resolve = resolve;
             replyHandler.reject = reject;
             replyHandler.replyTo = replyTo;
+            transport.subscribe(replyTo)
             this._replyToMessages.add(replyTo, replyHandler);
             // Add a timeout here too. This can be a default but also supplied as part of the sendOptions
         });
@@ -398,8 +400,15 @@ export class Bus {
     }
 
     private addSystemSubscriptions() {
-        // Subscribe for all .reply messages so they can be returned to their callers        
-        this.subscribe({
+        // Subscribe for all .reply messages so they can be returned to their callers
+        let transport = this.getTransport("*");
+
+        transport.subscribe("replyToHandler", "*.reply");
+
+        // In the handler that delegates messages to handlers the type will need to be looked at and
+        // perform the same or similar logic as below.
+            
+            /*{
             messageType: "*.reply", handler: (message: IMessage<any>, context: MessageHandlerContext) => {
                 var replyToHandler = this._replyToMessages.item(context.replyTo);
                 if (replyToHandler) {
@@ -409,7 +418,8 @@ export class Bus {
                     this._replyToMessages.remove(context.replyTo);
                 }
             }
-        });
+            */
+        );
     }
 
     public registerSaga<T>(saga: Saga<T>) {
