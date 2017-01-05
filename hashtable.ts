@@ -1,3 +1,5 @@
+import {Utils} from './Abus'
+
 export class DuplicateException extends Error {
 }
 
@@ -11,6 +13,12 @@ export default class Hashtable<T> {
     private _count: number = 0;
     private _keys: string[] = [];
     private _iteratorCount = 0;
+
+    constructor(hash?: any) {
+        if(hash) {
+            this._hash = hash;
+        }
+    }
 
     add(key: string, value: T): void {
         if (this.contains(key)) {
@@ -84,6 +92,9 @@ export default class Hashtable<T> {
         return this._hash[key] !== undefined;
     }
 
-    
+    clone() : Hashtable<any> {
+        let copy =  Utils.assign({}, this._hash);
+        return new Hashtable(copy);
+    }
 }
 

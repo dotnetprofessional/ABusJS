@@ -1,16 +1,17 @@
-import { Guid } from './ABus'
 import TimeSpan from './TimeSpan'
 import Hashtable from './Hashtable'
+import {Message} from './Message'
+import {IMessageQueue} from './IMessageQueue'
 /**
  * An in memory implementation of the StorageQueue interface
  * 
  * @export
  * @class Queue
  */
-export class InMemoryStorageQueue {
-    private internalQueue: Hashtable<StorageMessage> = new Hashtable<StorageMessage>();
+export class InMemoryStorageQueue implements IMessageQueue {
+    private internalQueue: Hashtable<Message> = new Hashtable<Message>();
     private _leasePeriod = TimeSpan.FromMinutes(1);
-    private _handler: (message: StorageMessage) => void;
+    private _handler: (message: Message) => void;
     private _nextScheduledPumpToken: any;
 
     clear() {
@@ -25,7 +26,7 @@ export class InMemoryStorageQueue {
         return this._leasePeriod;
     }
 
-    addMessageAsync(message: StorageMessage, deliverIn?: TimeSpan) {
+    addMessageAsync(message: Message, deliverIn?: TimeSpan) {
         // Update deliverAt if deliverIn specified
         if (deliverIn) {
             message.deliverAt = deliverIn.getDateTime();
@@ -37,7 +38,7 @@ export class InMemoryStorageQueue {
         this.onMessageProcessor();
     }
 
-    getMessageAsync(): StorageMessage {
+    getMessageAsync(): Message {
         let message = this.peekMessage();
         if (message) {
             message.dequeueCount += 1;
@@ -67,7 +68,7 @@ export class InMemoryStorageQueue {
         }
     }
 
-    onMessage(handler: (message: StorageMessage) => void) {
+    onMessage(handler: (message: Message) => void) {
         if (this._handler) {
             throw new TypeError('An onMessage handler already exists, only one handler is supported.');
         }
@@ -96,7 +97,6 @@ export class InMemoryStorageQueue {
         if (this.getCount() === 0) {
             // There are no more messages so no need to schedule anything
         } else {
-            debugger;
             // There are messages left in the queue but are not available for processing at this time
             // Check the messages that are left and find the one that needs to be processed next and schedule
             // that time for the next pump.
@@ -130,28 +130,4 @@ export class InMemoryStorageQueue {
     }
 }
 
-export class StorageMessage {
-    constructor(public readonly type, public readonly message: any) {
-        this.messageId = Guid.newGuid();
-        this.timestamp = Date.now();
-    }
 
-    public messageId: string;
-    public timestamp: number;
-    public dequeueCount: number = 0;
-    public deliverAt: number = 0;
-
-    getMessage<T>(): T {
-        return this.message as T;
-    }
-
-    clone(): StorageMessage {
-        var msg = new StorageMessage(this.type, this.message);
-        msg.messageId = this.messageId;
-        msg.timestamp = this.timestamp;
-        msg.deliverAt = this.deliverAt;
-        msg.dequeueCount = this.dequeueCount;
-
-        return msg;
-    }
-}

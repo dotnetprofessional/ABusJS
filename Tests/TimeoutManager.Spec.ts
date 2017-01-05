@@ -3,7 +3,7 @@ import TimeSpan from '../TimeSpan'
 import * as testData from './ABus.Sample.Messages'
 import * as ABus from '../ABus';
 
-describe("Deferring a message", () => {
+describe.skip("Deferring a message", () => {
     let bus = new ABus.Bus();
     let counter = 0;
     let timeoutManager = new TimeoutManager(bus);

@@ -3,6 +3,7 @@ import { IMessageTask, MessageExceptionTask } from './MessageTasks'
 import TimeSpan from './TimeSpan'
 import { Saga } from './Saga'
 import { TimeoutManager } from './TimeoutManager'
+import {LocalTransport}  from './LocalTransport'
 
 // Class to manage the message task handlers executed for each message
 class MessageTasks {
@@ -64,13 +65,8 @@ class SubscriptionInstance {
     options: MessageHandlerOptions;
 }
 
-export class RegisteredSubscription {
-    constructor(public readonly subscriptionId: string, public readonly messageType: string) {
-
-    }
-}
-
 export interface IMessageSubscription<T> {
+    name?: string;
     messageType: string;
     handler: IMessageHandler<T>;
 }
@@ -161,20 +157,21 @@ export class MessageHandlerContext implements IMessageHandlerContext {
 
 export class Guid {
     static newGuid(): string {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                    var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-                    return v.toString(16);
-            });
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
     }
 }
 
 
 export class Bus {
-    private _messageTypes = new Hashtable<Array<SubscriptionInstance>>();
+    private _messageHandlers = new Hashtable<SubscriptionInstance>();
     private _messageTasks = new MessageTasks([]);
     private _replyToMessages = new Hashtable<ReplyHandler>();
     private _timeoutManager = new TimeoutManager(this);
-
+    private _messageTransport = new LocalTransport();
+    
     private _config = {
         tracking: false,
         useConventions: true,
@@ -186,9 +183,16 @@ export class Bus {
         this.addSystemSubscriptions();
     }
 
-    private get messageTypes() {
-        return this._messageTypes;
+    private get messageHandlers() {
+        return this._messageHandlers;
     }
+
+    private getTransport(messageType: string) {
+        // Update with logic to pick the correct transport based on message type.
+        return this._messageTransport;
+    }
+
+
     get config() {
         return this._config;
     }
@@ -198,10 +202,10 @@ export class Bus {
     }
 
     getSubscribers(messageType: string): SubscriptionInstance[] {
-        return this.messageTypes.item(messageType);
+        return this.messageHandlers.item(messageType);
     }
 
-    subscribe<T>(subscription: IMessageSubscription<T>, options: MessageHandlerOptions = new MessageHandlerOptions()): RegisteredSubscription {
+    subscribe<T>(subscription: IMessageSubscription<T>, options: MessageHandlerOptions = new MessageHandlerOptions()): string {
 
         let userOptions = Utils.assign(new MessageHandlerOptions(), options);
 
@@ -216,75 +220,69 @@ export class Bus {
             throw new TypeError('messageHandler must be a function');
         }
 
-        let messageType = subscription.messageType;
-        if (!this.messageTypes.contains(messageType)) {
-            // Add entry for message type
-            this.messageTypes.add(messageType, []);
+        // A name should be specified if the handler deals with persistant messages,
+        // however it is optional otherwise so if none is specified a unique one will be generated.
+        if(!subscription.name) {
+            subscription.name = Guid.newGuid();
         }
-
-        // Register function/subsciption with messageType
-        var list = this.messageTypes.item(messageType);
 
         // create a subscription instances
         let subscriptionInstance = new SubscriptionInstance();
-        subscriptionInstance.subscriptionId = Guid.newGuid();
+        subscriptionInstance.subscriptionId = subscription.name;
         subscriptionInstance.messageSubscription = subscription;
         subscriptionInstance.options = options;
 
-        list.push(subscriptionInstance);
-        return new RegisteredSubscription(subscriptionInstance.subscriptionId, messageType);
+        if(this.messageHandlers.contains(subscription.name)) {
+            throw TypeError(`A subscription with the name ${subscription.name} already exists.`);
+        }
+
+        this.messageHandlers.add(subscription.name, subscriptionInstance);
+        // Register the subscription with the applicable transport
+        var transport = this.getTransport(subscription.messageType);
+        transport.subscribe(subscription.name, subscription.messageType);
+        return subscriptionInstance.subscriptionId;
     }
 
-    unsubscribe(subscription: RegisteredSubscription) {
+    unsubscribe(subscriptionId: string) {
         // Locate all subscriptions for this message type
-        var subscribers = this.messageTypes.item(subscription.messageType);
-        if (subscribers) {
-            for (let i = 0; i < subscribers.length; i++) {
-                let sub = subscribers[i];
-                if (sub.subscriptionId === subscription.subscriptionId) {
-                    // remove from array
-                    subscribers.splice(i, 1);
-                }
-            }
+        var subscription = this.messageHandlers.item(subscriptionId);
+        if (subscription) {
+            this.messageHandlers.remove(subscriptionId);
         }
     }
 
     subscriberCount(messageType: string): number {
-        var subscribers = this.messageTypes.item(messageType);
-        if (!subscribers) {
-            return undefined;
-        } else {
-            return subscribers.length;
-        }
+        var transport = this.getTransport(messageType);
+        return transport.subscriberCount(messageType);
     }
+
     send<T>(message: IMessage<T>, options?: SendOptions): Promise<any> {
         let context = new MessageHandlerContext(this);
         return this.sendInternal(message, options, context);
     }
 
     sendInternal<T>(message: IMessage<T>, options: SendOptions, context: IMessageHandlerContext): Promise<any> {
-        // Find any subscribers for this message
-        var subscribers = this.messageTypes.item(message.type) || [];
+
+        // Get the transport for this message type
+        var transport = this.getTransport(message.type);
+
         options = Utils.assign(new SendOptions(), options);
 
-        if (subscribers.length > 1) {
+        var subscribers = transport.subscriberCount(message.type);
+        if ( subscribers > 1) {
             throw new TypeError(`The command ${message.type} must have only one subscriber.`);
-        } else if (subscribers.length === 0) {
+        } else if (subscribers === 0) {
             throw new TypeError(`No subscriber defined for the command ${message.type}`);
         }
 
-        // If the message should be deferred then let the TimeoutManager handle the message
-        if (options.deliverIn) {
-            // Need to also handle timeout of timeouts!?
-            this._timeoutManager.deferMessage(message, context, { deliverAt: options.deliverIn.getDateTime() });
-            return;
-        }
         if (!message.metaData) {
             message.metaData = new Hashtable<any>();
         }
         let replyTo = Guid.newGuid();
         message.metaData.update("replyTo", replyTo);
 
+        // [GM]: Replies need to register with the transport 
+        //       Then once processed remove the subscription from the transport.
         let replyHandler = new ReplyHandler();
         let replyHandlerPromise = new Promise((resolve, reject) => {
             replyHandler.resolve = resolve;
@@ -293,9 +291,17 @@ export class Bus {
             this._replyToMessages.add(replyTo, replyHandler);
             // Add a timeout here too. This can be a default but also supplied as part of the sendOptions
         });
+        // If the message should be deferred then let the TimeoutManager handle the message
+        if (options.deliverIn) {
+            // Need to also handle timeout of timeouts!?
+            transport.defer(message, options.deliverIn);
+        }
+        else {
+            transport.send(message);
+        }
 
         // Delivery the message to be sent to the command subscriber
-        this.dispatchMessageToSubscribers(message, context, subscribers);
+        // this.dispatchMessageToSubscribers(message, context, subscribers);
 
         return replyHandlerPromise;
     }
@@ -308,7 +314,7 @@ export class Bus {
     // Typescript doesn't support internal methods yet
     publishInternal<T>(message: IMessage<T>, context: IMessageHandlerContext) {
         // Find any subscribers for this message
-        var subscribers = this.messageTypes.item(message.type) || [];
+        var subscribers = this.messageHandlers.item(message.type) || [];
 
         //TODO: [GM] Optimize this so that its only called if at least one subtype was subscribed 
         // There may also be subscribers that subscribed to a subtype
@@ -326,7 +332,7 @@ export class Bus {
         var searchType = '';
         for (let i = 0; i < subTypes.length - 1; i++) {
             searchType += subTypes[i] + '.';
-            subscribers = subscribers.concat(this.messageTypes.item(searchType + '*') || []);
+            subscribers = subscribers.concat(this.messageHandlers.item(searchType + '*') || []);
         }
 
         return subscribers;
@@ -338,7 +344,7 @@ export class Bus {
         var searchType = '';
         for (let i = subTypes.length - 1; i >= 0; i--) {
             searchType += '.' + subTypes[i];
-            subscribers = subscribers.concat(this.messageTypes.item("*" + searchType) || []);
+            subscribers = subscribers.concat(this.messageHandlers.item("*" + searchType) || []);
         }
 
         return subscribers;
@@ -387,7 +393,7 @@ export class Bus {
     }
 
     unregisterAll(): void {
-        this.messageTypes.clear();
+        this.messageHandlers.clear();
         this.addSystemSubscriptions();
     }
 

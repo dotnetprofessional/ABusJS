@@ -10,7 +10,7 @@ import {
 } from '../ABus';
 import * as testData from './ABus.Sample.Messages'
 
-describe("publishing a message outside of a handler", () => {
+describe.skip("publishing a message outside of a handler", () => {
     var pipeline = new Bus();
     var currentHandlerContext: MessageHandlerContext;
 
