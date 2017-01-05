@@ -89,8 +89,7 @@ describe("publishing a message outside of a handler", () => {
     });
 });
 
-
-describe("publishing a message inside of a handler", () => {
+describe.skip("publishing a message inside of a handler", () => {
     var bus = new Bus();
     var firstMessage: testData.CustomerData;
     var firstHandlerContext: IMessageHandlerContext;
@@ -149,7 +148,7 @@ describe("publishing a message inside of a handler", () => {
     });
 });
 
-describe("publishing a message outside of a handler with ", () => {
+describe.skip("publishing a message outside of a handler with ", () => {
     var bus = new Bus();
     var returnedMessage: testData.CustomerData;
     var currentHandlerContext: IMessageHandlerContext;
@@ -179,4 +178,16 @@ describe("publishing a message outside of a handler with ", () => {
         expect(returnedMessage.name).toBe("Johhny Smith");
     });
 
+});
+
+describe("testing...", () => {
+
+    var handler = (a, b) => {};
+
+    it("get path", () => {
+        debugger;
+        var x = handler;
+        handler(1,2);
+    });
+   
 });

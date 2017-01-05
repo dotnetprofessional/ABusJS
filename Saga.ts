@@ -62,7 +62,6 @@ export abstract class Saga<T> {
             if (!this.data) {
                 // Unable to locate Saga data, therefore the Saga was either not started or has already finsished
                 // publish a message incase this wasn't an expected event.
-                debugger;
                 context.publish({ type: SagaNotFoundException.typeName, message: new SagaNotFoundException("Saga key: " + sagaKey, message) });
             } else {
                 // Now execute the real handler

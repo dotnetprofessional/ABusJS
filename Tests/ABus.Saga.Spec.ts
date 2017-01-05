@@ -135,7 +135,7 @@ export class SampleSaga extends Saga<OrderSagaData> {
         context.send(new CancelOrderCommand());
     }
 }
-describe("Saga receiving a message that starts a Saga", () => {
+describe.skip("Saga receiving a message that starts a Saga", () => {
     let bus = new Bus();
     let log = new Log();
 
