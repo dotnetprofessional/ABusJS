@@ -1,11 +1,11 @@
 import { InMemoryStorageQueue} from '../InMemoryStorageQueue'
-import {Message} from '../Message'
+import {QueuedMessage} from '../QueuedMessage'
 import TimeSpan from '../TimeSpan'
-import { Utils } from '../Abus'
+import { Utils } from '../Utils'
 
 describe('Adding a message to the queue', () => {
     let queue = new InMemoryStorageQueue();
-    let msg = new Message("test.message", "Hello World!");
+    let msg = new QueuedMessage("test.message", "Hello World!");
     queue.addMessageAsync(msg);
 
     it("should increment the message count on queue by 1", () => {
@@ -33,7 +33,7 @@ describe('Adding a message to the queue', () => {
 
 describe('Getting a message from the queue', () => {
     let queue = new InMemoryStorageQueue();
-    let msg = new Message("test.message", "Hello World!");
+    let msg = new QueuedMessage("test.message", "Hello World!");
     queue.addMessageAsync(msg);
     queue.leasePeriod = TimeSpan.FromMilliseconds(50);
     let returnedMessage = queue.getMessageAsync();
@@ -60,7 +60,7 @@ describe('Getting a message from the queue', () => {
 
     it("should increment the dequeue count on each subsequent dequeue", () => {
         let newQueue = new InMemoryStorageQueue();
-        let testMsg = new Message("test.message", "Hello World!");
+        let testMsg = new QueuedMessage("test.message", "Hello World!");
         newQueue.addMessageAsync(testMsg);
         for (let i = 0; i < 5; i++) {
             var dequedMsg = newQueue.getMessageAsync();
@@ -72,7 +72,7 @@ describe('Getting a message from the queue', () => {
 
 describe('Completing a message', () => {
     let queue = new InMemoryStorageQueue();
-    let msg = new Message("test.message", "Hello World!");
+    let msg = new QueuedMessage("test.message", "Hello World!");
     queue.addMessageAsync(msg);
     queue.leasePeriod = TimeSpan.FromMilliseconds(100);
     let dequedMsg = queue.getMessageAsync();
@@ -91,7 +91,7 @@ describe('Completing a message', () => {
 
 describe('Abandoing a message', () => {
     let queue = new InMemoryStorageQueue();
-    let msg = new Message("test.message", "Hello World!");
+    let msg = new QueuedMessage("test.message", "Hello World!");
     queue.addMessageAsync(msg);
 
     it("should return the message back to the queue immediately", () => {
@@ -114,7 +114,7 @@ describe('Renewing a message lease', () => {
     it("should extend the time the message is leased (not available) for the time period specified", async () => {
         let queue = new InMemoryStorageQueue();
         queue.leasePeriod = TimeSpan.FromMilliseconds(30);
-        let msg = new Message("test.message", "Hello World!");
+        let msg = new QueuedMessage("test.message", "Hello World!");
         queue.addMessageAsync(msg);
 
         let dequedMsg = queue.getMessageAsync();
@@ -139,7 +139,7 @@ describe('Adding an onMessage handler', () => {
         queue.leasePeriod = TimeSpan.FromMilliseconds(30);
 
         let messageCount = 0;
-        let handler = (message: Message) => {
+        let handler = (message: QueuedMessage) => {
             messageCount++;
             // Mark the message as consumed - otherwise the same message will be delivered again!
             queue.completeMessageAsync(message.messageId);
@@ -149,7 +149,7 @@ describe('Adding an onMessage handler', () => {
         // Add several messages
         let expectedMessageCount = 5;
         for (let i = 1; i <= expectedMessageCount; i++) {
-            queue.addMessageAsync(new Message("test.message", "Hello World!"));
+            queue.addMessageAsync(new QueuedMessage("test.message", "Hello World!"));
         }
 
         expect(messageCount).toBe(expectedMessageCount);
@@ -158,10 +158,10 @@ describe('Adding an onMessage handler', () => {
     it("should provide deferred messages when the time up expires", async () => {
         let queue = new InMemoryStorageQueue();
         queue.leasePeriod = TimeSpan.FromMilliseconds(30);
-        let msg = new Message("test.message", "Hello World!");
+        let msg = new QueuedMessage("test.message", "Hello World!");
 
         let messageCount = 0;
-        let handler = (message: Message) => {
+        let handler = (message: QueuedMessage) => {
             messageCount++;
             // Mark the message as consumed - otherwise the same message will be delivered again!
             queue.completeMessageAsync(message.messageId);
@@ -178,7 +178,7 @@ describe('Adding an onMessage handler', () => {
 
 describe('Peeking a meessage', () => {
     let queue = new InMemoryStorageQueue();
-    queue.addMessageAsync(new Message("test.message", "Hello World!"));
+    queue.addMessageAsync(new QueuedMessage("test.message", "Hello World!"));
 
     it("should return the next available message", () => {
         var peek = queue.peekMessage();

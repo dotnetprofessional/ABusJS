@@ -1,19 +1,24 @@
 import {TimeoutManager} from '../TimeoutManager';
 import TimeSpan from '../TimeSpan'
 import * as testData from './ABus.Sample.Messages'
-import * as ABus from '../ABus';
+import {Bus} from '../ABus'
+import {MessageHandlerContext} from '../MessageHandlerContext'
+import {IMessageHandlerContext} from '../IMessageHandlerContext'
+import {MessageHandlerOptions, ThreadingOptions} from '../MessageHandlerOptions'
+import {Guid} from '../Guid'
+
 
 describe.skip("Deferring a message", () => {
-    let bus = new ABus.Bus();
+    let bus = new Bus();
     let counter = 0;
     let timeoutManager = new TimeoutManager(bus);
-    let messageHandlerContext = new ABus.MessageHandlerContext(bus);
-    messageHandlerContext.messageId = ABus.Guid.newGuid();
+    let messageHandlerContext = new MessageHandlerContext(bus);
+    messageHandlerContext.metaData.messageId = Guid.newGuid();
 
     jest.useFakeTimers();
 
-    bus.subscribe({messageType: testData.TestMessage.TYPE, 
-            handler: (message: testData.TestMessage, context: ABus.MessageHandlerContext)=>{
+    bus.subscribe({messageFilter: testData.TestMessage.TYPE, 
+            handler: (message: testData.TestMessage, context: MessageHandlerContext)=>{
         counter = 100;
     }});
 
