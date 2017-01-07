@@ -1,13 +1,11 @@
-import {
-    Bus,
-    MessageHandlerContext,
-    IMessage,
-    IMessageSubscription,
-    IMessageHandlerContext,
-    MessageHandlerOptions,
-    ThreadingOptions,
-    Utils
-} from '../ABus';
+import {Bus} from '../ABus'
+import {MessageHandlerContext} from '../MessageHandlerContext'
+import {IMessage} from '../IMessage'
+import {IMessageSubscription} from '../IMessageSubscription'
+import {IMessageHandlerContext} from '../IMessageHandlerContext'
+import {MessageHandlerOptions, ThreadingOptions} from '../MessageHandlerOptions'
+import {Utils} from '../Utils'
+
 import * as testData from './ABus.Sample.Messages'
 
 describe.skip("publishing a message outside of a handler", () => {
@@ -16,7 +14,7 @@ describe.skip("publishing a message outside of a handler", () => {
 
     pipeline.config.useConventions = false;
     pipeline.subscribe({
-        messageType: testData.TestMessage.TYPE,
+        messageFilter: testData.TestMessage.TYPE,
         handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
             currentHandlerContext = context;
         }
@@ -39,12 +37,12 @@ describe.skip("publishing a message outside of a handler", () => {
     });
 
     it("should set the conversationId on messageHandlerContext", () => {
-        expect(currentHandlerContext.conversationId).toBeDefined();
+        expect(currentHandlerContext.metaData.conversationId).toBeDefined();
     });
 
     it("should set the correlationId on messageHandlerContext to undefined", () => {
         // Messages outside of a handler are not part of an existing conversation
-        expect(currentHandlerContext.correlationId).toBeUndefined();
+        expect(currentHandlerContext.metaData.correlationId).toBeUndefined();
     });
 
     it("should add replyTo to messageHandlerContext", () => {
@@ -54,13 +52,13 @@ describe.skip("publishing a message outside of a handler", () => {
     it("should verify there is only one subscriber for message type", () => {
         // Subscribe twice for the same message. When attempting to use Send this should fail
         pipeline.subscribe({
-            messageType: testData.TestMessage.TYPE,
+            messageFilter: testData.TestMessage.TYPE,
             handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
             }
         });
 
         pipeline.subscribe({
-            messageType: testData.TestMessage.TYPE,
+            messageFilter: testData.TestMessage.TYPE,
             handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
             }
         });
@@ -87,7 +85,7 @@ describe.skip("publishing a message outside of a handler", () => {
         let recievedEvent = false;
         pipeline.unregisterAll();
         pipeline.subscribe({
-            messageType: testData.TestMessage.TYPE,
+            messageFilter: testData.TestMessage.TYPE,
             handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
                 recievedEvent = true;
             }
@@ -108,7 +106,7 @@ describe.skip("publishing a message outside of a handler", () => {
         pipeline.unregisterAll();
 
         pipeline.subscribe({
-            messageType: testData.TestMessage.TYPE,
+            messageFilter: testData.TestMessage.TYPE,
             handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
                 recievedEvent = true;
                 context.reply("Hello World!");

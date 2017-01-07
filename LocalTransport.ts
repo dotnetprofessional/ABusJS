@@ -3,14 +3,8 @@ import TimeSpan from './TimeSpan'
 import Hashtable from './Hashtable'
 import { IMessageQueue } from './IMessageQueue'
 import { InMemoryStorageQueue } from './InMemoryStorageQueue'
-import { IMessage } from './ABus'
-import { Message } from './Message'
-
-class Subscription {
-    constructor(public name: string, public filter: string) {
-
-    }
-}
+import { IMessage } from './IMessage'
+import { QueuedMessage } from './QueuedMessage'
 
 export class LocalTransport implements IMessageTransport {
     // Key = QueueEndpoint.fullname, value = subscription name
@@ -107,7 +101,7 @@ export class LocalTransport implements IMessageTransport {
         subscribers = subscribers.concat(this.getStartsWithSubscribers(message.type) || []);
         subscribers = subscribers.concat(this.getEndsWithSubscribers(message.type) || []);
 
-        let transportMessage = new Message(message.type, message.message, message.metaData);
+        let transportMessage = new QueuedMessage(message.type, message.message, message.metaData);
 
         subscribers.forEach(s => {
             // Clone message prior to sending so each subscriber has their own immutable copy
@@ -139,7 +133,7 @@ export class LocalTransport implements IMessageTransport {
 
         return subscribers;
     }
-    private processIncommingQueueMessage(message: Message): void {
+    private processIncommingQueueMessage(message: QueuedMessage): void {
         if (this._onMessageHandler) {
             let msg: IMessage<any> = { type: message.type, message: message };
 

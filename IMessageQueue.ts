@@ -1,15 +1,15 @@
 import TimeSpan from './TimeSpan'
 import Hashtable from './Hashtable'
-import {Message} from './Message'
+import {QueuedMessage} from './QueuedMessage'
 
 export interface IMessageQueue {
     clear();
 
     leasePeriod: TimeSpan;
 
-    addMessageAsync(message: Message, deliverIn?: TimeSpan);
+    addMessageAsync(message: QueuedMessage, deliverIn?: TimeSpan);
 
-    getMessageAsync(): Message;
+    getMessageAsync(): QueuedMessage;
 
     completeMessageAsync(messageId: string);
 
@@ -17,7 +17,7 @@ export interface IMessageQueue {
 
     peekMessage();
 
-    onMessage(handler: (message: Message) => void);
+    onMessage(handler: (message: QueuedMessage) => void);
 
     renewLeaseAsync(messageId: string, timeSpan: TimeSpan);
 

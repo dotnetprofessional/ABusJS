@@ -1,5 +1,6 @@
 import TimeSpan from './TimeSpan'
-import { IMessage } from './ABus'
+import { IMessage } from './IMessage'
+
 
 export class QueueEndpoint {
     host: string;

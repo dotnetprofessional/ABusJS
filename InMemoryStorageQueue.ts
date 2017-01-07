@@ -1,7 +1,8 @@
 import TimeSpan from './TimeSpan'
 import Hashtable from './Hashtable'
-import {Message} from './Message'
+import {QueuedMessage} from './QueuedMessage'
 import {IMessageQueue} from './IMessageQueue'
+
 /**
  * An in memory implementation of the StorageQueue interface
  * 
@@ -9,9 +10,9 @@ import {IMessageQueue} from './IMessageQueue'
  * @class Queue
  */
 export class InMemoryStorageQueue implements IMessageQueue {
-    private internalQueue: Hashtable<Message> = new Hashtable<Message>();
+    private internalQueue: Hashtable<QueuedMessage> = new Hashtable<QueuedMessage>();
     private _leasePeriod = TimeSpan.FromMinutes(1);
-    private _handler: (message: Message) => void;
+    private _handler: (message: QueuedMessage) => void;
     private _nextScheduledPumpToken: any;
 
     clear() {
@@ -26,7 +27,7 @@ export class InMemoryStorageQueue implements IMessageQueue {
         return this._leasePeriod;
     }
 
-    addMessageAsync(message: Message, deliverIn?: TimeSpan) {
+    addMessageAsync(message: QueuedMessage, deliverIn?: TimeSpan) {
         // Update deliverAt if deliverIn specified
         if (deliverIn) {
             message.deliverAt = deliverIn.getDateTime();
@@ -38,7 +39,7 @@ export class InMemoryStorageQueue implements IMessageQueue {
         this.onMessageProcessor();
     }
 
-    getMessageAsync(): Message {
+    getMessageAsync(): QueuedMessage {
         let message = this.peekMessage();
         if (message) {
             message.dequeueCount += 1;
@@ -68,7 +69,7 @@ export class InMemoryStorageQueue implements IMessageQueue {
         }
     }
 
-    onMessage(handler: (message: Message) => void) {
+    onMessage(handler: (message: QueuedMessage) => void) {
         if (this._handler) {
             throw new TypeError('An onMessage handler already exists, only one handler is supported.');
         }

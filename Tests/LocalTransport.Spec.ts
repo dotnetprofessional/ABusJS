@@ -1,5 +1,5 @@
 import { LocalTransport } from '../LocalTransport'
-import { IMessage } from '../Abus'
+import { IMessage } from '../IMessage'
 import * as testData from './Abus.Sample.Messages'
 
 describe("subscribing to a message type", () => {

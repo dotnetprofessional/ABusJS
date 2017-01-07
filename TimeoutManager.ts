@@ -1,5 +1,7 @@
-import {IMessage, IMessageHandlerContext, Bus} from './Abus'
+import {Bus} from './Abus'
 import TimeSpan from './TimeSpan'
+import {IMessage} from './IMessage'
+import {IMessageHandlerContext} from './IMessageHandlerContext'
 import HashTable from './HashTable'
 
 /**

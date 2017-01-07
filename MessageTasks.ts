@@ -1,4 +1,6 @@
-import { IMessage, MessageHandlerContext, Guid } from './ABus'
+import { IMessage } from './IMessage'
+import { MessageHandlerContext } from './MessageHandlerContext'
+import { Guid } from './Guid'
 import Hashtable from './hashtable';
 
 export interface IMessageTask {
