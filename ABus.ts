@@ -1,5 +1,5 @@
 import Hashtable from './hashtable';
-import { IMessageTask, MessageExceptionTask } from './MessageTasks'
+import { IMessageTask, MessageExceptionTask } from './Tasks/MessageTasks'
 import TimeSpan from './TimeSpan'
 //import { Saga } from './Saga'
 import { TimeoutManager } from './TimeoutManager'
@@ -14,7 +14,7 @@ import { Guid } from './Guid'
 import { SendOptions } from './SendOptions'
 import { IMessageHandlerContext } from './IMessageHandlerContext'
 import { MessageHandlerContext } from './MessageHandlerContext'
-import {MetaData} from './MetaData'
+import { MetaData, Intents } from './MetaData'
 
 // Class to manage the message task handlers executed for each message
 class MessageTasks {
@@ -69,6 +69,7 @@ export class Bus {
     constructor() {
         this.messageTasks.add(new MessageExceptionTask());
         this.addSystemSubscriptions();
+        this.registerForTransportEvents();
     }
 
     private get messageHandlers() {
@@ -140,6 +141,11 @@ export class Bus {
         var subscription = this.messageHandlers.item(subscriptionName);
         if (subscription) {
             this.messageHandlers.remove(subscriptionName);
+
+            // Also remove the message from the transport
+            var transport = this.getTransport(""); // [GM]: May need to record the transport used for subscription
+            transport.unsubscribe(subscriptionName);
+
         }
     }
 
@@ -181,31 +187,26 @@ export class Bus {
             this._replyToMessages.add(replyTo, replyHandler);
             // Add a timeout here too. This can be a default but also supplied as part of the sendOptions
         });
-        // If the message should be deferred then let the TimeoutManager handle the message
-        if (options.deliverIn) {
-            // Need to also handle timeout of timeouts!?
-            transport.defer(message, options.deliverIn);
-        }
-        else {
-            transport.send(message);
-        }
+        debugger;
+        context.metaData.intent = Intents.publish;
 
-        // Delivery the message to be sent to the command subscriber
-        // this.dispatchMessageToSubscribers(message, context, subscribers);
-
+        // Delivery the message to be sent to the transport
+        this.dispatchOutboundMessageAsync(message, options, context, this.messageTasks.localInstance);
         return replyHandlerPromise;
     }
 
     publish<T>(message: IMessage<T>): void {
         let context = new MessageHandlerContext(this);
-        this.publishInternal(message, context);
+        this.publishInternal(message, new SendOptions(), context);
     }
 
     // Typescript doesn't support internal methods yet
-    publishInternal<T>(message: IMessage<T>, context: IMessageHandlerContext) {
+    publishInternal<T>(message: IMessage<T>, options: SendOptions, context: IMessageHandlerContext) {
         // Push the message onto the correct transport
-        let transport = this.getTransport(message.type);
-        transport.publish(message);
+        debugger;
+        context.metaData.intent = Intents.publish;
+
+        this.dispatchOutboundMessageAsync(message, options, context, this.messageTasks.localInstance);
     }
 
 
@@ -220,16 +221,8 @@ export class Bus {
         let transport = this.getTransport("*");
 
         transport.subscribe("replyToHandler", "*.reply");
-
-        // In the handler that delegates messages to handlers the type will need to be looked at and
-        // perform the same or similar logic as below.
-
-        /*{
-        messageType: "*.reply", handler: (message: IMessage<any>, context: MessageHandlerContext) => {
-            
-        }
-        */
     }
+
     /*
         public registerSaga<T>(saga: Saga<T>) {
             saga.bus = this;
@@ -240,6 +233,7 @@ export class Bus {
         let transport = this.getTransport("*");
 
         transport.onMessage((message: IMessage<any>) => {
+            debugger;
             var replyToHandler = this._replyToMessages.item(message.metaData.replyTo);
             if (replyToHandler) {
                 replyToHandler.resolve(message.message);
@@ -251,50 +245,86 @@ export class Bus {
 
                 // Find the handler that subscribed to this message
                 let subscription = this.messageHandlers.item(message.type);
-                this.dispatchMessage(message, subscription, new MessageHandlerContext(this, new MetaData))
+                this.dispatchInboundMessageAsync(message, new MessageHandlerContext(this, new MetaData), this.messageTasks.localInstance, subscription);
             }
         });
 
     }
 
-    private dispatchMessage(message: IMessage<any>, subscription: SubscriptionInstance, context: MessageHandlerContext) {
-        let newContext = new MessageHandlerContext(this, message.metaData || new MetaData());
-        // Add context data to message
-        if (!context.metaData.conversationId) {
-            newContext.metaData.conversationId = Guid.newGuid();
-        } else {
-            newContext.metaData.conversationId = context.metaData.conversationId;
-        }
+    // private dispatchMessage(message: IMessage<any>, subscription: SubscriptionInstance, context: MessageHandlerContext) {
+    //     let newContext = new MessageHandlerContext(this, message.metaData || new MetaData());
+    //     // Add context data to message
+    //     /*
+    //     if (!context.metaData.conversationId) {
+    //         newContext.metaData.conversationId = Guid.newGuid();
+    //     } else {
+    //         newContext.metaData.conversationId = context.metaData.conversationId;
+    //     }
 
-        if (context.replyTo) {
-            newContext.metaData.replyTo = context.replyTo;
-        }
+    //     if (context.replyTo) {
+    //         newContext.metaData.replyTo = context.replyTo;
+    //     }
 
-        if (context.sagaKey) {
-            newContext.metaData.sagaKey = context.sagaKey;
-        }
-        // CorrelationId becomes the current messa
-        newContext.metaData.correlationId = context.messageId;
-        newContext.metaData.messageId = Guid.newGuid();
-        newContext.metaData.messageType = message.type;
+    //     if (context.sagaKey) {
+    //         newContext.metaData.sagaKey = context.sagaKey;
+    //     }
+    //     // CorrelationId becomes the current messa
+    //     newContext.metaData.correlationId = context.messageId;
+    //     newContext.metaData.messageId = Guid.newGuid();
+    //     newContext.metaData.messageType = message.type;
+    //     this.dispatchOutboundMessageAsync(message, newContext, this.messageTasks.localInstance);
+    // }
 
-        this.ExecuteMessageTasksAsync(message, newContext, this.messageTasks.localInstance, subscription);
-    }
-
-    async ExecuteMessageTasksAsync(message: IMessage<any>, context: MessageHandlerContext, tasks: MessageTasks, subscription: SubscriptionInstance) {
+    async dispatchOutboundMessageAsync(message: IMessage<any>, options: SendOptions, context: IMessageHandlerContext, tasks: MessageTasks) {
         let task = tasks.next;
 
         // determine if the task is using a promise and if so wait for it to complete
         await task.invoke(message, context, async () => {
-            if (tasks.next != null && !context.shouldTerminatePipeline) {
-                await this.ExecuteMessageTasksAsync(message, context, tasks, subscription);
+            if (context.shouldTerminatePipeline) {
+                // Stop the processing of the pipeline immediately.
+                return;
+            }
+
+            if (tasks.next != null) {
+                await this.dispatchOutboundMessageAsync(message, options, context, tasks);
             }
             else {
-                let handler = subscription.messageSubscription.handler;
-                await handler(message, context);
+                // Final step send message to the transport
+                let transport = this.getTransport(message.type);
+                if (message.metaData.intent === Intents.publish) {
+                    transport.publish(message);
+                } else {
+                    transport.send(message, options.deliverIn);
+                }
             }
         });
     }
 
+    async dispatchInboundMessageAsync(message: IMessage<any>, context: MessageHandlerContext, tasks: MessageTasks, subscription: SubscriptionInstance) {
+        let task = tasks.next;
 
+        // determine if the task is using a promise and if so wait for it to complete
+        await task.invoke(message, context, async () => {
+            if (context.shouldTerminatePipeline) {
+                // Stop the processing of the pipeline immediately.
+                return;
+            }
+
+            if (tasks.next != null) {
+                await this.dispatchInboundMessageAsync(message, context, tasks, subscription);
+            }
+            else {
+                var replyToHandler = this._replyToMessages.item(message.metaData.replyTo);
+                if (replyToHandler) {
+                    await replyToHandler.resolve(message.message);
+
+                    // Remove the handler
+                    this._replyToMessages.remove(message.metaData.replyTo);
+                } else {
+                    let handler = subscription.messageSubscription.handler;
+                    await handler(message, context);
+                }
+            }
+        });
+    }
 }

@@ -1,14 +1,14 @@
-import { IMessage } from './IMessage'
-import { MessageHandlerContext } from './MessageHandlerContext'
-import { Guid } from './Guid'
-import Hashtable from './hashtable';
+import { IMessage } from '../IMessage'
+import { IMessageHandlerContext } from '../IMessageHandlerContext'
+import { Guid } from '../Guid'
+import Hashtable from '../hashtable';
 
 export interface IMessageTask {
-    invoke(message: IMessage<any>, context: MessageHandlerContext, next): void;
+    invoke(message: IMessage<any>, context: IMessageHandlerContext, next): void;
 }
 
 export class MessageExceptionTask implements IMessageTask {
-    invoke(message: IMessage<any>, context: MessageHandlerContext, next: any) {
+    invoke(message: IMessage<any>, context: IMessageHandlerContext, next: any) {
         try {
             next();
         } catch (error) {

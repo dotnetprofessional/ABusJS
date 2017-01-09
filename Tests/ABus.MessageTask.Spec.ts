@@ -8,7 +8,7 @@ import {Utils} from '../Utils'
 
 import {
         IMessageTask,
-} from '../messageTasks' 
+} from '../Tasks/messageTasks' 
 
 import * as testData from './ABus.Sample.Messages'
 

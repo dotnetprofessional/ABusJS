@@ -27,7 +27,7 @@ export class MessageHandlerContext implements IMessageHandlerContext {
     }
 
     publish<T>(message: IMessage<T>): void {
-        this.bus.publishInternal(message, new MessageHandlerContext(this.bus, this.metaData));
+        this.bus.publishInternal(message, new SendOptions(), new MessageHandlerContext(this.bus, this.metaData));
     }
 
     send<T>(message: IMessage<T>, options?: SendOptions): Promise<any> {
@@ -36,6 +36,6 @@ export class MessageHandlerContext implements IMessageHandlerContext {
 
     reply<T>(reply: T): void {
         var msg = { type: this.messageType + ".reply", message: reply };
-        this.bus.publishInternal(msg, new MessageHandlerContext(this.bus, this.metaData));
+        this.bus.publishInternal(msg,  new SendOptions(), new MessageHandlerContext(this.bus, this.metaData));
     }
 }

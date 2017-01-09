@@ -25,10 +25,11 @@ export interface IMessageTransport {
      * Sends a command message to the Endpoint
      * 
      * @param {Message} message
+     * @param {TimeSpan} timeToDelay
      * 
      * @memberOf IMessageTransport
      */
-    send(message: IMessage<any>): void;
+    send(message: IMessage<any>, timeToDelay?: TimeSpan): void;
 
     /**
      * Create a subsription on the Endpoint
@@ -47,16 +48,6 @@ export interface IMessageTransport {
      * @memberOf IMessageTransport
      */
     unsubscribe(name: string): void;
-
-    /**
-     * Sends a message that will be queued in the future
-     * 
-     * @param {Message} message
-     * @param {TimeSpan} timeToDelay
-     * 
-     * @memberOf IMessageTransport
-     */
-    defer(message: IMessage<any>, timeToDelay: TimeSpan): void;
 
     /**
      * Notifies subscribers when a message arrives indicating which

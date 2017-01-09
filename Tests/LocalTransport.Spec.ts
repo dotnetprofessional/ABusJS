@@ -117,7 +117,7 @@ describe("subscribing to a message sub type", () => {
     });
 });
 
-describe("Sending an recieving messages", () => {
+describe.skip("Sending an recieving messages", () => {
     var transport = new LocalTransport();
     let counter = 0;
 
