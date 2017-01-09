@@ -5,7 +5,7 @@ import {MessageHandlerOptions, ThreadingOptions} from '../MessageHandlerOptions'
 
 import * as testData from './ABus.Sample.Messages'
 
-describe.skip("subscribing to a message type", () => {
+describe("subscribing to a message type", () => {
     var pipeline = new Bus();
 
     it("should register subscriber for the message type", () => {
@@ -51,7 +51,7 @@ describe.skip("subscribing to a message type", () => {
     });
 });
 
-describe.skip("unsubscribing to a message type", () => {
+describe("unsubscribing to a message type", () => {
     var pipeline = new Bus();
 
     pipeline.subscribe({ messageFilter: testData.TestMessage.TYPE, handler: (message: any) => { } });
@@ -71,7 +71,7 @@ describe.skip("unsubscribing to a message type", () => {
     });
 });
 
-describe.skip("subscribing to a message sub type", () => {
+describe("subscribing to a message sub type", () => {
     var pipeline = new Bus();
 
     it("should receive messages for all message types currently registered with supplied type prefix", () => {
@@ -88,6 +88,7 @@ describe.skip("subscribing to a message sub type", () => {
             }
         });
 
+        debugger;
         pipeline.publish({ type: testData.TestMessage.TYPE, message: {} });
         pipeline.publish({ type: testData.TestMessage2.TYPE, message: {} });
 
@@ -121,7 +122,7 @@ describe.skip("subscribing to a message sub type", () => {
     });
 });
 
-describe.skip("subscribing to a message with throttling", () => {
+describe("subscribing to a message with throttling", () => {
     var pipeline = new Bus();
 
     it.skip("should only forward messages once per throttle period ", () => {

@@ -5,6 +5,7 @@ import { IMessageQueue } from './IMessageQueue'
 import { InMemoryStorageQueue } from './InMemoryStorageQueue'
 import { IMessage } from './IMessage'
 import { QueuedMessage } from './QueuedMessage'
+import {Subscription} from './Subscription'
 
 export class LocalTransport implements IMessageTransport {
     // Key = QueueEndpoint.fullname, value = subscription name
@@ -22,8 +23,8 @@ export class LocalTransport implements IMessageTransport {
         this.sendMessageToQueue(message);
     }
 
-    send(message: IMessage<any>): void {
-        this.sendMessageToQueue(message);
+    send(message: IMessage<any>, timeToDelay?: TimeSpan): void {
+        this.sendMessageToQueue(message, timeToDelay);
     }
 
     subscribe(name: string, filter: string): void {
@@ -80,10 +81,6 @@ export class LocalTransport implements IMessageTransport {
 
     subscriberCount(filter: string) {
         return this._subscriptionsByFilter.item(filter).length;
-    }
-
-    defer(message: IMessage<any>, timeToDelay: TimeSpan): void {
-        this.sendMessageToQueue(message, timeToDelay);
     }
 
     onMessage(handler: (message: IMessage<any>) => void) {
