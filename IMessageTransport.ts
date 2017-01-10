@@ -11,6 +11,12 @@ export class QueueEndpoint {
     }
 }
 
+/**
+ * 
+ * 
+ * @export
+ * @interface IMessageTransport
+ */
 export interface IMessageTransport {
     /**
      * Publishes an event message to the Endpoint
@@ -59,4 +65,13 @@ export interface IMessageTransport {
      * @memberOf IMessageTransport
      */
     onMessage(handler: (message: IMessage<any>) => void);
+
+    /**
+     * Marks the message as processed and removes it from the queue.
+     * 
+     * @param {string} messageId
+     * 
+     * @memberOf IMessageTransport
+     */
+    completeMessageAsync(messageId: string);
 }

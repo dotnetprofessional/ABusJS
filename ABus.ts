@@ -16,6 +16,7 @@ import { IMessageHandlerContext } from './IMessageHandlerContext'
 import { MessageHandlerContext } from './MessageHandlerContext'
 import { MetaData, Intents } from './MetaData'
 import { AddStandardMetaDataTask } from './Tasks/AddStandardMetaDataTask'
+import {IMessageTransport} from './IMessageTransport'
 
 // Class to manage the message task handlers executed for each message
 class MessageTasks {
@@ -250,11 +251,14 @@ export class Bus {
             } else {
                 // A non-reply message
                 // Find the handler that subscribed to this message
-                debugger;
                 let subscription = this.messageHandlers.item(message.metaData.item('subscription'));
                 // Ensure the subscription is still registered before attempting to dispatch it.
                 if (subscription) {
-                    this.dispatchInboundMessageAsync(message, new MessageHandlerContext(this, message.metaData), this.inBoundMessageTasks.localInstance, subscription);
+                    this.dispatchInboundMessageAsync(message, new MessageHandlerContext(this, message.metaData), this.inBoundMessageTasks.localInstance, subscription, transport);
+                } else {
+                    debugger;
+                    // Mark the message as complete as there are no subscribers for this message
+                    transport.completeMessageAsync(message.metaData.messageId);
                 }
             }
         });
@@ -310,7 +314,7 @@ export class Bus {
         }
     }
 
-    async dispatchInboundMessageAsync(message: IMessage<any>, context: MessageHandlerContext, tasks: MessageTasks, subscription: SubscriptionInstance) {
+    async dispatchInboundMessageAsync(message: IMessage<any>, context: MessageHandlerContext, tasks: MessageTasks, subscription: SubscriptionInstance, transport: IMessageTransport) {
         let task = tasks.next;
 
         // determine if the task is using a promise and if so wait for it to complete
@@ -321,7 +325,7 @@ export class Bus {
                     return;
                 }
 
-                await this.dispatchInboundMessageAsync(message, context, tasks, subscription);
+                await this.dispatchInboundMessageAsync(message, context, tasks, subscription, transport);
             });
         } else {
             var replyToHandler = this._replyToMessages.item(message.metaData.replyTo);
@@ -333,6 +337,9 @@ export class Bus {
             } else {
                 let handler = subscription.messageSubscription.handler;
                 await handler(message, context);
+                debugger;
+                // If reached this far the handler processed the message and so the message can be removed from the queue
+                transport.completeMessageAsync(message.metaData.messageId);
             }
         }
     }

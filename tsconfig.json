@@ -6,12 +6,16 @@
             "es5",
             "es2015.iterable",
             "es2017.object",
+            "es2015.collection",
             "dom"
         ],
         "module": "commonjs",
         "noImplicitAny": false,
         "sourceMap": true,
-        "outDir": "lib"
+        "outDir": "lib",
+        "noUnusedParameters": false,
+        "noUnusedLocals": false,
+        "skipLibCheck": true
         //"importHelpers": true
     },
         "exclude": [
