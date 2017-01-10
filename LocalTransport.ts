@@ -6,6 +6,7 @@ import { InMemoryStorageQueue } from './InMemoryStorageQueue'
 import { IMessage } from './IMessage'
 import { QueuedMessage } from './QueuedMessage'
 import {Subscription} from './Subscription'
+import {MetaData} from './MetaData'
 
 export class LocalTransport implements IMessageTransport {
     // Key = QueueEndpoint.fullname, value = subscription name
@@ -95,6 +96,7 @@ export class LocalTransport implements IMessageTransport {
 
         //TODO: [GM] Optimize this so that its only called if at least one subtype was subscribed 
         // There may also be subscribers that subscribed to a subtype
+        debugger;
         subscribers = subscribers.concat(this.getStartsWithSubscribers(message.type) || []);
         subscribers = subscribers.concat(this.getEndsWithSubscribers(message.type) || []);
 
@@ -103,6 +105,8 @@ export class LocalTransport implements IMessageTransport {
         subscribers.forEach(s => {
             // Clone message prior to sending so each subscriber has their own immutable copy
             let clone = transportMessage.clone();
+            debugger;
+            clone.metaData.add("subscription", s.name);
             this._internalQueue.addMessageAsync(clone, deliverIn);
         });
     }
@@ -132,8 +136,8 @@ export class LocalTransport implements IMessageTransport {
     }
     private processIncommingQueueMessage(message: QueuedMessage): void {
         if (this._onMessageHandler) {
-            let msg: IMessage<any> = { type: message.type, message: message };
-
+            let msg: IMessage<any> = { type: message.type, message: message.body};
+            msg.metaData = new MetaData(message.metaData.internalHash());
             // Send the message to subscribers
             this._onMessageHandler(msg)
         }

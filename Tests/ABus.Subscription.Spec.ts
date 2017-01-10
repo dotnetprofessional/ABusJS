@@ -88,7 +88,6 @@ describe("subscribing to a message sub type", () => {
             }
         });
 
-        debugger;
         pipeline.publish({ type: testData.TestMessage.TYPE, message: {} });
         pipeline.publish({ type: testData.TestMessage2.TYPE, message: {} });
 
@@ -97,8 +96,12 @@ describe("subscribing to a message sub type", () => {
 
     it("should receive messages for all message types currently registered with supplied type suffix", () => {
         let counter = 0;
+        pipeline.unregisterAll();
+        debugger;
         pipeline.subscribe({
             messageFilter: "*.reply", handler: (message: any, context: IMessageHandlerContext) => {
+                // DEBUG HERE!
+                debugger;
                 if (context.messageType === testData.TestMessage1Reply.TYPE) {
                     counter += 1;
                 } else {
@@ -113,7 +116,7 @@ describe("subscribing to a message sub type", () => {
                 } 
             }
         });
-
+        debugger;
         pipeline.publish({ type: testData.TestMessage1Reply.TYPE, message: {} });
         pipeline.publish({ type: testData.TestMessage2Reply.TYPE, message: {} });
         pipeline.publish({ type: testData.TestMessage2.TYPE, message: {} });

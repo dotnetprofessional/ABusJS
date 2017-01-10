@@ -12,6 +12,7 @@ export class MessageExceptionTask implements IMessageTask {
         try {
             next();
         } catch (error) {
+            debugger;
             message.metaData = context.metaData;
             context.publish({ type: MessageException.typeName, message: new MessageException(error, message) });
         }
