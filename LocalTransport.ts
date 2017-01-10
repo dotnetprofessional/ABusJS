@@ -84,6 +84,11 @@ export class LocalTransport implements IMessageTransport {
         return this._subscriptionsByFilter.item(filter).length;
     }
 
+    completeMessageAsync(messageId: string) {
+        debugger;
+        this._internalQueue.completeMessageAsync(messageId);
+    }
+
     onMessage(handler: (message: IMessage<any>) => void) {
         this._onMessageHandler = handler;
     }
@@ -96,7 +101,6 @@ export class LocalTransport implements IMessageTransport {
 
         //TODO: [GM] Optimize this so that its only called if at least one subtype was subscribed 
         // There may also be subscribers that subscribed to a subtype
-        debugger;
         subscribers = subscribers.concat(this.getStartsWithSubscribers(message.type) || []);
         subscribers = subscribers.concat(this.getEndsWithSubscribers(message.type) || []);
 
@@ -105,7 +109,6 @@ export class LocalTransport implements IMessageTransport {
         subscribers.forEach(s => {
             // Clone message prior to sending so each subscriber has their own immutable copy
             let clone = transportMessage.clone();
-            debugger;
             clone.metaData.add("subscription", s.name);
             this._internalQueue.addMessageAsync(clone, deliverIn);
         });
@@ -134,6 +137,7 @@ export class LocalTransport implements IMessageTransport {
 
         return subscribers;
     }
+
     private processIncommingQueueMessage(message: QueuedMessage): void {
         if (this._onMessageHandler) {
             let msg: IMessage<any> = { type: message.type, message: message.body};

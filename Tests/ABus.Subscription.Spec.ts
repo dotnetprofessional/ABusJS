@@ -5,7 +5,7 @@ import {MessageHandlerOptions, ThreadingOptions} from '../MessageHandlerOptions'
 
 import * as testData from './ABus.Sample.Messages'
 
-describe("subscribing to a message type", () => {
+describe.skip("subscribing to a message type", () => {
     var pipeline = new Bus();
 
     it("should register subscriber for the message type", () => {
@@ -51,7 +51,7 @@ describe("subscribing to a message type", () => {
     });
 });
 
-describe("unsubscribing to a message type", () => {
+describe.skip("unsubscribing to a message type", () => {
     var pipeline = new Bus();
 
     pipeline.subscribe({ messageFilter: testData.TestMessage.TYPE, handler: (message: any) => { } });
@@ -97,11 +97,8 @@ describe("subscribing to a message sub type", () => {
     it("should receive messages for all message types currently registered with supplied type suffix", () => {
         let counter = 0;
         pipeline.unregisterAll();
-        debugger;
         pipeline.subscribe({
             messageFilter: "*.reply", handler: (message: any, context: IMessageHandlerContext) => {
-                // DEBUG HERE!
-                debugger;
                 if (context.messageType === testData.TestMessage1Reply.TYPE) {
                     counter += 1;
                 } else {
@@ -116,7 +113,6 @@ describe("subscribing to a message sub type", () => {
                 } 
             }
         });
-        debugger;
         pipeline.publish({ type: testData.TestMessage1Reply.TYPE, message: {} });
         pipeline.publish({ type: testData.TestMessage2Reply.TYPE, message: {} });
         pipeline.publish({ type: testData.TestMessage2.TYPE, message: {} });
@@ -125,7 +121,7 @@ describe("subscribing to a message sub type", () => {
     });
 });
 
-describe("subscribing to a message with throttling", () => {
+describe.skip("subscribing to a message with throttling", () => {
     var pipeline = new Bus();
 
     it.skip("should only forward messages once per throttle period ", () => {

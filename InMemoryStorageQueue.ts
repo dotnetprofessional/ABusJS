@@ -1,7 +1,7 @@
 import TimeSpan from './TimeSpan'
 import Hashtable from './Hashtable'
-import {QueuedMessage} from './QueuedMessage'
-import {IMessageQueue} from './IMessageQueue'
+import { QueuedMessage } from './QueuedMessage'
+import { IMessageQueue } from './IMessageQueue'
 
 /**
  * An in memory implementation of the StorageQueue interface
@@ -10,13 +10,13 @@ import {IMessageQueue} from './IMessageQueue'
  * @class Queue
  */
 export class InMemoryStorageQueue implements IMessageQueue {
-    private internalQueue: Hashtable<QueuedMessage> = new Hashtable<QueuedMessage>();
+    private internalQueue: QueuedMessage[] = [];
     private _leasePeriod = TimeSpan.FromMinutes(1);
     private _handler: (message: QueuedMessage) => void;
     private _nextScheduledPumpToken: any;
 
-    clear() {
-        this.internalQueue.clear();
+    clear():void {
+        this.internalQueue = [];
     }
 
     set leasePeriod(period: TimeSpan) {
@@ -27,13 +27,13 @@ export class InMemoryStorageQueue implements IMessageQueue {
         return this._leasePeriod;
     }
 
-    addMessageAsync(message: QueuedMessage, deliverIn?: TimeSpan) {
+    addMessageAsync(message: QueuedMessage, deliverIn?: TimeSpan): void {
         // Update deliverAt if deliverIn specified
         if (deliverIn) {
             message.deliverAt = deliverIn.getDateTime();
         }
 
-        this.internalQueue.add(message.messageId, message);
+        this.internalQueue.push(message);
 
         // deliver message if handlers defined.
         this.onMessageProcessor();
@@ -49,22 +49,41 @@ export class InMemoryStorageQueue implements IMessageQueue {
         return null;
     }
 
-    completeMessageAsync(messageId: string) {
-        this.internalQueue.remove(messageId);
+    completeMessageAsync(messageId: string): void {
+        let q = this.internalQueue;
+        for (let i = 0; i < this.internalQueue.length; i++) {
+            if (q[i].messageId === messageId) {
+                // Match found! so now remove it!
+                q.splice(i, 1);
+                return;
+            }
+        }
     }
 
-    abandonMessageAsync(messageId: string) {
+    /**
+     * Releases the lease on a message allowing it to return the queue to be processed again.
+     * 
+     * @param {string} messageId
+     * 
+     * @memberOf InMemoryStorageQueue
+     */
+    abandonMessageAsync(messageId: string): void {
         this.renewLeaseAsync(messageId, TimeSpan.FromMilliseconds(0));
     }
-    peekMessage() {
-        for (let i = 0; i < this.internalQueue.count; i++) {
-            let key = this.internalQueue.keys()[i];
-            if (key) {
-                var message = this.internalQueue.item(key);
-                // Don't deliver messages that have been deferred
-                if (!message.deliverAt || message.deliverAt <= Date.now()) {
-                    return message;
-                }
+
+    /**
+     * Returns the next available message without taking a lease on it.
+     * 
+     * @returns {QueuedMessage}
+     *  
+     * @memberOf InMemoryStorageQueue
+     */
+    peekMessage(): QueuedMessage {
+        for (let i = 0; i < this.internalQueue.length; i++) {
+            let message = this.internalQueue[i];
+            // Don't deliver messages that have been deferred
+            if (!message.deliverAt || message.deliverAt <= Date.now()) {
+                return message;
             }
         }
     }
@@ -102,8 +121,7 @@ export class InMemoryStorageQueue implements IMessageQueue {
             // Check the messages that are left and find the one that needs to be processed next and schedule
             // that time for the next pump.
             let nextTimeSlot;
-            this.internalQueue.keys().forEach(key => {
-                let msg = this.internalQueue.item(key);
+            this.internalQueue.forEach(msg => {
                 if (!nextTimeSlot || msg.deliverAt < nextTimeSlot) {
                     nextTimeSlot = msg.deliverAt;
                 }
@@ -115,19 +133,21 @@ export class InMemoryStorageQueue implements IMessageQueue {
     }
 
     renewLeaseAsync(messageId: string, timeSpan: TimeSpan) {
-        let message = this.internalQueue.item(messageId);
-        if (!message) {
-            throw new TypeError("Unable to locate message with id: " + messageId);
+        // Locate message and update the deliverAt property
+        let q = this.internalQueue;
+        for (let i = 0; i < this.internalQueue.length; i++) {
+            if (q[i].messageId === messageId) {
+                // Match found!
+                q[i].deliverAt = timeSpan.getDateTime();
+                return q[i].clone();
+            }
         }
-        message.deliverAt = timeSpan.getDateTime();
-        // Update the message with new details
-        this.internalQueue.update(messageId, message);
 
-        return message.clone();
+        throw new TypeError("Unable to locate message with id: " + messageId);
     }
 
     getCount(): number {
-        return this.internalQueue.count;
+        return this.internalQueue.length;
     }
 }
 
