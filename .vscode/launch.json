@@ -23,6 +23,10 @@
             "sourceMaps": true,
             "outFiles": [
                 "${workspaceRoot}/{lib}/**/*.js"
+            ],
+            "skipFiles": [
+                "node_modules/**/*.js",
+                "lib/**/*.js"
             ]
         },
         {
