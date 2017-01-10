@@ -5,6 +5,7 @@
             "es2015.promise",
             "es5",
             "es2015.iterable",
+            "es2017.object",
             "dom"
         ],
         "module": "commonjs",

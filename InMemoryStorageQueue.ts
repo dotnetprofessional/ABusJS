@@ -62,7 +62,7 @@ export class InMemoryStorageQueue implements IMessageQueue {
             if (key) {
                 var message = this.internalQueue.item(key);
                 // Don't deliver messages that have been deferred
-                if (message.deliverAt <= Date.now()) {
+                if (!message.deliverAt || message.deliverAt <= Date.now()) {
                     return message;
                 }
             }

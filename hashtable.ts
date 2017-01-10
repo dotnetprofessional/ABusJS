@@ -1,4 +1,4 @@
-import {Utils} from './Utils'
+import { Utils } from './Utils'
 
 export class DuplicateException extends Error {
 }
@@ -14,10 +14,21 @@ export default class Hashtable<T> {
     private _keys: string[] = [];
     private _iteratorCount = 0;
 
-    constructor(hash?: any) {
-        if(hash) {
+    constructor(hash?: Object) {
+        if (hash) {
             this._hash = hash;
+            // Now update the keys and count
+            for (let attr in hash) {
+                if (hash.hasOwnProperty(attr)) {
+                    this._count++;
+                    this._keys.push(attr);
+                }
+            }
         }
+    }
+    
+    internalHash() {
+        return this._hash;
     }
 
     add(key: string, value: T): void {
@@ -46,15 +57,15 @@ export default class Hashtable<T> {
         return this._hash[key];
     }
 
-/* This doesn't seem to be working with es6 and node!? Wait for TS 2.1
-    *items() {
-        for (var property in this._hash) {
-            if (this._hash.hasOwnProperty(property)) {
-                yield this.item[property];
+    /* This doesn't seem to be working with es6 and node!? Wait for TS 2.1
+        *items() {
+            for (var property in this._hash) {
+                if (this._hash.hasOwnProperty(property)) {
+                    yield this.item[property];
+                }
             }
         }
-    }
-*/
+    */
     items() {
         let items: T[] = [];
         for (var property in this._hash) {
@@ -92,8 +103,8 @@ export default class Hashtable<T> {
         return this._hash[key] !== undefined;
     }
 
-    clone() : Hashtable<any> {
-        let copy =  Utils.assign({}, this._hash);
+    clone(): Hashtable<any> {
+        let copy = Utils.assign({}, this._hash);
         return new Hashtable(copy);
     }
 }

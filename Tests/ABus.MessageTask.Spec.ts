@@ -48,8 +48,8 @@ describe.skip("Adding a message task to pipeline with Sync handlers", () => {
     var logs = [];
     var messageTask = new TestMessageTask(logs);
 
-    pipeline.messageTasks.clear();
-    pipeline.messageTasks.add(messageTask);
+    pipeline.inBoundMessageTasks.clear();
+    pipeline.inBoundMessageTasks.add(messageTask);
 
     pipeline.subscribe({
         messageFilter: testData.TestMessage.TYPE,
@@ -79,8 +79,8 @@ describe.skip("Adding a message task to pipeline with Async handlers", () => {
     var logs =[];
     var messageTask = new TestMessageTask(logs);
 
-    pipeline.messageTasks.clear();
-    pipeline.messageTasks.add(messageTask);
+    pipeline.inBoundMessageTasks.clear();
+    pipeline.inBoundMessageTasks.add(messageTask);
 
     pipeline.subscribe({
         messageFilter: testData.TestMessage.TYPE,
