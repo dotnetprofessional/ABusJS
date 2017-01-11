@@ -8,6 +8,7 @@ export class MetaData extends Hashtable<any> {
     get correlationId(): string { return this.item("correlationId"); }
     get replyTo(): string { return this.item("replyTo"); }
     get sagaKey(): string { return this.item("sagaKey"); }
+    get subscription(): string { return this.item("subscription"); }
     get shouldTerminatePipeline(): boolean { return !!(this.item("shouldTerminatePipeline")); }
 
     set messageType(messageType: string) { this.update("messageType", messageType); }
@@ -17,6 +18,7 @@ export class MetaData extends Hashtable<any> {
     set correlationId(correlationId: string) { this.update("correlationId", correlationId); }
     set replyTo(replyTo: string) { this.update("replyTo", replyTo); }
     set sagaKey(sagaKey: string) { this.update("sagaKey", sagaKey); }
+    set subscription(subscription: string) { this.update("subscription", subscription); }
     set shouldTerminatePipeline(shouldTerminatePipeline: boolean) { this.update("shouldTerminatePipeline", shouldTerminatePipeline.toString()); }
 }
 

@@ -40,7 +40,7 @@ class TestMessageTask implements IMessageTask {
     }
 }
 
-describe.skip("Adding a message task to pipeline with Sync handlers", () => {
+describe("Adding a message task to pipeline with Sync handlers", () => {
     var pipeline = new Bus();
     var returnedMessage: testData.CustomerData;
     var currentHandlerContext: IMessageHandlerContext;
@@ -71,7 +71,7 @@ describe.skip("Adding a message task to pipeline with Sync handlers", () => {
     });
 });
 
-describe.skip("Adding a message task to pipeline with Async handlers", () => {
+describe("Adding a message task to pipeline with Async handlers", () => {
     var pipeline = new Bus();
     var returnedMessage: testData.CustomerData;
     var currentHandlerContext: IMessageHandlerContext;

@@ -92,7 +92,6 @@ describe("subscribing to a message sub type", () => {
     it("should receive messages for all message types currently registered with supplied type suffix", () => {
         let counter = 0;
         transport.unsubscribeAll();
-        debugger;   
         transport.subscribe("test_reply", "*.reply")
         transport.onMessage((message: IMessage<any>) => {
             if (message.type === testData.TestMessage1Reply.TYPE) {

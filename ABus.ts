@@ -16,7 +16,7 @@ import { IMessageHandlerContext } from './IMessageHandlerContext'
 import { MessageHandlerContext } from './MessageHandlerContext'
 import { MetaData, Intents } from './MetaData'
 import { AddStandardMetaDataTask } from './Tasks/AddStandardMetaDataTask'
-import {IMessageTransport} from './IMessageTransport'
+import { IMessageTransport } from './IMessageTransport'
 
 // Class to manage the message task handlers executed for each message
 class MessageTasks {
@@ -165,13 +165,15 @@ export class Bus {
 
     send<T>(message: IMessage<T>, options?: SendOptions): Promise<any> {
         let context = new MessageHandlerContext(this);
-        message.metaData = context.metaData;
         return this.sendInternal(message, options, context);
     }
 
     sendInternal<T>(message: IMessage<T>, options: SendOptions, context: IMessageHandlerContext): Promise<any> {
         // Get the transport for this message type
         var transport = this.getTransport(message.type);
+
+        // Initialize the metaData for the message
+        message.metaData = new MetaData();
 
         options = Utils.assign(new SendOptions(), options);
 
@@ -206,13 +208,13 @@ export class Bus {
 
     publish<T>(message: IMessage<T>): void {
         let context = new MessageHandlerContext(this);
-        message.metaData = context.metaData;
         this.publishInternal(message, new SendOptions(), context);
     }
 
     // Typescript doesn't support internal methods yet
     publishInternal<T>(message: IMessage<T>, options: SendOptions, context: IMessageHandlerContext) {
-        // Push the message onto the correct transport
+        // Initialize the metaData for the message
+        message.metaData = new MetaData();
         message.metaData.intent = Intents.publish;
 
         this.dispatchOutboundMessageAsync(message, options, context, this.outBoundMessageTasks.localInstance);
@@ -256,7 +258,6 @@ export class Bus {
                 if (subscription) {
                     this.dispatchInboundMessageAsync(message, new MessageHandlerContext(this, message.metaData), this.inBoundMessageTasks.localInstance, subscription, transport);
                 } else {
-                    debugger;
                     // Mark the message as complete as there are no subscribers for this message
                     transport.completeMessageAsync(message.metaData.messageId);
                 }
@@ -336,8 +337,7 @@ export class Bus {
                 this._replyToMessages.remove(message.metaData.replyTo);
             } else {
                 let handler = subscription.messageSubscription.handler;
-                await handler(message, context);
-                debugger;
+                await handler(message.message, context);
                 // If reached this far the handler processed the message and so the message can be removed from the queue
                 transport.completeMessageAsync(message.metaData.messageId);
             }
