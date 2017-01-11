@@ -86,3 +86,46 @@
 Test Summary
  › Ran all tests.
  › 57 tests passed (57 total in 6 test suites, run time 3.274s)
+
+Workflow
+Bus.Publish(msg) 
+-  -> create a new MessageHandlerContext instance for new outgoing message
+-  -> assign context.metaData to message 
++  -> initialize metaData on message 
+  -> set intent to publish 
+  -> [Bus]invoke outBoundTasks
+  -> invoke transport.publish(msg) 
+  -> [Transport] creates a copy (clone) of message for each registered subscriber
+    ??? convert to QueuedMessage???
+  -> Adds subscription name to copy of message
+  -> [Transport] adds message to queue
+  -> [InMemoryQueue] adds message to internal queue
+  -> [InMemoryQueue] processes queue and dispatches messages to subscriber (Transport)
+  -> [Transport] converts QueuedMessage from Queue to IMessage<any> including metaData
+  -> [Bus] recieves message from transport
+  -> [Bus] looks up subscriber based on subsription identified in metaData.subscription
+  -> [Bus] invoke outBoundTasks
+  -> [Bus] execute handler for message
+  -> [Bus] mark message as complete
+
+
+context.Publish(msg) 
+-  -> create a new MessageHandlerContext instance for new outgoing message
+-  -> assign context.metaData to message
++  -> initialize metaData on message 
+  -> set intent to publish 
+  -> [Bus]invoke outBoundTasks using existing context + message
+  -> invoke transport.publish(msg) 
+  -> [Transport] creates a copy (clone) of message for each registered subscriber
+    ??? convert to QueuedMessage???
+  -> Adds subscription name to copy of message
+  -> [Transport] adds message to queue
+  -> [InMemoryQueue] adds message to internal queue
+  -> [InMemoryQueue] processes queue and dispatches messages to subscriber (Transport)
+  -> [Transport] converts QueuedMessage from Queue to IMessage<any> including metaData
+  -> [Bus] recieves message from transport
+  -> [Bus] looks up subscriber based on subsription identified in metaData.subscription
+  -> [Bus] invoke outBoundTasks using context of the message
+  -> [Bus] execute handler for message 
+  -> [Bus] mark message as complete
+ 

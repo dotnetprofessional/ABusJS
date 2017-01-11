@@ -7,13 +7,15 @@ export class AddStandardMetaDataTask implements IMessageTask {
     invoke(message: IMessage<any>, context: MessageHandlerContext, next: any) {
         // Add context data to message
         if (!context.metaData.conversationId) {
-            context.metaData.conversationId = Guid.newGuid();
+            message.metaData.conversationId = Guid.newGuid();
+        } else {
+            message.metaData.conversationId = context.metaData.conversationId;
         }
 
         // CorrelationId becomes the current messa
-        context.metaData.correlationId = context.messageId;
-        context.metaData.messageId = Guid.newGuid();
-        context.metaData.messageType = message.type;
+        message.metaData.correlationId = context.messageId;
+        message.metaData.messageId = Guid.newGuid();
+        message.metaData.messageType = message.type;
 
         next();
     }

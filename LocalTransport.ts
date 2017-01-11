@@ -85,7 +85,6 @@ export class LocalTransport implements IMessageTransport {
     }
 
     completeMessageAsync(messageId: string) {
-        debugger;
         this._internalQueue.completeMessageAsync(messageId);
     }
 

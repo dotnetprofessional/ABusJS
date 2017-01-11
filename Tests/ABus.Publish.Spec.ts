@@ -8,7 +8,7 @@ import {Utils} from '../Utils'
 
 import * as testData from './ABus.Sample.Messages'
 
-describe.skip("publishing a message outside of a handler", () => {
+describe("publishing a message outside of a handler", () => {
     var bus = new Bus();
     var returnedMessage: testData.CustomerData;
     var currentHandlerContext: IMessageHandlerContext;
@@ -86,7 +86,7 @@ describe.skip("publishing a message outside of a handler", () => {
     });
 });
 
-describe.skip("publishing a message inside of a handler", () => {
+describe("publishing a message inside of a handler", () => {
     var bus = new Bus();
     var firstMessage: testData.CustomerData;
     var firstHandlerContext: IMessageHandlerContext;
@@ -145,7 +145,7 @@ describe.skip("publishing a message inside of a handler", () => {
     });
 });
 
-describe.skip("publishing a message outside of a handler with ", () => {
+describe("publishing a message outside of a handler with ", () => {
     var bus = new Bus();
     var returnedMessage: testData.CustomerData;
     var currentHandlerContext: IMessageHandlerContext;
@@ -182,7 +182,6 @@ describe("testing...", () => {
     var handler = (a, b) => {};
 
     it("get path", () => {
-        debugger;
         var x = handler;
         handler(1,2);
     });

@@ -5,7 +5,7 @@ import {MessageHandlerOptions, ThreadingOptions} from '../MessageHandlerOptions'
 
 import * as testData from './ABus.Sample.Messages'
 
-describe.skip("subscribing to a message type", () => {
+describe("subscribing to a message type", () => {
     var pipeline = new Bus();
 
     it("should register subscriber for the message type", () => {
@@ -51,7 +51,7 @@ describe.skip("subscribing to a message type", () => {
     });
 });
 
-describe.skip("unsubscribing to a message type", () => {
+describe("unsubscribing to a message type", () => {
     var pipeline = new Bus();
 
     pipeline.subscribe({ messageFilter: testData.TestMessage.TYPE, handler: (message: any) => { } });
@@ -113,6 +113,7 @@ describe("subscribing to a message sub type", () => {
                 } 
             }
         });
+        debugger;
         pipeline.publish({ type: testData.TestMessage1Reply.TYPE, message: {} });
         pipeline.publish({ type: testData.TestMessage2Reply.TYPE, message: {} });
         pipeline.publish({ type: testData.TestMessage2.TYPE, message: {} });

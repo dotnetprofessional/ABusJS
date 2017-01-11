@@ -1,8 +1,8 @@
-import {IMessageHandlerContext} from './IMessageHandlerContext'
-import {MetaData} from './MetaData'
-import {IMessage} from './IMessage' 
-import {Bus} from './ABus'
-import {SendOptions} from './SendOptions'
+import { IMessageHandlerContext } from './IMessageHandlerContext'
+import { MetaData } from './MetaData'
+import { IMessage } from './IMessage'
+import { Bus } from './ABus'
+import { SendOptions } from './SendOptions'
 
 export class MessageHandlerContext implements IMessageHandlerContext {
     constructor(public bus: Bus, public metaData: MetaData = new MetaData()) {
@@ -27,15 +27,15 @@ export class MessageHandlerContext implements IMessageHandlerContext {
     }
 
     publish<T>(message: IMessage<T>): void {
-        this.bus.publishInternal(message, new SendOptions(), new MessageHandlerContext(this.bus, this.metaData));
+        this.bus.publishInternal(message, new SendOptions(), this);
     }
 
     send<T>(message: IMessage<T>, options?: SendOptions): Promise<any> {
-        return this.bus.sendInternal(message, options, new MessageHandlerContext(this.bus, this.metaData));
+        return this.bus.sendInternal(message, options, this);
     }
 
     reply<T>(reply: T): void {
-        var msg = { type: this.messageType + ".reply", message: reply };
-        this.bus.publishInternal(msg,  new SendOptions(), new MessageHandlerContext(this.bus, this.metaData));
+        var msg = { type: this.messageType + ".reply", message: reply } as IMessage<any>;
+        this.bus.publishInternal(msg, new SendOptions(), this);
     }
 }
