@@ -60,7 +60,7 @@ describe("publishing a message outside of a handler", () => {
         expect(currentHandlerContext.metaData.correlationId).toBeUndefined();
     });
 
-    it.skip("should not throw an exception if subscriber throws an exception", () => {
+    it("should not throw an exception if subscriber throws an exception", () => {
         // subscribe to a msg that will then fail during its processing.
         bus.subscribe({
             messageFilter: testData.TestMessage.TYPE,
@@ -143,47 +143,4 @@ describe("publishing a message inside of a handler", () => {
         expect(secondHandlerContext.metaData.correlationId).toBeDefined();
         expect(secondHandlerContext.metaData.correlationId).toBe(firstHandlerContext.messageId);
     });
-});
-
-describe("publishing a message outside of a handler with ", () => {
-    var bus = new Bus();
-    var returnedMessage: testData.CustomerData;
-    var currentHandlerContext: IMessageHandlerContext;
-    var counter = 0;
-
-    bus.subscribe({
-        messageFilter: testData.TestMessage.TYPE,
-        handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
-            returnedMessage = message;
-            currentHandlerContext = context;
-        }
-    }, {threading: ThreadingOptions.Single});
-
-    bus.subscribe({
-        messageFilter: testData.TestMessage2.TYPE,
-        handler: async (message: testData.CustomerData, context: MessageHandlerContext) => {
-            returnedMessage = message;
-            currentHandlerContext = context;
-            await Utils.sleep(5);
-            // Now set the counter
-            counter = 10;
-        }
-    });
-
-    it("should send message to all registered subscribers", () => {
-        bus.publish(new testData.TestMessage("Johhny Smith"));
-        expect(returnedMessage.name).toBe("Johhny Smith");
-    });
-
-});
-
-describe("testing...", () => {
-
-    var handler = (a, b) => {};
-
-    it("get path", () => {
-        var x = handler;
-        handler(1,2);
-    });
-   
 });

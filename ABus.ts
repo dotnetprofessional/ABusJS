@@ -163,12 +163,12 @@ export class Bus {
         return transport.subscriberCount(messageFilter);
     }
 
-    send<T>(message: IMessage<T>, options?: SendOptions): void {
+    sendAsync<T, R>(message: IMessage<T>, options?: SendOptions): Promise<R> {
         let context = new MessageHandlerContext(this);
-        this.sendInternal(message, options, context);
+        return this.sendInternalAsync(message, options, context);
     }
 
-    sendInternal<T>(message: IMessage<T>, options: SendOptions, context: IMessageHandlerContext): Promise<any> {
+    sendInternalAsync<T>(message: IMessage<T>, options: SendOptions, context: IMessageHandlerContext): Promise<any> {
         // Get the transport for this message type
         var transport = this.getTransport(message.type);
 
@@ -208,7 +208,9 @@ export class Bus {
     // Typescript doesn't support internal methods yet
     publishInternal<T>(message: IMessage<T>, options: SendOptions, context: IMessageHandlerContext) {
         // Initialize the metaData for the message
-        message.metaData = new MetaData();
+        if(!message.metaData) {
+            message.metaData = new MetaData();
+        }
         message.metaData.messageId = Guid.newGuid();
         message.metaData.intent = Intents.publish;
 

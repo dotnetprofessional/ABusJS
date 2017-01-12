@@ -22,5 +22,5 @@ export interface IMessageHandlerContext {
     bus: Bus
 
     publish<T>(message: IMessage<T>): void;
-    send<T>(message: IMessage<T>, options?: SendOptions): void
+    sendAsync<T>(message: IMessage<T>, options?: SendOptions): void
 }
