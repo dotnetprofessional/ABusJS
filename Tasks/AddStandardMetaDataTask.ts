@@ -14,7 +14,6 @@ export class AddStandardMetaDataTask implements IMessageTask {
 
         // CorrelationId becomes the current messa
         message.metaData.correlationId = context.messageId;
-        message.metaData.messageId = Guid.newGuid();
         message.metaData.messageType = message.type;
 
         next();
