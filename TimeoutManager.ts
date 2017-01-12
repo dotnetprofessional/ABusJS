@@ -20,7 +20,7 @@ export class TimeoutManager {
         let deferFor = TimeSpan.getTimeSpan(options.deliverAt).totalMilliseconds;
         let timeoutKey = setTimeout(()=> {
             this._deferedMessages.remove(context.messageId);
-            context.send(message);
+            context.sendAsync(message);
         }, deferFor);
         
         this._deferedMessages.add(context.messageId, {timeoutKey, message, context, options});

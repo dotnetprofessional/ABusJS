@@ -81,7 +81,12 @@ export class LocalTransport implements IMessageTransport {
     }
 
     subscriberCount(filter: string) {
-        return this._subscriptionsByFilter.item(filter).length;
+        let subscribers = this._subscriptionsByFilter.item(filter);
+        if(subscribers) {
+            return subscribers.length;
+        } else {
+            return 0;
+        }
     }
 
     completeMessageAsync(messageId: string) {

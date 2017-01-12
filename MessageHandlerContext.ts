@@ -30,12 +30,17 @@ export class MessageHandlerContext implements IMessageHandlerContext {
         this.bus.publishInternal(message, new SendOptions(), this);
     }
 
-    send<T>(message: IMessage<T>, options?: SendOptions): Promise<any> {
-        return this.bus.sendInternal(message, options, this);
+    sendAsync<T>(message: IMessage<T>, options?: SendOptions): Promise<any> {
+        return this.bus.sendInternalAsync(message, options, this);
     }
 
     reply<T>(reply: T): void {
         var msg = { type: this.messageType + ".reply", message: reply } as IMessage<any>;
+        msg.metaData = new MetaData();
+        // Need to add a replyTo so it can be delivered to the correct handler
+        msg.metaData.replyTo = this.metaData.messageId;
+        // Here a publish is used instead of a send as only a publish supports wild card subscriptions
+        // this is needed by the Bus to subscribe to all reply messages ie *.reply 
         this.bus.publishInternal(msg, new SendOptions(), this);
     }
 }

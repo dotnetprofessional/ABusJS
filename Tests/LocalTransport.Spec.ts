@@ -61,9 +61,6 @@ describe("unsubscribing to a message type", () => {
         transport.unsubscribe("test");
         expect(transport.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
     });
-
-    it.skip("handler no longer recieves messages", () => {
-    });
 });
 
 describe("subscribing to a message sub type", () => {
