@@ -113,7 +113,6 @@ describe("subscribing to a message sub type", () => {
                 } 
             }
         });
-        debugger;
         pipeline.publish({ type: testData.TestMessage1Reply.TYPE, message: {} });
         pipeline.publish({ type: testData.TestMessage2Reply.TYPE, message: {} });
         pipeline.publish({ type: testData.TestMessage2.TYPE, message: {} });

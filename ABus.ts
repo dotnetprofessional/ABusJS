@@ -163,9 +163,9 @@ export class Bus {
         return transport.subscriberCount(messageFilter);
     }
 
-    send<T>(message: IMessage<T>, options?: SendOptions): Promise<any> {
+    send<T>(message: IMessage<T>, options?: SendOptions): void {
         let context = new MessageHandlerContext(this);
-        return this.sendInternal(message, options, context);
+        this.sendInternal(message, options, context);
     }
 
     sendInternal<T>(message: IMessage<T>, options: SendOptions, context: IMessageHandlerContext): Promise<any> {
@@ -174,6 +174,8 @@ export class Bus {
 
         // Initialize the metaData for the message
         message.metaData = new MetaData();
+        message.metaData.messageId = Guid.newGuid();
+        message.metaData.intent = Intents.send;
 
         options = Utils.assign(new SendOptions(), options);
 
@@ -184,25 +186,17 @@ export class Bus {
             throw new TypeError(`No subscriber defined for the command ${message.type}`);
         }
 
-        if (!message.metaData) {
-            message.metaData = new MetaData();
-        }
-        let replyTo = Guid.newGuid();
-
-        message.metaData.update("replyTo", replyTo);
-
         let replyHandler = new ReplyHandler();
         let replyHandlerPromise = new Promise((resolve, reject) => {
             replyHandler.resolve = resolve;
             replyHandler.reject = reject;
-            replyHandler.replyTo = replyTo;
-            this._replyToMessages.add(replyTo, replyHandler);
+            replyHandler.replyTo = message.metaData.messageId;
+            this._replyToMessages.add(replyHandler.replyTo, replyHandler);
             // Add a timeout here too. This can be a default but also supplied as part of the sendOptions
         });
-        context.metaData.intent = Intents.send;
 
         // Delivery the message to be sent to the transport
-        this.dispatchOutboundMessageAsync(message, options, context, this.inBoundMessageTasks.localInstance);
+        this.dispatchOutboundMessageAsync(message, options, context, this.outBoundMessageTasks.localInstance);
         return replyHandlerPromise;
     }
 
@@ -215,6 +209,7 @@ export class Bus {
     publishInternal<T>(message: IMessage<T>, options: SendOptions, context: IMessageHandlerContext) {
         // Initialize the metaData for the message
         message.metaData = new MetaData();
+        message.metaData.messageId = Guid.newGuid();
         message.metaData.intent = Intents.publish;
 
         this.dispatchOutboundMessageAsync(message, options, context, this.outBoundMessageTasks.localInstance);
