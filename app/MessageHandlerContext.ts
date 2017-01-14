@@ -1,7 +1,7 @@
 import { IMessageHandlerContext } from './IMessageHandlerContext'
 import { MetaData } from './MetaData'
 import { IMessage } from './IMessage'
-import { Bus } from './ABus'
+import { Bus } from './Bus'
 import { SendOptions } from './SendOptions'
 
 export class MessageHandlerContext implements IMessageHandlerContext {

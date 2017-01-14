@@ -1,6 +1,6 @@
-import { LocalTransport } from '../LocalTransport'
-import { IMessage } from '../IMessage'
-import * as testData from './Abus.Sample.Messages'
+import { LocalTransport } from '../App/LocalTransport'
+import { IMessage } from '../App/IMessage'
+import * as testData from './ABus.Sample.Messages'
 
 describe("subscribing to a message type", () => {
     var transport = new LocalTransport();

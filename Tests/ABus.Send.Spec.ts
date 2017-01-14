@@ -1,8 +1,8 @@
-import { Bus } from '../ABus'
-import { MessageHandlerContext } from '../MessageHandlerContext'
-import { IMessageHandlerContext } from '../IMessageHandlerContext'
-import { Utils } from '../Utils'
-import TimeSpan from '../timespan'
+import { Bus } from '../App/Bus'
+import { MessageHandlerContext } from '../App/MessageHandlerContext'
+import { IMessageHandlerContext } from '../App/IMessageHandlerContext'
+import { Utils } from '../App/Utils'
+import TimeSpan from '../App/timespan'
 
 import * as testData from './ABus.Sample.Messages'
 

@@ -17,8 +17,8 @@ export class MessageExceptionTask implements IMessageTask {
 }
 
 export class MessageException<T> {
-    readonly errorKey = "ABus.Error";
-    readonly errorCount = "ABus.Error.Count";
+    readonly errorKey = "Bus.Error";
+    readonly errorCount = "Bus.Error.Count";
 
     constructor(public error: string, public message: IMessage<T>) {
         // Add the error to the message and update the error count
@@ -30,7 +30,7 @@ export class MessageException<T> {
     // [GM]: See if we can use species to get child class
     name: string = MessageException.typeName;
 
-    public static typeName = "ABus.MessageException";
+    public static typeName = "Bus.MessageException";
 }
 
 export class UnhandledMessageException<T> extends MessageException<T> {

@@ -1,4 +1,4 @@
-import { Bus } from './ABus'
+import { Bus } from './Bus'
 
 export function handler(type: string) {
     return function handler_decorator(target: any, key: string) {

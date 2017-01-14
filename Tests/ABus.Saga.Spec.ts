@@ -4,16 +4,16 @@ describe("Saga Spec", ()=>{
     });
 });
 
-// //import { Saga, SagaTimeout } from '../Saga'
-// import { Bus} from '../ABus'
+// //import { Saga, SagaTimeout } from '../App/Saga'
+// import { Bus} from '../App/Bus'
 // import Log from './Logging'
-// import {MessageHandlerContext} from '../MessageHandlerContext'
-// import {Message} from '../Message'
-// import {Utils} from '../Utils'
-// import {Guid} from '../Guid'
-// import TimeSpan from '../TimeSpan'
+// import {MessageHandlerContext} from '../App/MessageHandlerContext'
+// import {Message} from '../App/Message'
+// import {Utils} from '../App/Utils'
+// import {Guid} from '../App/Guid'
+// import TimeSpan from '../App/TimeSpan'
 
-// import * as testData from './ABus.Sample.Messages'
+// import * as testData from './Bus.Sample.Messages'
 
 // // Define messages for the Saga
 // class StartOrder {
