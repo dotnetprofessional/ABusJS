@@ -82,6 +82,7 @@ export class Bus {
 
     private getTransport(messageFilter: string) {
         // Update with logic to pick the correct transport based on message type.
+        messageFilter =""; // Only to suppress compile errors until this parameter is used.
         return this._messageTransport;
     }
 
