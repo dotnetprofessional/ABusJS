@@ -12,7 +12,7 @@ describe("Subsriptions", () => {
 
         it("should register subscriber for the message type", () => {
             pipeline.unregisterAll();
-            pipeline.subscribe({ messageFilter: testData.TestMessage.TYPE, handler: (message: any, bus: MessageHandlerContext) => { } });
+            pipeline.subscribe({ messageFilter: testData.TestMessage.TYPE, handler: (message: any, context: MessageHandlerContext) => { } });
             expect(pipeline.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
         });
 
@@ -140,7 +140,7 @@ var handlerXValue = 0;
 // This class handles messages and needs to be exported to prevent compiler errors about not being used.
 export class TestMessageHandler {
     @handler(testData.TestMessage.TYPE)
-    handler(message: testData.CustomerData, bus: MessageHandlerContext) {
+    handler(message: testData.CustomerData, context: MessageHandlerContext) {
         handlerXValue = 100;
     };
 }
