@@ -1,5 +1,4 @@
 import TimeSpan from './TimeSpan'
-import Hashtable from './Hashtable'
 import { QueuedMessage } from './QueuedMessage'
 import { IMessageQueue } from './IMessageQueue'
 
@@ -11,7 +10,7 @@ import { IMessageQueue } from './IMessageQueue'
  */
 export class InMemoryStorageQueue implements IMessageQueue {
     private internalQueue: QueuedMessage[] = [];
-    private _leasePeriod = TimeSpan.FromMinutes(1);
+    private _leasePeriod = TimeSpan.FromMinutes(60);
     private _handler: (message: QueuedMessage) => void;
     private _nextScheduledPumpToken: any;
 
@@ -39,11 +38,11 @@ export class InMemoryStorageQueue implements IMessageQueue {
         this.onMessageProcessor();
     }
 
-    getMessageAsync(): QueuedMessage {
+    getMessage(): QueuedMessage {
         let message = this.peekMessage();
         if (message) {
             message.dequeueCount += 1;
-            return this.renewLeaseAsync(message.messageId, this.leasePeriod);
+            return this.renewLease(message.id, this.leasePeriod);
         }
         // No messages that haven't been derred are available
         return null;
@@ -52,7 +51,7 @@ export class InMemoryStorageQueue implements IMessageQueue {
     completeMessageAsync(messageId: string): void {
         let q = this.internalQueue;
         for (let i = 0; i < this.internalQueue.length; i++) {
-            if (q[i].messageId === messageId) {
+            if (q[i].id === messageId) {
                 // Match found! so now remove it!
                 q.splice(i, 1);
                 return;
@@ -68,7 +67,7 @@ export class InMemoryStorageQueue implements IMessageQueue {
      * @memberOf InMemoryStorageQueue
      */
     abandonMessageAsync(messageId: string): void {
-        this.renewLeaseAsync(messageId, TimeSpan.FromMilliseconds(0));
+        this.renewLease(messageId, TimeSpan.FromMilliseconds(0));
     }
 
     /**
@@ -83,6 +82,15 @@ export class InMemoryStorageQueue implements IMessageQueue {
             let message = this.internalQueue[i];
             // Don't deliver messages that have been deferred
             if (!message.deliverAt || message.deliverAt <= Date.now()) {
+                return message;
+            }
+        }
+    }
+
+    findMessage(compare: (m:QueuedMessage)=>void): QueuedMessage {
+        for (let i = 0; i < this.internalQueue.length; i++) {
+            let message = this.internalQueue[i];
+            if(compare(message)) {
                 return message;
             }
         }
@@ -104,8 +112,9 @@ export class InMemoryStorageQueue implements IMessageQueue {
         }
 
         do {
-            msg = this.getMessageAsync();
+            msg = this.getMessage();
             if (msg) {
+                // Handler in the transport
                 this._handler(msg);
             }
         } while (msg);
@@ -114,7 +123,7 @@ export class InMemoryStorageQueue implements IMessageQueue {
         clearTimeout(this._nextScheduledPumpToken);
 
         // End of messages schedule the next time messages are checked
-        if (this.getCount() === 0) {
+        if (this.count === 0) {
             // There are no more messages so no need to schedule anything
         } else {
             // There are messages left in the queue but are not available for processing at this time
@@ -128,15 +137,15 @@ export class InMemoryStorageQueue implements IMessageQueue {
             });
 
             // Schedule next pump and record the timeout token
-            this._nextScheduledPumpToken = setTimeout(() => this.onMessageProcessor(), TimeSpan.getTimeSpan(nextTimeSlot).totalMilliseconds);
+            this._nextScheduledPumpToken = setTimeout(async () => this.onMessageProcessor(), TimeSpan.getTimeSpan(nextTimeSlot).totalMilliseconds);
         }
     }
 
-    renewLeaseAsync(messageId: string, timeSpan: TimeSpan) {
+    renewLease(messageId: string, timeSpan: TimeSpan) {
         // Locate message and update the deliverAt property
         let q = this.internalQueue;
         for (let i = 0; i < this.internalQueue.length; i++) {
-            if (q[i].messageId === messageId) {
+            if (q[i].id === messageId) {
                 // Match found!
                 q[i].deliverAt = timeSpan.getDateTime();
                 return q[i].clone();
@@ -146,7 +155,7 @@ export class InMemoryStorageQueue implements IMessageQueue {
         throw new TypeError("Unable to locate message with id: " + messageId);
     }
 
-    getCount(): number {
+    get count(): number {
         return this.internalQueue.length;
     }
 }

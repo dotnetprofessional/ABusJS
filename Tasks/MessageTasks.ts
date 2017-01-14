@@ -1,7 +1,5 @@
 import { IMessage } from '../IMessage'
 import { IMessageHandlerContext } from '../IMessageHandlerContext'
-import { Guid } from '../Guid'
-import Hashtable from '../hashtable';
 
 export interface IMessageTask {
     invoke(message: IMessage<any>, context: IMessageHandlerContext, next): void;

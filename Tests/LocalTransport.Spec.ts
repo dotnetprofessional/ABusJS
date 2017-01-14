@@ -54,7 +54,7 @@ describe("unsubscribing to a message type", () => {
     it("removes handler from subscription", () => {
         expect(transport.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
         // Add another subscriber
-        let subscription = transport.subscribe("test1", testData.TestMessage.TYPE);
+        transport.subscribe("test1", testData.TestMessage.TYPE);
         expect(transport.subscriberCount(testData.TestMessage.TYPE)).toBe(2);
 
         // Remove the last subscriber 
@@ -65,7 +65,6 @@ describe("unsubscribing to a message type", () => {
 
 describe("subscribing to a message sub type", () => {
     var transport = new LocalTransport();
-    let counter = 0;
 
     it("should receive messages for all message types currently registered with supplied type prefix", () => {
         let counter = 0;
@@ -113,9 +112,59 @@ describe("subscribing to a message sub type", () => {
     });
 });
 
+describe("multiple subscribers to a message", () => {
+    var transport = new LocalTransport();
+
+    it("should receive messages for all message types currently registered with supplied type prefix",  () => {
+        let counter = 0;
+        transport.subscribe("test1", "test.*");
+        transport.subscribe("test2", testData.TestMessage.TYPE);
+        transport.onMessage((message: IMessage<any>) => {
+            if (message.type === testData.TestMessage.TYPE) {
+                counter += 1;
+            } else {
+                if (message.type === testData.TestMessage2.TYPE) {
+                    counter += 2;
+                }
+            }
+        });
+
+        transport.send({ type: testData.TestMessage.TYPE, message: {} });
+        // This message is only handled by one of the subscribers
+        transport.send({ type: testData.TestMessage2.TYPE, message: {} });
+
+        expect(counter).toBe(4);
+    });
+
+    it("should receive messages for all message types currently registered with supplied type suffix", () => {
+        let counter = 0;
+        transport.unsubscribeAll();
+        transport.subscribe("test_reply", "*.reply")
+        transport.onMessage((message: IMessage<any>) => {
+            if (message.type === testData.TestMessage1Reply.TYPE) {
+                counter += 1;
+            } else {
+                if (message.type === testData.TestMessage2Reply.TYPE) {
+                    counter += 2;
+                }
+            }
+
+            if (message.type === testData.TestMessage2.TYPE) {
+                // Ensures this message wasn't recieved as it wasn't subscribed to
+                counter += 1;
+            }
+        });
+
+        transport.send({ type: testData.TestMessage1Reply.TYPE, message: {} });
+        transport.send({ type: testData.TestMessage2Reply.TYPE, message: {} });
+        transport.send({ type: testData.TestMessage2.TYPE, message: {} });
+
+        expect(counter).toBe(3);
+    });
+});
+
 describe.skip("Sending an recieving messages", () => {
     var transport = new LocalTransport();
-    let counter = 0;
 
     it("should be fast!", () => {
         let counter = 0;

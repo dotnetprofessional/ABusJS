@@ -1,8 +1,6 @@
 import Hashtable from './hashtable';
 import { IMessageTask, MessageExceptionTask } from './Tasks/MessageTasks'
-import TimeSpan from './TimeSpan'
 //import { Saga } from './Saga'
-import { TimeoutManager } from './TimeoutManager'
 import { LocalTransport } from './LocalTransport'
 import { SubscriptionInstance } from './SubscriptionInstance'
 import { ReplyHandler } from './ReplyHandler'
@@ -61,8 +59,9 @@ export class Bus {
     private _outBoundMessageTasks = new MessageTasks([]);
     private _inBoundMessageTasks = new MessageTasks([]);
     private _replyToMessages = new Hashtable<ReplyHandler>();
-    private _timeoutManager = new TimeoutManager(this);
     private _messageTransport = new LocalTransport();
+
+    public static instance: Bus = new Bus();
 
     private _config = {
         tracking: false,
@@ -108,7 +107,7 @@ export class Bus {
 
     subscribe<T>(subscription: IMessageSubscription<T>, options: MessageHandlerOptions = new MessageHandlerOptions()): string {
 
-        let userOptions = Utils.assign(new MessageHandlerOptions(), options);
+        //let userOptions = Utils.assign(new MessageHandlerOptions(), options);
 
         if (!subscription) {
             throw new TypeError("Invalid subscription.");
@@ -228,7 +227,7 @@ export class Bus {
         // Subscribe for all .reply messages so they can be returned to their callers
         let transport = this.getTransport("*");
 
-        transport.subscribe("replyToHandler", "*.reply");
+        transport.subscribe("replyToHandlerXXX", "*.reply");
     }
 
     /*
@@ -240,7 +239,7 @@ export class Bus {
     private registerForTransportEvents(): void {
         let transport = this.getTransport("*");
 
-        transport.onMessage((message: IMessage<any>) => {
+        transport.onMessage(async (message: IMessage<any>) => {
             var replyToHandler = this._replyToMessages.item(message.metaData.replyTo);
             if (replyToHandler) {
                 replyToHandler.resolve(message.message);
@@ -253,7 +252,7 @@ export class Bus {
                 let subscription = this.messageHandlers.item(message.metaData.item('subscription'));
                 // Ensure the subscription is still registered before attempting to dispatch it.
                 if (subscription) {
-                    this.dispatchInboundMessageAsync(message, new MessageHandlerContext(this, message.metaData), this.inBoundMessageTasks.localInstance, subscription, transport);
+                    await this.dispatchInboundMessageAsync(message, new MessageHandlerContext(this, message.metaData), this.inBoundMessageTasks.localInstance, subscription, transport);
                 } else {
                     // Mark the message as complete as there are no subscribers for this message
                     transport.completeMessageAsync(message.metaData.messageId);

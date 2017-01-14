@@ -1,12 +1,12 @@
-import { IMessageTransport, QueueEndpoint } from './IMessageTransport'
+import { IMessageTransport } from './IMessageTransport'
 import TimeSpan from './TimeSpan'
 import Hashtable from './Hashtable'
-import { IMessageQueue } from './IMessageQueue'
 import { InMemoryStorageQueue } from './InMemoryStorageQueue'
 import { IMessage } from './IMessage'
 import { QueuedMessage } from './QueuedMessage'
 import {Subscription} from './Subscription'
 import {MetaData} from './MetaData'
+import {Guid} from "./Guid";
 
 export class LocalTransport implements IMessageTransport {
     // Key = QueueEndpoint.fullname, value = subscription name
@@ -90,7 +90,8 @@ export class LocalTransport implements IMessageTransport {
     }
 
     completeMessageAsync(messageId: string) {
-        this._internalQueue.completeMessageAsync(messageId);
+        let internalMessage = this._internalQueue.findMessage(m=>m.metaData.item("messageId") === messageId);
+        this._internalQueue.completeMessageAsync(internalMessage.id);
     }
 
     onMessage(handler: (message: IMessage<any>) => void) {
@@ -113,6 +114,8 @@ export class LocalTransport implements IMessageTransport {
         subscribers.forEach(s => {
             // Clone message prior to sending so each subscriber has their own immutable copy
             let clone = transportMessage.clone();
+            // Ensure each copy has a unique id 
+            clone.id = Guid.newGuid();
             clone.metaData.add("subscription", s.name);
             this._internalQueue.addMessageAsync(clone, deliverIn);
         });
@@ -146,8 +149,11 @@ export class LocalTransport implements IMessageTransport {
         if (this._onMessageHandler) {
             let msg: IMessage<any> = { type: message.type, message: message.body};
             msg.metaData = new MetaData(message.metaData.internalHash());
+
+            // Add some metaData from the QueuedMessage
+            msg.metaData.dequeueCount = message.dequeueCount;
             // Send the message to subscribers
-            this._onMessageHandler(msg)
+            this._onMessageHandler(msg);
         }
     }
 }

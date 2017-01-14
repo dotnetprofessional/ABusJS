@@ -5,18 +5,24 @@ export class QueuedMessage {
     constructor(public readonly type: string, public readonly body: any, public metaData: Hashtable<any> = new Hashtable<any>()) {
         // Only set the default meta data if there is none already.
         if (this.metaData.count === 0) {
-            this.messageId = Guid.newGuid();
-            this.timestamp = Date.now();
             this.deliverAt = 0;
+        }
+
+        // Some meta data is specific to a QueuedMessage
+        // validate that a specific property is set to determine 
+        // if its been correctly initialized
+        if(!this.id) {
+            this.id = Guid.newGuid();
             this.dequeueCount = 0;
+            this.timestamp = Date.now();
         }
     }
 
-    public get messageId() {
-        return this.metaData.item('messageId');
+    public get id() {
+        return this.metaData.item('id');
     };
-    public set messageId(value: string) {
-        this.metaData.update('messageId', value);
+    public set id(value: string) {
+        this.metaData.update('id', value);
     };
 
     public get timestamp() {
