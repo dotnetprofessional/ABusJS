@@ -1,7 +1,7 @@
-import { InMemoryStorageQueue} from '../InMemoryStorageQueue'
-import {QueuedMessage} from '../QueuedMessage'
-import TimeSpan from '../TimeSpan'
-import { Utils } from '../Utils'
+import { InMemoryStorageQueue} from '../App/InMemoryStorageQueue'
+import {QueuedMessage} from '../App/QueuedMessage'
+import TimeSpan from '../App/TimeSpan'
+import { Utils } from '../App/Utils'
 
 describe('Adding a message to the queue', () => {
     let queue = new InMemoryStorageQueue();

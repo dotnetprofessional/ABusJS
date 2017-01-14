@@ -1,7 +1,7 @@
 import {MetaData} from './MetaData'
 import {IMessage} from './IMessage'
 import {SendOptions} from './SendOptions'
-import {Bus} from './ABus'
+import {Bus} from './Bus'
 
 /**
  * Provides additional information about the current state

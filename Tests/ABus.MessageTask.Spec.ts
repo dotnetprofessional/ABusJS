@@ -1,12 +1,12 @@
-import { Bus } from '../ABus'
-import { MessageHandlerContext } from '../MessageHandlerContext'
-import { IMessage } from '../IMessage'
-import { IMessageHandlerContext } from '../IMessageHandlerContext'
-import { Utils } from '../Utils'
+import { Bus } from '../App/Bus'
+import { MessageHandlerContext } from '../App/MessageHandlerContext'
+import { IMessage } from '../App/IMessage'
+import { IMessageHandlerContext } from '../App/IMessageHandlerContext'
+import { Utils } from '../App/Utils'
 
 import {
     IMessageTask,
-} from '../Tasks/messageTasks'
+} from '../App/Tasks/messageTasks'
 
 import * as testData from './ABus.Sample.Messages'
 

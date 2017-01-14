@@ -1,7 +1,7 @@
-import { Bus } from '../ABus'
-import { MessageHandlerContext } from '../MessageHandlerContext'
-import { IMessageHandlerContext } from '../IMessageHandlerContext'
-import { handler } from '../Decorators'
+import { Bus } from '../App/Bus'
+import { MessageHandlerContext } from '../App/MessageHandlerContext'
+import { IMessageHandlerContext } from '../App/IMessageHandlerContext'
+import { handler } from '../App/Decorators'
 
 import * as testData from './ABus.Sample.Messages'
 

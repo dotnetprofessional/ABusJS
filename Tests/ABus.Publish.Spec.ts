@@ -1,8 +1,8 @@
-import { Bus } from '../ABus'
-import { MessageHandlerContext } from '../MessageHandlerContext'
-import { IMessageHandlerContext } from '../IMessageHandlerContext'
-import { ThreadingOptions } from '../MessageHandlerOptions'
-import { Utils } from '../Utils'
+import { Bus } from '../App/Bus'
+import { MessageHandlerContext } from '../App/MessageHandlerContext'
+import { IMessageHandlerContext } from '../App/IMessageHandlerContext'
+import { ThreadingOptions } from '../App/MessageHandlerOptions'
+import { Utils } from '../App/Utils'
 
 import * as testData from './ABus.Sample.Messages'
 

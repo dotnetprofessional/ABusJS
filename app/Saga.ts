@@ -1,9 +1,9 @@
 // import TimeSpan from './TimeSpan'
 // import HashTable from './HashTable'
-// import * as testData from './Tests/Abus.sample.messages'
+// import * as testData from './Tests/Bus.sample.messages'
 // import { MessageException } from './MessageTasks'
 // import {IMessage} from './IMessage'
-// import {Bus} from './ABus'
+// import {Bus} from './Bus'
 
 // class SagaNotFoundException<T> extends MessageException<T> {
 //     constructor(public error: string, public message: IMessage<T>) {
@@ -51,7 +51,7 @@
 
 //     subscribe<T>(subscription: IMessageSubscription<T>, options:MessageHandlerOptions = new MessageHandlerOptions()): void {
 //         let handlerName = this.getFunctionName(subscription.handler);
-//         let sagaHandler = async (message: any, context: abus.MessageHandlerContext) => {
+//         let sagaHandler = async (message: any, context: Bus.MessageHandlerContext) => {
 //             // Setup the Saga instance for this message
 //             var sagaKey = context.sagaKey;
 //             if (!sagaKey) {
@@ -81,9 +81,9 @@
 //         this._subscriptions.push(this.bus.subscribe(subscription, options));
 //     }
 
-//     subscribeAsSagaStart<T>(subscription: abus.IMessageSubscription<T>, options: abus.MessageHandlerOptions = new abus.MessageHandlerOptions()): void {
+//     subscribeAsSagaStart<T>(subscription: Bus.IMessageSubscription<T>, options: Bus.MessageHandlerOptions = new Bus.MessageHandlerOptions()): void {
 //         let handlerName = this.getFunctionName(subscription.handler);
-//         let sagaHandler = async (message: any, context: abus.MessageHandlerContext) => {
+//         let sagaHandler = async (message: any, context: Bus.MessageHandlerContext) => {
 //             var sagaKey = this.getSagaKeyFromMessage(message, context);
 //             this.sagaKey = sagaKey;
 //             // Setup the Saga instance for this message
@@ -134,19 +134,19 @@
 //     /**
 //      * 
 //      * 
-//      * @param {abus.IMessageHandler<SagaTimeout>} handler The routine to call when the timeout expires
+//      * @param {Bus.IMessageHandler<SagaTimeout>} handler The routine to call when the timeout expires
 //      * @param {TimeSpan} timeout The amount of time to wait in ms before triggering a timeout.
 //      * @param {*} data An optional piece of state data that can be used in the timeout handler 
 //      * 
 //      * @memberOf Saga
 //      */
-//     requestTimeout(context: abus.IMessageHandlerContext, handler: abus.IMessageHandler<SagaTimeout>, timeout: TimeSpan, data?: any) {
-//         let timeoutMsgType = 'abus.saga.timeout' + this.sagaKey;
+//     requestTimeout(context: Bus.IMessageHandlerContext, handler: Bus.IMessageHandler<SagaTimeout>, timeout: TimeSpan, data?: any) {
+//         let timeoutMsgType = 'Bus.saga.timeout' + this.sagaKey;
 //         this.subscribe({ messageType: timeoutMsgType, handler: handler });
 //         context.send({ type: timeoutMsgType, message: { data } }, { deliverIn: timeout });
 //     }
 
-//     private getSagaKeyFromMessage(message: abus.IMessage<any>, context: abus.MessageHandlerContext) {
+//     private getSagaKeyFromMessage(message: Bus.IMessage<any>, context: Bus.MessageHandlerContext) {
 //         var sagaKey = context.sagaKey;
 //         if (!sagaKey) {
 //             sagaKey = this.getSagaKey(message);
@@ -168,7 +168,7 @@
 // // Rethink if both a Save and Update are required.
 // export class InMemorySagaStorage<T> implements IPersistSagaData<T> {
 //     private _data: HashTable<T> = new HashTable<T>();
-//     public instanceId: string = abus.Guid.newGuid();
+//     public instanceId: string = Bus.Guid.newGuid();
 
 //     save(key: string, data: T): void {
 //         this._data.update(key, data);

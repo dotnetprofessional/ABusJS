@@ -1,6 +1,6 @@
 import {
     IMessage,
-} from '../IMessage';
+} from '../App/IMessage';
 
 export class TestMessage implements IMessage<CustomerData>{
     constructor(public name: string) {
