@@ -3,16 +3,10 @@ import { Utils } from './Utils'
 export class DuplicateException extends Error {
 }
 
-interface KeyValuePair<T> {
-    key: string;
-    value: T;
-}
-
 export default class Hashtable<T> {
     private _hash = {};
     private _count: number = 0;
     private _keys: string[] = [];
-    private _iteratorCount = 0;
 
     constructor(hash?: Object) {
         if (hash) {

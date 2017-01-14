@@ -1,5 +1,4 @@
 import TimeSpan from './TimeSpan'
-import Hashtable from './Hashtable'
 import {QueuedMessage} from './QueuedMessage'
 
 export interface IMessageQueue {
@@ -9,7 +8,7 @@ export interface IMessageQueue {
 
     addMessageAsync(message: QueuedMessage, deliverIn?: TimeSpan);
 
-    getMessageAsync(): QueuedMessage;
+    getMessage(): QueuedMessage;
 
     completeMessageAsync(messageId: string);
 
@@ -19,8 +18,8 @@ export interface IMessageQueue {
 
     onMessage(handler: (message: QueuedMessage) => void);
 
-    renewLeaseAsync(messageId: string, timeSpan: TimeSpan);
+    renewLease(messageId: string, timeSpan: TimeSpan);
 
-    getCount(): number;
+    count: number;
     
 }

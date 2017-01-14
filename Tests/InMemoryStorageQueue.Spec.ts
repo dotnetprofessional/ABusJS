@@ -9,7 +9,7 @@ describe('Adding a message to the queue', () => {
     queue.addMessageAsync(msg);
 
     it("should increment the message count on queue by 1", () => {
-        expect(queue.getCount()).toBe(1);
+        expect(queue.count).toBe(1);
     });
 
     it("should set the message type to the supplied type", () => {
@@ -23,7 +23,7 @@ describe('Adding a message to the queue', () => {
     });
 
     it("should set the messageId to a unique Guid", () => {
-        expect(msg.messageId).toBeTruthy();
+        expect(msg.id).toBeTruthy();
     });
 
     it("should set the deliverAt to zero meaning to deliver immediately", () => {
@@ -31,26 +31,27 @@ describe('Adding a message to the queue', () => {
     });
 });
 
+
 describe('Getting a message from the queue', () => {
     let queue = new InMemoryStorageQueue();
     let msg = new QueuedMessage("test.message", "Hello World!");
     queue.addMessageAsync(msg);
     queue.leasePeriod = TimeSpan.FromMilliseconds(50);
-    let returnedMessage = queue.getMessageAsync();
+    let returnedMessage = queue.getMessage();
 
     it("should return the message", () => {
         expect(returnedMessage).toBeTruthy();
     });
 
     it("make the message unavailable to other consumers for the configured lease period", () => {
-        var nextMessage = queue.getMessageAsync();
+        var nextMessage = queue.getMessage();
         expect(nextMessage).toBeFalsy();
     });
 
     it("should return the message back to the queue after the lease period has completed", async () => {
         await Utils.sleep(60);
 
-        var nextMessage = queue.getMessageAsync();
+        var nextMessage = queue.getMessage();
         expect(nextMessage).toBeTruthy();
     });
 
@@ -63,8 +64,8 @@ describe('Getting a message from the queue', () => {
         let testMsg = new QueuedMessage("test.message", "Hello World!");
         newQueue.addMessageAsync(testMsg);
         for (let i = 0; i < 5; i++) {
-            var dequedMsg = newQueue.getMessageAsync();
-            newQueue.abandonMessageAsync(dequedMsg.messageId);
+            var dequedMsg = newQueue.getMessage();
+            newQueue.abandonMessageAsync(dequedMsg.id);
             expect(dequedMsg.dequeueCount).toBe(i + 1);
         }
     });
@@ -75,17 +76,17 @@ describe('Completing a message', () => {
     let msg = new QueuedMessage("test.message", "Hello World!");
     queue.addMessageAsync(msg);
     queue.leasePeriod = TimeSpan.FromMilliseconds(100);
-    let dequedMsg = queue.getMessageAsync();
+    let dequedMsg = queue.getMessage();
     expect(dequedMsg).toBeTruthy();
-    queue.completeMessageAsync(dequedMsg.messageId);
-    dequedMsg = queue.getMessageAsync();
+    queue.completeMessageAsync(dequedMsg.id);
+    dequedMsg = queue.getMessage();
 
     it("should remove the message permanently from the queue", () => {
         expect(dequedMsg).toBeFalsy();
     });
 
     it("should reduce the message count by 1", () => {
-        expect(queue.getCount()).toBe(0);
+        expect(queue.count).toBe(0);
     });
 })
 
@@ -96,16 +97,16 @@ describe('Abandoing a message', () => {
 
     it("should return the message back to the queue immediately", () => {
         // First deque msg to make it unavailable
-        let dequedMsg = queue.getMessageAsync();
+        let dequedMsg = queue.getMessage();
         expect(dequedMsg).toBeTruthy();
 
         // Validate that the message is unavailable
-        let dequedMsg2 = queue.getMessageAsync();
+        let dequedMsg2 = queue.getMessage();
         expect(dequedMsg2).toBeFalsy();
 
         // Abandon message making it available again
-        queue.abandonMessageAsync(dequedMsg.messageId);
-        dequedMsg = queue.getMessageAsync();
+        queue.abandonMessageAsync(dequedMsg.id);
+        dequedMsg = queue.getMessage();
         expect(dequedMsg).toBeTruthy();
     });
 })
@@ -117,17 +118,17 @@ describe('Renewing a message lease', () => {
         let msg = new QueuedMessage("test.message", "Hello World!");
         queue.addMessageAsync(msg);
 
-        let dequedMsg = queue.getMessageAsync();
+        let dequedMsg = queue.getMessage();
         expect(dequedMsg).toBeTruthy();
-        dequedMsg = queue.getMessageAsync();
+        dequedMsg = queue.getMessage();
         expect(dequedMsg).toBeFalsy();
         await Utils.sleep(30);
-        dequedMsg = queue.getMessageAsync();
+        dequedMsg = queue.getMessage();
         expect(dequedMsg).toBeTruthy();
 
         // Now extend the lease
-        queue.renewLeaseAsync(dequedMsg.messageId, TimeSpan.FromMinutes(1));
-        dequedMsg = queue.getMessageAsync();
+        queue.renewLease(dequedMsg.id, TimeSpan.FromMinutes(1));
+        dequedMsg = queue.getMessage();
         expect(dequedMsg).toBeFalsy();
     });
 })
@@ -142,7 +143,7 @@ describe('Adding an onMessage handler', () => {
         let handler = (message: QueuedMessage) => {
             messageCount++;
             // Mark the message as consumed - otherwise the same message will be delivered again!
-            queue.completeMessageAsync(message.messageId);
+            queue.completeMessageAsync(message.id);
         };
 
         queue.onMessage(handler);
@@ -164,7 +165,7 @@ describe('Adding an onMessage handler', () => {
         let handler = (message: QueuedMessage) => {
             messageCount++;
             // Mark the message as consumed - otherwise the same message will be delivered again!
-            queue.completeMessageAsync(message.messageId);
+            queue.completeMessageAsync(message.id);
         };
 
         queue.onMessage(handler);
@@ -186,7 +187,7 @@ describe('Peeking a meessage', () => {
     });
 
     it("should not prevent the message from being returned by a getMessage call", () => {
-        let message = queue.getMessageAsync();
+        let message = queue.getMessage();
         expect(message).toBeTruthy();
     });
 });
