@@ -10,7 +10,8 @@
         "noUnusedParameters": false,
         "noUnusedLocals": true,
         "skipLibCheck": true,
-        "emitDecoratorMetadata": false
+        "emitDecoratorMetadata": false,
+        "outFile": "out/abus.js"
         //"importHelpers": true
     },
         "exclude": [

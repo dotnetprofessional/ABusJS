@@ -2,7 +2,7 @@ import { IMessage } from '../IMessage'
 import { IMessageHandlerContext } from '../IMessageHandlerContext'
 
 export interface IMessageTask {
-    invoke(message: IMessage<any>, context: IMessageHandlerContext, next): void;
+    invoke(message: IMessage<any>, context: IMessageHandlerContext, next): void|Promise<void>;
 }
 
 export class MessageExceptionTask implements IMessageTask {
