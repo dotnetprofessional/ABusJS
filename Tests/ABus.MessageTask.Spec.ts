@@ -3,10 +3,7 @@ import { MessageHandlerContext } from '../App/MessageHandlerContext'
 import { IMessage } from '../App/IMessage'
 import { IMessageHandlerContext } from '../App/IMessageHandlerContext'
 import { Utils } from '../App/Utils'
-
-import {
-    IMessageTask,
-} from '../App/Tasks/messageTasks'
+import { IMessageTask } from '../App/Tasks/IMessageTask'
 
 import * as testData from './ABus.Sample.Messages'
 
@@ -17,10 +14,11 @@ class TestMessageTask implements IMessageTask {
     constructor(private log: string[]) {
 
     }
-    invoke(message: IMessage<any>, context: MessageHandlerContext, next: any) {
+    async invokeAsync(message: IMessage<any>, context: MessageHandlerContext, next: any) {
         this._counter++;
         this.log.push('TestMessageTask: before next');
-        next();
+        await next();
+        debugger;
         this.log.push('TestMessageTask: after next');
         this._counter++;
     }
@@ -58,13 +56,17 @@ describe("Message Task", () => {
                 currentHandlerContext = context;
                 counter++;
                 logs.push('Handler: added 1 to counter');
+                debugger;
             }
         });
 
-        it("should execute code before and after calling next()", () => {
+        it("should execute code before and after calling next()", async () => {
             messageTask.reset();
             expect(messageTask.counter).toBe(0);
-            pipeline.publish(new testData.TestMessage("Johhny Smith"));
+            pipeline.publish(new testData.TestMessage("Task Sync Handler"));
+            // Need to wait for the pipeline to complete
+            await Utils.sleep(10);
+
             expect(logs.length).toBe(3);
             expect(counter).toBe(1);
             expect(messageTask.counter).toBe(2);
@@ -100,8 +102,8 @@ describe("Message Task", () => {
         it("should execute code before and after calling next()", async () => {
             messageTask.reset();
             expect(messageTask.counter).toBe(0);
-            pipeline.publish(new testData.TestMessage("Johhny Smith"));
-            await Utils.sleep(100);
+            pipeline.publish(new testData.TestMessage("Task Async Handler"));
+            await Utils.sleep(10);
             expect(logs.length).toBe(3);
             expect(counter).toBe(1);
             expect(messageTask.counter).toBe(2);

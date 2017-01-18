@@ -1,5 +1,6 @@
 import Hashtable from './hashtable';
-import { IMessageTask, MessageExceptionTask } from './Tasks/MessageTasks'
+import { IMessageTask } from './Tasks/IMessageTask'
+import { MessageExceptionTask } from './Tasks/MessageExceptionTask'
 //import { Saga } from './Saga'
 import { LocalTransport } from './LocalTransport'
 import { SubscriptionInstance } from './SubscriptionInstance'
@@ -17,7 +18,7 @@ import { AddStandardMetaDataTask } from './Tasks/AddStandardMetaDataTask'
 import { IMessageTransport } from './IMessageTransport'
 
 // Class to manage the message task handlers executed for each message
-class MessageTasks {
+export class MessageTasks {
     private _tasks: IMessageTask[];
     private _iterationCount = 0;
 
@@ -82,7 +83,7 @@ export class Bus {
 
     private getTransport(messageFilter: string) {
         // Update with logic to pick the correct transport based on message type.
-        messageFilter =""; // Only to suppress compile errors until this parameter is used.
+        messageFilter = ""; // Only to suppress compile errors until this parameter is used.
         return this._messageTransport;
     }
 
@@ -208,7 +209,7 @@ export class Bus {
     // Typescript doesn't support internal methods yet
     publishInternal<T>(message: IMessage<T>, options: SendOptions, context: IMessageHandlerContext) {
         // Initialize the metaData for the message
-        if(!message.metaData) {
+        if (!message.metaData) {
             message.metaData = new MetaData();
         }
         message.metaData.messageId = Guid.newGuid();
@@ -292,7 +293,7 @@ export class Bus {
 
         if (task != null) {
             // determine if the task is using a promise and if so wait for it to complete
-            await task.invoke(message, context, async () => {
+            await task.invokeAsync(message, context,  async () =>  {
                 if (context.shouldTerminatePipeline) {
                     // Stop the processing of the pipeline immediately.
                     return;
@@ -317,7 +318,7 @@ export class Bus {
 
         // determine if the task is using a promise and if so wait for it to complete
         if (task != null) {
-            await task.invoke(message, context, async () => {
+            await task.invokeAsync(message, context, async () => {
                 if (context.shouldTerminatePipeline) {
                     // Stop the processing of the pipeline immediately.
                     return;
@@ -333,11 +334,19 @@ export class Bus {
                 // Remove the handler
                 this._replyToMessages.remove(message.metaData.replyTo);
             } else {
-                let handler = subscription.messageSubscription.handler;
-                await handler(message.message, context);
-                // If reached this far the handler processed the message and so the message can be removed from the queue
-                transport.completeMessageAsync(message.metaData.messageId);
+                let handler = subscription.messageSubscription.handler
+                let handlerResult = handler(message.message, context);
+                if (handlerResult && handlerResult["then"]) {
+                    (handlerResult as Promise<void>).then(() => {
+                        // If reached this far the handler processed the message and so the message can be removed from the queue
+                        transport.completeMessageAsync(message.metaData.messageId);
+                    });
+                } else {
+                    // If reached this far the handler processed the message and so the message can be removed from the queue
+                    transport.completeMessageAsync(message.metaData.messageId);
+                }
             }
         }
     }
 }
+

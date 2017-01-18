@@ -11,7 +11,10 @@
         "noUnusedLocals": true,
         "skipLibCheck": true,
         "emitDecoratorMetadata": false,
-        "outFile": "out/abus.js"
+        //"mapRoot": "lib",
+        "declaration": true // Setting this to true will break debugging.
+        
+        //"outFile": "out/abus.js"
         //"importHelpers": true
     },
         "exclude": [
