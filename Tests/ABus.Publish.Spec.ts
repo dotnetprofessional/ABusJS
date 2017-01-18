@@ -69,11 +69,17 @@ describe("Publish method", () => {
         });
 
         //[GM] This is broken
-        // This test will fail if the bus.unregiserAll is removed. It goes into an infinate loop
         it("should not throw an exception if subscriber throws an exception", async () => {
             // subscribe to a msg that will then fail during its processing.
             let msg = null;
             bus.unregisterAll();
+            bus.subscribe({
+                messageFilter: testData.TestMessage.TYPE,
+                handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
+                    msg = message;
+                    throw new TypeError("Boom!!");
+                }
+            });
             bus.subscribe({
                 messageFilter: testData.TestMessage.TYPE,
                 handler: (message: testData.CustomerData, context: MessageHandlerContext) => {

@@ -172,7 +172,7 @@ describe('Adding an onMessage handler', () => {
         // Add several messages
         queue.addMessageAsync(msg, TimeSpan.FromMilliseconds(20));
         expect(messageCount).toBe(0);
-        await Utils.sleep(20);
+        await Utils.sleep(50);
         expect(messageCount).toBe(1);
     });
 })
