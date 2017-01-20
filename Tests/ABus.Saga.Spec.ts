@@ -11,7 +11,7 @@ describe("Saga Spec", ()=>{
 // import {Message} from '../App/Message'
 // import {Utils} from '../App/Utils'
 // import {Guid} from '../App/Guid'
-// import TimeSpan from '../App/TimeSpan'
+// import TimeSpan from '../App/Timespan'
 
 // import * as testData from './Bus.Sample.Messages'
 

@@ -1,6 +1,20 @@
 {
   "name": "abus",
   "version": "0.0.1",
+  "author": "Garry McGlennon",
+  "description": "A service bus implementation for javascript.",
+  "repository": {
+    "url": ""
+  },
+  "main": "./lib/abus",
+  "keywords": [
+    "abus",
+    "service bus",
+    "queue"
+  ],
+  "engines": {
+    "node": "*"
+  },
   "scripts": {
     "test": "jest",
     "release": "tsc -- -m system --outFile out\\abus.js bus.ts"

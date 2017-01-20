@@ -2,7 +2,7 @@ import { Bus } from '../App/Bus'
 import { MessageHandlerContext } from '../App/MessageHandlerContext'
 import { IMessageHandlerContext } from '../App/IMessageHandlerContext'
 import { Utils } from '../App/Utils'
-import TimeSpan from '../App/timespan'
+import TimeSpan from '../App/Timespan'
 
 import * as testData from './ABus.Sample.Messages'
 

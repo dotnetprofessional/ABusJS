@@ -1,4 +1,4 @@
-import Hashtable from './hashtable';
+import Hashtable from './Hashtable';
 import { IMessageTask } from './Tasks/IMessageTask'
 import { MessageExceptionTask } from './Tasks/MessageExceptionTask'
 //import { Saga } from './Saga'

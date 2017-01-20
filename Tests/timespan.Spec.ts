@@ -1,4 +1,4 @@
-import TimeSpan from '../App/timespan';
+import TimeSpan from '../App/Timespan';
 
 describe("Creating a time span of 1 day", () => {
     let timespan = new TimeSpan(1, 0, 0, 0, 0);

@@ -1,6 +1,6 @@
 import { InMemoryStorageQueue} from '../App/InMemoryStorageQueue'
 import {QueuedMessage} from '../App/QueuedMessage'
-import TimeSpan from '../App/TimeSpan'
+import TimeSpan from '../App/Timespan'
 import { Utils } from '../App/Utils'
 
 describe('Adding a message to the queue', () => {

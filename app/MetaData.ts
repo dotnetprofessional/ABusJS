@@ -1,4 +1,4 @@
-import Hashtable from './hashtable'
+import Hashtable from './Hashtable'
 
 export class MetaData extends Hashtable<any> {
     get messageType(): string { return this.item("messageType"); }
