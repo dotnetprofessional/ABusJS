@@ -1,4 +1,4 @@
-import Hashtable from '../App/hashtable';
+import Hashtable from '../App/Hashtable';
 
 describe("Creating instance", () => {
     var ht = new Hashtable<string>();

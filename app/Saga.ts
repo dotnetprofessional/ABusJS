@@ -1,4 +1,4 @@
-// import TimeSpan from './TimeSpan'
+// import TimeSpan from './Timespan'
 // import HashTable from './HashTable'
 // import * as testData from './Tests/Bus.sample.messages'
 // import { MessageException } from './MessageTasks'

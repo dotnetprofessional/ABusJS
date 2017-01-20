@@ -1,4 +1,4 @@
-import TimeSpan from './TimeSpan'
+import TimeSpan from './Timespan'
 import {QueuedMessage} from './QueuedMessage'
 
 export interface IMessageQueue {

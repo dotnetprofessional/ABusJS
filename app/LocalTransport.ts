@@ -1,5 +1,5 @@
 import { IMessageTransport } from './IMessageTransport'
-import TimeSpan from './TimeSpan'
+import TimeSpan from './Timespan'
 import Hashtable from './Hashtable'
 import { InMemoryStorageQueue } from './InMemoryStorageQueue'
 import { IMessage } from './IMessage'
