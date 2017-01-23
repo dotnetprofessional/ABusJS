@@ -3,7 +3,7 @@
     "typings": "abus.d.ts",
     "version": "0.1.0",
     "description": "A service bus implementation for javascript.",
-    "main": "abus.js",
+    "main": "app/abus.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },
