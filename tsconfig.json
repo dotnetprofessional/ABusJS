@@ -6,7 +6,7 @@
         "experimentalDecorators": true,
         "noImplicitAny": false,
         "sourceMap": true,
-        "outDir": "lib",
+        "outDir": "dist/app",
         "noUnusedParameters": false,
         "noUnusedLocals": true,
         "skipLibCheck": true,
