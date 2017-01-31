@@ -99,4 +99,5 @@ export default class TimeSpan {
     static getTimeSpan(date: number): TimeSpan {
         return new TimeSpan(date - Date.now()); 
     }
+    
 }
