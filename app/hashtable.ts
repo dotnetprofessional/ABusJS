@@ -101,5 +101,6 @@ export default class Hashtable<T> {
         let copy = Utils.assign({}, this._hash);
         return new Hashtable(copy);
     }
+    
 }
 
