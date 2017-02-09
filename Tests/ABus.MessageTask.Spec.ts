@@ -1,33 +1,26 @@
-import {
-    Bus,
-    MessageHandlerContext,
-    IMessage,
-    IMessageSubscription,
-    IMessageHandlerContext,
-    MessageHandlerOptions,
-    ThreadingOptions,
-    Utils
-} from '../ABus';
-
-import {
-        IMessageTask,
-} from '../messageTasks' 
+import { Bus } from '../App/Bus'
+import { MessageHandlerContext } from '../App/MessageHandlerContext'
+import { IMessage } from '../App/IMessage'
+import { IMessageHandlerContext } from '../App/IMessageHandlerContext'
+import { Utils } from '../App/Utils'
+import { IMessageTask } from '../App/Tasks/IMessageTask'
 
 import * as testData from './ABus.Sample.Messages'
 
 
 class TestMessageTask implements IMessageTask {
-    private _counter:number = 0;
+    private _counter: number = 0;
 
-    constructor(private log: string[]){
+    constructor(private log: string[]) {
 
     }
-    invoke(message: IMessage<any>, context: MessageHandlerContext, next: any) {
-        this._counter ++;
+    async invokeAsync(message: IMessage<any>, context: MessageHandlerContext, next: any) {
+        this._counter++;
         this.log.push('TestMessageTask: before next');
-        next();
+        await next();
+        debugger;
         this.log.push('TestMessageTask: after next');
-        this._counter ++;
+        this._counter++;
     }
 
     reset() {
@@ -43,70 +36,78 @@ class TestMessageTask implements IMessageTask {
     }
 }
 
-describe("Adding a message task to pipeline with Sync handlers", () => {
-    var pipeline = new Bus();
-    var returnedMessage: testData.CustomerData;
-    var currentHandlerContext: IMessageHandlerContext;
-    var counter = 0;
-    var logs = [];
-    var messageTask = new TestMessageTask(logs);
+describe("Message Task", () => {
 
-    pipeline.messageTasks.clear();
-    pipeline.messageTasks.add(messageTask);
+    describe("Adding a message task to pipeline with Sync handlers", () => {
+        var pipeline = new Bus();
+        var returnedMessage: testData.CustomerData;
+        var currentHandlerContext: IMessageHandlerContext;
+        var counter = 0;
+        var logs = [];
+        var messageTask = new TestMessageTask(logs);
 
-    pipeline.subscribe({
-        messageType: testData.TestMessage.TYPE,
-        handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
-            returnedMessage = message;
-            currentHandlerContext = context;
-            counter ++;
-            logs.push('Handler: added 1 to counter');
-        }
-    });
+        pipeline.inBoundMessageTasks.clear();
+        pipeline.inBoundMessageTasks.add(messageTask);
 
-    it("should execute code before and after calling next()", () => {
-        messageTask.reset();
-        expect(messageTask.counter).toBe(0);
-        pipeline.publish(new testData.TestMessage("Johhny Smith"));
-        expect(logs.length).toBe(3);
-        expect(counter).toBe(1);
-        expect(messageTask.counter).toBe(2);
-    });
-});
+        pipeline.subscribe({
+            messageFilter: testData.TestMessage.TYPE,
+            handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
+                returnedMessage = message;
+                currentHandlerContext = context;
+                counter++;
+                logs.push('Handler: added 1 to counter');
+                debugger;
+            }
+        });
 
-describe("Adding a message task to pipeline with Async handlers", () => {
-    var pipeline = new Bus();
-    var returnedMessage: testData.CustomerData;
-    var currentHandlerContext: IMessageHandlerContext;
-    var counter = 0;
-    var logs =[];
-    var messageTask = new TestMessageTask(logs);
-
-    pipeline.messageTasks.clear();
-    pipeline.messageTasks.add(messageTask);
-
-    pipeline.subscribe({
-        messageType: testData.TestMessage.TYPE,
-        handler: async  (message: testData.CustomerData, context: MessageHandlerContext) => {
-            returnedMessage = message;
-            currentHandlerContext = context;
+        it("should execute code before and after calling next()", async () => {
+            messageTask.reset();
+            expect(messageTask.counter).toBe(0);
+            pipeline.publish(new testData.TestMessage("Task Sync Handler"));
+            // Need to wait for the pipeline to complete
             await Utils.sleep(10);
-            logs.push('Handler: added 1 to counter');
-            counter ++;
-        }
+
+            expect(logs.length).toBe(3);
+            expect(counter).toBe(1);
+            expect(messageTask.counter).toBe(2);
+        });
     });
 
-/*
-*    should execute code before calling next() 
-*    should execute code after calling next()
-*/
-    it("should execute code before and after calling next()", async () => {
-        messageTask.reset();
-        expect(messageTask.counter).toBe(0);
-        pipeline.publish(new testData.TestMessage("Johhny Smith"));
-        await Utils.sleep(100);
-        expect(logs.length).toBe(3);
-        expect(counter).toBe(1);
-        expect(messageTask.counter).toBe(2);
+    describe("Adding a message task to pipeline with Async handlers", () => {
+        var pipeline = new Bus();
+        var returnedMessage: testData.CustomerData;
+        var currentHandlerContext: IMessageHandlerContext;
+        var counter = 0;
+        var logs = [];
+        var messageTask = new TestMessageTask(logs);
+
+        pipeline.inBoundMessageTasks.clear();
+        pipeline.inBoundMessageTasks.add(messageTask);
+
+        pipeline.subscribe({
+            messageFilter: testData.TestMessage.TYPE,
+            handler: async (message: testData.CustomerData, context: MessageHandlerContext) => {
+                returnedMessage = message;
+                currentHandlerContext = context;
+                await Utils.sleep(10);
+                logs.push('Handler: added 1 to counter');
+                counter++;
+            }
+        });
+
+        /*
+        *    should execute code before calling next() 
+        *    should execute code after calling next()
+        */
+        it("should execute code before and after calling next()", async () => {
+            messageTask.reset();
+            expect(messageTask.counter).toBe(0);
+            pipeline.publish(new testData.TestMessage("Task Async Handler"));
+            await Utils.sleep(10);
+            expect(logs.length).toBe(3);
+            expect(counter).toBe(1);
+            expect(messageTask.counter).toBe(2);
+        });
     });
+
 });
