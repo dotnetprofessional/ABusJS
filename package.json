@@ -1,8 +1,23 @@
 {
   "name": "abus",
   "version": "0.0.1",
+  "author": "Garry McGlennon",
+  "description": "A service bus implementation for javascript.",
+  "repository": {
+    "url": ""
+  },
+  "main": "./lib/abus",
+  "keywords": [
+    "abus",
+    "service bus",
+    "queue"
+  ],
+  "engines": {
+    "node": "*"
+  },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "release": "tsc -- -m system --outFile out\\abus.js bus.ts"
   },
   "jest": {
     "transform": {
@@ -15,7 +30,7 @@
       "tsx",
       "js"
     ],
-    "verbose": false,
+    "verbose": true,
     "collectCoverage": false,
     "collectCoverageFrom": [
       "**/*.{ts,tsx}",
@@ -34,7 +49,8 @@
   "devDependencies": {
     "jest": "^17.0.3",
     "jest-cli": "^17.0.3",
-    "ts-jest": "^17.0.0"
+    "ts-jest": "^17.0.0",
+    "tslint": "^4.3.1"
   },
   "dependencies": {
     "typescript": "^2.1.1"

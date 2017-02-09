@@ -1,0 +1,18 @@
+{
+    "name": "abus",
+    "typings": "app/abus.d.ts",
+    "version": "0.1.0",
+    "description": "A service bus implementation for javascript.",
+    "main": "app/abus.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "abus",
+        "service bus",
+        "queue"
+    ],
+    "author": "Garry McGlennon",
+    "license": "",
+    "peerDependencies": {}
+}
