@@ -4,9 +4,9 @@ import Hashtable from './Hashtable'
 import { InMemoryStorageQueue } from './InMemoryStorageQueue'
 import { IMessage } from './IMessage'
 import { QueuedMessage } from './QueuedMessage'
-import {Subscription} from './Subscription'
-import {MetaData} from './MetaData'
-import {Guid} from "./Guid";
+import { Subscription } from './Subscription'
+import { MetaData } from './MetaData'
+import { Guid } from "./Guid";
 
 export class LocalTransport implements IMessageTransport {
     // Key = QueueEndpoint.fullname, value = subscription name
@@ -14,6 +14,7 @@ export class LocalTransport implements IMessageTransport {
     private _subscriptionsByFilter: Hashtable<Subscription[]> = new Hashtable<Subscription[]>();
     private _internalQueue = new InMemoryStorageQueue();
     private _onMessageHandler: (message: IMessage<any>) => void = null;
+    private _hasSubTypeSubscriptions: boolean;
 
     constructor() {
         // Setup message pump from InMemoryStorageQueue
@@ -54,6 +55,11 @@ export class LocalTransport implements IMessageTransport {
 
         // Add new subscription
         filterSubsriptions.push(subscription);
+
+        // Optimization
+        if (!this._hasSubTypeSubscriptions) {
+            this._hasSubTypeSubscriptions = filter.indexOf("*") > 0;
+        }
     }
 
     unsubscribe(name: string): void {
@@ -63,11 +69,11 @@ export class LocalTransport implements IMessageTransport {
         // [GM] This is a hack that needs to be cleaned up later
         let newCopy: Subscription[] = [];
         subscribers.forEach(s => {
-            if(s.name !== subscription.name) {
+            if (s.name !== subscription.name) {
                 newCopy.push(s);
-            } 
+            }
         });
-        if(newCopy.length === 0) {
+        if (newCopy.length === 0) {
             // remove filter completely
             this._subscriptionsByFilter.remove(subscription.filter);
         } else {
@@ -82,7 +88,7 @@ export class LocalTransport implements IMessageTransport {
 
     subscriberCount(filter: string) {
         let subscribers = this._subscriptionsByFilter.item(filter);
-        if(subscribers) {
+        if (subscribers) {
             return subscribers.length;
         } else {
             return 0;
@@ -90,7 +96,7 @@ export class LocalTransport implements IMessageTransport {
     }
 
     completeMessageAsync(messageId: string) {
-        let internalMessage = this._internalQueue.findMessage(m=>m.metaData.item("messageId") === messageId);
+        let internalMessage = this._internalQueue.findMessage(m => m.metaData.item("messageId") === messageId);
         this._internalQueue.completeMessageAsync(internalMessage.id);
     }
 
@@ -104,7 +110,7 @@ export class LocalTransport implements IMessageTransport {
         // Find any subscribers for this message
         var subscribers = this._subscriptionsByFilter.item(message.type) || [];
 
-        //TODO: [GM] Optimize this so that its only called if at least one subtype was subscribed 
+        // TODO: [GM] Optimize this so that its only called if at least one subtype was subscribed 
         // There may also be subscribers that subscribed to a subtype
         subscribers = subscribers.concat(this.getStartsWithSubscribers(message.type) || []);
         subscribers = subscribers.concat(this.getEndsWithSubscribers(message.type) || []);
@@ -147,7 +153,7 @@ export class LocalTransport implements IMessageTransport {
 
     private processIncommingQueueMessage(message: QueuedMessage): void {
         if (this._onMessageHandler) {
-            let msg: IMessage<any> = { type: message.type, message: message.body};
+            let msg: IMessage<any> = { type: message.type, message: message.body };
             msg.metaData = new MetaData(message.metaData.internalHash());
 
             // Add some metaData from the QueuedMessage

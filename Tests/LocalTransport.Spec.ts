@@ -163,29 +163,3 @@ describe("multiple subscribers to a message", () => {
     });
 });
 
-describe.skip("Sending an recieving messages", () => {
-    var transport = new LocalTransport();
-
-    it("should be fast!", () => {
-        let counter = 0;
-        transport.subscribe("test", "test.*")
-        let timerStart = new Date().getTime();
-        let timerEnd = 0;
-        transport.onMessage((message: IMessage<any>) => {
-            counter++;
-            if(counter === 1000) {
-                timerEnd = new Date().getTime();
-            }
-        });
-
-        for(let i=0;i<1000;i++) {
-            transport.send({ type: testData.TestMessage.TYPE, message: {} });
-        }
-
-        let elapsed = timerEnd - timerStart;
-        expect(counter).toBe(1000);
-        expect(elapsed).toBeLessThan(100);
-    });
-
-});
-
