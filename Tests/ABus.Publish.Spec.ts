@@ -154,7 +154,44 @@ describe("Publish method", () => {
         });
     });
 
-    it.skip("should not send the message if the timeout has been reached for a persisted message", () => {
+    describe("publishing a message inside of a handler using derived message", () => {
+        var bus = new Bus();
+        var firstMessage: testData.CustomerData;
+        var firstHandlerContext: IMessageHandlerContext;
+
+        var secondMessage: testData.CustomerData;
+        var secondHandlerContext: IMessageHandlerContext;
+
+        bus.subscribe({
+            messageFilter: testData.TestMessage.TYPE,
+            handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
+                firstMessage = message;
+                firstHandlerContext = context;
+                context.publish(new testData.CustomerData2("second message"));
+            }
+        });
+
+        bus.subscribe({
+            messageFilter: testData.CustomerData2.TYPE,
+            handler: (message: testData.CustomerData2, context: MessageHandlerContext) => {
+                debugger;
+                secondMessage = message;
+                secondHandlerContext = context;
+            }
+        });
+
+        bus.publish(new testData.CustomerData("Johhny Smith"));
+
+        it("should send message to all registered subscribers", () => {
+            return Utils.sleep(10)
+                .then(() => {
+                    expect(secondHandlerContext.messageType).toBe(testData.CustomerData2.TYPE);
+                    expect(secondMessage.name).toBe("second message");
+                });
+        });
+    });
+
+   it.skip("should not send the message if the timeout has been reached for a persisted message", () => {
         // This test only makes sense once persistent timers have been implemented.
     });
 });
