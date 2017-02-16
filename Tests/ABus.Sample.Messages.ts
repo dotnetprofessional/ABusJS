@@ -39,5 +39,23 @@ export class TestMessage2Reply extends TestMessage {
 }
 
 export class CustomerData {
+    static TYPE = "CustomerData";
+
+    constructor(name?: string) {
+        if(name) {
+            this.name = name;
+        }
+    }
+    name: string;
+}
+
+export class CustomerData2 {
+    static TYPE = "CustomerData2";
+    
+    constructor(name?: string) {
+        if(name) {
+            this.name = name;
+        }
+    }
     name: string;
 }

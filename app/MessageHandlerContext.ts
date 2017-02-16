@@ -26,11 +26,11 @@ export class MessageHandlerContext implements IMessageHandlerContext {
         this.metaData.update(key, value);
     }
 
-    publish<T>(message: IMessage<T>): void {
+    publish<T>(message: IMessage<T> | T): void {
         this.bus.publishInternal(message, new SendOptions(), this);
     }
 
-    sendAsync<T>(message: IMessage<T>, options?: SendOptions): Promise<any> {
+    sendAsync<T>(message: IMessage<T> | T, options?: SendOptions): Promise<any> {
         return this.bus.sendInternalAsync(message, options, this);
     }
 

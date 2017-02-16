@@ -3,7 +3,7 @@ export class Utils {
         return new Promise(resolve => setTimeout(resolve, ms));
     };
 
-    static assign<T, U>(target: T, source: U): T {
+    static assign<T, U>(target: T|U, source: U|T): T|U {
         for (let attr in source) {
             target[attr] = source[attr];
         }
