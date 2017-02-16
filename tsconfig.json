@@ -1,7 +1,14 @@
 {
     "compilerOptions": {
-        "target": "es2017",
-
+        "target": "es2016",
+         "lib": [
+             "es2015.promise",
+             "es5",
+             "es2015.iterable",
+             "es2017.object",
+             "es2015.collection",
+             "dom"
+         ],
         "module": "commonjs",
         "experimentalDecorators": true,
         "noImplicitAny": false,
@@ -11,11 +18,11 @@
         "noUnusedLocals": true,
         "skipLibCheck": true,
         "emitDecoratorMetadata": false,
-        //"mapRoot": "lib",
-        "declaration": true // Setting this to true will break debugging.
+        "mapRoot": "lib",
+        "declaration": true,  // Setting this to true will break debugging.
         
-        //"outFile": "out/abus.js"
-        //"importHelpers": true
+        //"outFile": "out/abus.js",
+        "importHelpers": false
     },
         "exclude": [
         "node_modules"
