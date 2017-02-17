@@ -6,3 +6,5 @@ export { IMessageTask } from './app/Tasks/IMessageTask'
 export { IMessageSubscription } from './app/IMessageSubscription';
 export { MessageHandlerOptions } from "./app/MessageHandlerOptions";
 export { SendOptions } from './app/SendOptions';
+export { MessageException } from "./app/Tasks/MessageException";
+export { UnhandledMessageException } from "./app/Tasks/UnhandledMessageException";
