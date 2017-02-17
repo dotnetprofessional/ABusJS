@@ -21,7 +21,7 @@
         "stripInternal": true,
         "removeComments": true,
         //"mapRoot": "lib",
-        "declaration": true // Setting this to true will break debugging.
+        "declaration": false, // Setting this to true will break debugging.
         
         //"outFile": "out/abus.js",
         "importHelpers": false
