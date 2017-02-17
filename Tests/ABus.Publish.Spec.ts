@@ -163,7 +163,7 @@ describe("Publish method", () => {
         var secondHandlerContext: IMessageHandlerContext;
 
         bus.subscribe({
-            messageFilter: testData.TestMessage.TYPE,
+            messageFilter: testData.CustomerData.TYPE,
             handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
                 firstMessage = message;
                 firstHandlerContext = context;
@@ -174,7 +174,6 @@ describe("Publish method", () => {
         bus.subscribe({
             messageFilter: testData.CustomerData2.TYPE,
             handler: (message: testData.CustomerData2, context: MessageHandlerContext) => {
-                debugger;
                 secondMessage = message;
                 secondHandlerContext = context;
             }

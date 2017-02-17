@@ -64,6 +64,16 @@ export class Bus {
 
     public static instance: Bus = new Bus();
 
+    /**
+     * Makes this Bus instance globally reachable through Bus.instance.
+     * 
+     * @memberOf Bus
+     */
+    public makeGlobal(): Bus {
+        Bus.instance = this;
+        return this;
+    }
+
     private _config = {
         tracking: false,
         useConventions: true,
@@ -187,13 +197,13 @@ export class Bus {
                 throw TypeError("You must pass either an instance of IMessage<T> or a class. You cannot pass an object literal.");
             }
             // Redefine the parameter as an IMessage
-            debugger;
             message = { type: name, message: message, metaData: new MetaData() } as IMessage<T>;
         }
 
         return message as IMessage<T>;
     }
 
+    /** @internal */
     sendInternalAsync<T>(message: IMessage<T> | T, options: SendOptions, context: IMessageHandlerContext): Promise<any> {
         // Ensure we have an IMessage<T>
         let messageToSend = this.getIMessage(message)
@@ -235,6 +245,7 @@ export class Bus {
     }
 
     // Typescript doesn't support internal methods yet
+    /** @internal */
     publishInternal<T>(message: IMessage<T> | T, options: SendOptions, context: IMessageHandlerContext) {
         // Ensure we have an IMessage<T>
         message = this.getIMessage(message);
@@ -294,30 +305,6 @@ export class Bus {
         });
 
     }
-
-    // private dispatchMessage(message: IMessage<any>, subscription: SubscriptionInstance, context: MessageHandlerContext) {
-    //     let newContext = new MessageHandlerContext(this, message.metaData || new MetaData());
-    //     // Add context data to message
-    //     /*
-    //     if (!context.metaData.conversationId) {
-    //         newContext.metaData.conversationId = Guid.newGuid();
-    //     } else {
-    //         newContext.metaData.conversationId = context.metaData.conversationId;
-    //     }
-
-    //     if (context.replyTo) {
-    //         newContext.metaData.replyTo = context.replyTo;
-    //     }
-
-    //     if (context.sagaKey) {
-    //         newContext.metaData.sagaKey = context.sagaKey;
-    //     }
-    //     // CorrelationId becomes the current messa
-    //     newContext.metaData.correlationId = context.messageId;
-    //     newContext.metaData.messageId = Guid.newGuid();
-    //     newContext.metaData.messageType = message.type;
-    //     this.dispatchOutboundMessageAsync(message, newContext, this.messageTasks.localInstance);
-    // }
 
     async dispatchOutboundMessageAsync(message: IMessage<any>, options: SendOptions, context: IMessageHandlerContext, tasks: MessageTasks) {
         let task = tasks.next;

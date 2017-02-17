@@ -10,9 +10,11 @@
         "noUnusedParameters": false,
         "noUnusedLocals": true,
         "skipLibCheck": true,
-        "emitDecoratorMetadata": false,
+        "emitDecoratorMetadata": true,
+        "stripInternal": true,
+        "removeComments": true,
         //"mapRoot": "lib",
-        "declaration": false // Setting this to true will break debugging.
+        "declaration": true // Setting this to true will break debugging.
         
         //"outFile": "out/abus.js"
         //"importHelpers": true
