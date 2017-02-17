@@ -1,7 +1,7 @@
 import { Bus } from '../App/Bus'
 import { MessageHandlerContext } from '../App/MessageHandlerContext'
 import { IMessageHandlerContext } from '../App/IMessageHandlerContext'
-import { handler } from '../App/Decorators'
+import { handler, iHandleMessages } from '../App/Decorators'
 
 import * as testData from './ABus.Sample.Messages'
 
@@ -136,20 +136,96 @@ describe("Subsriptions", () => {
 
 });
 
-var handlerXValue = 0;
 // This class handles messages and needs to be exported to prevent compiler errors about not being used.
+@iHandleMessages
 export class TestMessageHandler {
+    public value = 5;
+    constructor(value: number) {
+        this.value = value;
+    }
     @handler(testData.TestMessage.TYPE)
     handler(message: testData.CustomerData, context: MessageHandlerContext) {
-        handlerXValue = 100;
+        this.value = 100 + this.value;
+    };
+}
+
+@iHandleMessages
+export class TestMessageHandler2 {
+    public value = 5;
+    constructor(value: number) {
+        this.value = value;
+    }
+
+    @handler(testData.CustomerData2)
+    handler2(message: testData.CustomerData2, context: MessageHandlerContext) {
+        this.value = 100 + this.value;
+    };
+}
+
+@iHandleMessages
+export class TestMessageHandler3 {
+    public value = 0;
+    constructor(value: number) {
+        this.value = value;
+    }
+
+    @handler(testData.TestMessage.TYPE)
+    handler(message: testData.CustomerData, context: MessageHandlerContext) {
+        this.value = 100 + this.value;
+    };
+
+    @handler(testData.CustomerData2)
+    handler2(message: testData.CustomerData2, context: MessageHandlerContext) {
+        this.value = 100 + this.value;
     };
 }
 
 describe("subscribing to a message type using decorators", () => {
-    var bus = Bus.instance;
 
+    describe("using a string literal to define the messageFilter", () => {
+        var bus = new Bus().makeGlobal();
+        // Provide an instance for the handler to attach to
+        let handlerClass = new TestMessageHandler(10);
 
-    it("should register subscriber for the message type", async () => {
-        expect(bus.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
+        it("should register subscriber for the message type", async () => {
+            expect(bus.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
+        });
+
+        it("should call handler with correct class instance", async () => {
+            bus.sendAsync(new testData.TestMessage(""));
+            expect(handlerClass.value).toBe(110);
+        });
+    });
+
+    describe("using the message type to define the messageFilter", () => {
+        var bus = new Bus().makeGlobal();
+        // Provide an instance for the handler to attach to
+        let handlerClass = new TestMessageHandler2(50);
+
+        it("should register subscriber for the message type", async () => {
+            expect(bus.subscriberCount("CustomerData2")).toBe(1);
+        });
+
+        it("should call handler with correct class instance", async () => {
+            bus.sendAsync(new testData.CustomerData2(""));
+            expect(handlerClass.value).toBe(150);
+        });
+    });
+
+    describe("having multiple handlers using both methods", () => {
+        var bus = new Bus().makeGlobal();
+        // Provide an instance for the handler to attach to
+        let handlerClass = new TestMessageHandler3(30);
+
+        it("should register subscriber for the message type", async () => {
+            expect(bus.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
+            expect(bus.subscriberCount("CustomerData2")).toBe(1);
+        });
+
+        it("should call handlers with correct class instance", async () => {
+            bus.sendAsync(new testData.TestMessage(""));
+            bus.sendAsync(new testData.CustomerData2(""));
+            expect(handlerClass.value).toBe(230);
+        });
     });
 });
