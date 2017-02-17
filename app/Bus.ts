@@ -64,6 +64,16 @@ export class Bus {
 
     public static instance: Bus = new Bus();
 
+    /**
+     * Makes this Bus instance globally reachable through Bus.instance.
+     * 
+     * @memberOf Bus
+     */
+    public makeGlobal(): Bus {
+        Bus.instance = this;
+        return this;
+    }
+
     private _config = {
         tracking: false,
         useConventions: true,
@@ -108,9 +118,6 @@ export class Bus {
     //}
 
     subscribe<T>(subscription: IMessageSubscription<T>, options: MessageHandlerOptions = new MessageHandlerOptions()): string {
-
-        //let userOptions = Utils.assign(new MessageHandlerOptions(), options);
-
         if (!subscription) {
             throw new TypeError("Invalid subscription.");
         }
@@ -164,50 +171,85 @@ export class Bus {
         return transport.subscriberCount(messageFilter);
     }
 
-    sendAsync<T, R>(message: IMessage<T>, options?: SendOptions): Promise<R> {
+    sendAsync<T, R>(message: IMessage<T> | T, options?: SendOptions): Promise<R> {
         let context = new MessageHandlerContext(this);
-        return this.sendInternalAsync(message, options, context);
+        return this.sendInternalAsync(message as IMessage<T>, options, context);
     }
 
-    sendInternalAsync<T>(message: IMessage<T>, options: SendOptions, context: IMessageHandlerContext): Promise<any> {
+    /**
+     * Returns the passed in message if already of type IMessage<T> otherwise
+     * returns a derived IMessage<T> from the message.
+     * 
+     * @private
+     * @param {(IMessage<T>|T)} message
+     * @returns {IMessage<T>}
+     * 
+     * @memberOf Bus
+     */
+    private getIMessage<T>(message: IMessage<T> | T): IMessage<T> {
+        // Determine if the message passed is of IMessage
+        let messageCheck = message as IMessage<T>;
+        if (!messageCheck.type && !messageCheck.message) {
+            // This appears to be an object that is not of type IMessage
+            // Synthesize an IMessage from what we know.
+            var name = message.constructor.name;
+            if (!name) {
+                throw TypeError("You must pass either an instance of IMessage<T> or a class. You cannot pass an object literal.");
+            }
+            // Redefine the parameter as an IMessage
+            message = { type: name, message: message, metaData: new MetaData() } as IMessage<T>;
+        }
+
+        return message as IMessage<T>;
+    }
+
+    /** @internal */
+    sendInternalAsync<T>(message: IMessage<T> | T, options: SendOptions, context: IMessageHandlerContext): Promise<any> {
+        // Ensure we have an IMessage<T>
+        let messageToSend = this.getIMessage(message)
+
         // Get the transport for this message type
-        var transport = this.getTransport(message.type);
+        var transport = this.getTransport(messageToSend.type);
 
         // Initialize the metaData for the message
-        message.metaData = new MetaData();
-        message.metaData.messageId = Guid.newGuid();
-        message.metaData.intent = Intents.send;
+        messageToSend.metaData = new MetaData();
+        messageToSend.metaData.messageId = Guid.newGuid();
+        messageToSend.metaData.intent = Intents.send;
 
         options = Utils.assign(new SendOptions(), options);
 
-        var subscribers = transport.subscriberCount(message.type);
+        var subscribers = transport.subscriberCount(messageToSend.type);
         if (subscribers > 1) {
-            throw new TypeError(`The command ${message.type} must have only one subscriber.`);
+            throw new TypeError(`The command ${messageToSend.type} must have only one subscriber.`);
         } else if (subscribers === 0) {
-            throw new TypeError(`No subscriber defined for the command ${message.type}`);
+            throw new TypeError(`No subscriber defined for the command ${messageToSend.type}`);
         }
 
         let replyHandler = new ReplyHandler();
         let replyHandlerPromise = new Promise((resolve, reject) => {
             replyHandler.resolve = resolve;
             replyHandler.reject = reject;
-            replyHandler.replyTo = message.metaData.messageId;
+            replyHandler.replyTo = messageToSend.metaData.messageId;
             this._replyToMessages.add(replyHandler.replyTo, replyHandler);
             // Add a timeout here too. This can be a default but also supplied as part of the sendOptions
         });
 
         // Delivery the message to be sent to the transport
-        this.dispatchOutboundMessageAsync(message, options, context, this.outBoundMessageTasks.localInstance);
+        this.dispatchOutboundMessageAsync(messageToSend, options, context, this.outBoundMessageTasks.localInstance);
         return replyHandlerPromise;
     }
 
-    publish<T>(message: IMessage<T>): void {
+    publish<T>(message: IMessage<T> | T): void {
         let context = new MessageHandlerContext(this);
         this.publishInternal(message, new SendOptions(), context);
     }
 
     // Typescript doesn't support internal methods yet
-    publishInternal<T>(message: IMessage<T>, options: SendOptions, context: IMessageHandlerContext) {
+    /** @internal */
+    publishInternal<T>(message: IMessage<T> | T, options: SendOptions, context: IMessageHandlerContext) {
+        // Ensure we have an IMessage<T>
+        message = this.getIMessage(message);
+
         // Initialize the metaData for the message
         if (!message.metaData) {
             message.metaData = new MetaData();
@@ -264,36 +306,12 @@ export class Bus {
 
     }
 
-    // private dispatchMessage(message: IMessage<any>, subscription: SubscriptionInstance, context: MessageHandlerContext) {
-    //     let newContext = new MessageHandlerContext(this, message.metaData || new MetaData());
-    //     // Add context data to message
-    //     /*
-    //     if (!context.metaData.conversationId) {
-    //         newContext.metaData.conversationId = Guid.newGuid();
-    //     } else {
-    //         newContext.metaData.conversationId = context.metaData.conversationId;
-    //     }
-
-    //     if (context.replyTo) {
-    //         newContext.metaData.replyTo = context.replyTo;
-    //     }
-
-    //     if (context.sagaKey) {
-    //         newContext.metaData.sagaKey = context.sagaKey;
-    //     }
-    //     // CorrelationId becomes the current messa
-    //     newContext.metaData.correlationId = context.messageId;
-    //     newContext.metaData.messageId = Guid.newGuid();
-    //     newContext.metaData.messageType = message.type;
-    //     this.dispatchOutboundMessageAsync(message, newContext, this.messageTasks.localInstance);
-    // }
-
     async dispatchOutboundMessageAsync(message: IMessage<any>, options: SendOptions, context: IMessageHandlerContext, tasks: MessageTasks) {
         let task = tasks.next;
 
         if (task != null) {
             // determine if the task is using a promise and if so wait for it to complete
-            await task.invokeAsync(message, context,  async () =>  {
+            await task.invokeAsync(message, context, async () => {
                 if (context.shouldTerminatePipeline) {
                     // Stop the processing of the pipeline immediately.
                     return;

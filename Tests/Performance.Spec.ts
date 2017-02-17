@@ -85,7 +85,7 @@ describe("LocalTransport", () => {
     });
 })
 
-describe("abus", () => {
+describe.skip("abus", () => {
     let iterations = 1000;
     describe("Sending 1000 message via SendAsync", () => {
         var p = new PerformanceHandler(iterations);
@@ -98,7 +98,6 @@ describe("abus", () => {
         }
         p.stop();
         console.log("operations: " + p.operationsPerSec());
-        debugger;
 
         it("should execute in under x ms", () => {
 
