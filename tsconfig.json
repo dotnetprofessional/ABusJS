@@ -10,7 +10,9 @@
         "noUnusedParameters": false,
         "noUnusedLocals": true,
         "skipLibCheck": true,
-        "emitDecoratorMetadata": false,
+        "emitDecoratorMetadata": true,
+        "stripInternal": true,
+        "removeComments": true,
         //"mapRoot": "lib",
         "declaration": true // Setting this to true will break debugging.
         

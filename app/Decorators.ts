@@ -1,7 +1,68 @@
 import { Bus } from './Bus'
 
-export function handler(type: string) {
+/**
+ * Defines a function as a message handler which must implement the IMessageHandler interface.
+ * 
+ * @export
+ * @param {string} type
+ * @returns
+ */
+export function handler(type: string | Function) {
     return function handler_decorator(target: any, key: string) {
-        Bus.instance.subscribe({ messageFilter: type, handler: target[key] });
+        if(typeof(type)==="function") {
+            type = type.name;
+        }
+
+        var handlers = Object.getOwnPropertyDescriptor(target, "__messageHandlers");
+        if (!handlers) {
+            // First handler so create a property to store all the handlers
+            Object.defineProperty(target, "__messageHandlers", { value: [] });
+        }
+
+        // Record the details of this handler for later binding.
+        target["__messageHandlers"].push({ type: type, handler: key });
     }
+}
+
+/**
+ * Defines that this class contains message handlers
+ * if no messages handers are defined an exception will be thrown.
+ * 
+ * @export
+ * @param {*} target
+ * @returns
+ */
+export function iHandleMessages(target: any) {
+    // save a reference to the original constructor
+    var original = target;
+
+    // a utility function to generate instances of a class
+    function construct(constructor, args) {
+        var c: any = function () {
+            // Locate any handlers that were defined using @handler
+            // then subscribe to the bus with the binding the current class instance
+            var handlers = target.prototype["__messageHandlers"] as Array<any>;
+            if (!handlers) {
+                throw new TypeError("iHandleMessages defined on class that has no handlers defined.");
+            }
+
+            handlers.map(handler => {
+                Bus.instance.subscribe({ messageFilter: handler.type, handler: this[handler.handler].bind(this) });
+            });
+
+            return constructor.apply(this, args);
+        }
+        c.prototype = constructor.prototype;
+        return new c();
+    }
+
+    // the new constructor behaviour
+    var f: any = function (...args) {
+        return construct(original, args);;
+    }
+    // copy prototype so intanceof operator still works
+    f.prototype = original.prototype;
+
+    // return new constructor (will override original)
+    return f;
 }
