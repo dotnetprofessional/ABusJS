@@ -9,8 +9,8 @@ import { Bus } from './Bus'
  */
 export function handler(type: string | Function) {
     return function handler_decorator(target: any, key: string) {
-        if(typeof(type)==="function") {
-            type = type.name;
+        if (typeof (type) === "function") {
+            type = (type as any).name;
         }
 
         var handlers = Object.getOwnPropertyDescriptor(target, "__messageHandlers");

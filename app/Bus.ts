@@ -192,7 +192,7 @@ export class Bus {
         if (!messageCheck.type && !messageCheck.message) {
             // This appears to be an object that is not of type IMessage
             // Synthesize an IMessage from what we know.
-            var name = message.constructor.name;
+            var name = (message.constructor as any).name;
             if (!name) {
                 throw TypeError("You must pass either an instance of IMessage<T> or a class. You cannot pass an object literal.");
             }
