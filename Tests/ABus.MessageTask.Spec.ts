@@ -18,7 +18,6 @@ class TestMessageTask implements IMessageTask {
         this._counter++;
         this.log.push('TestMessageTask: before next');
         await next();
-        debugger;
         this.log.push('TestMessageTask: after next');
         this._counter++;
     }
@@ -56,7 +55,6 @@ describe("Message Task", () => {
                 currentHandlerContext = context;
                 counter++;
                 logs.push('Handler: added 1 to counter');
-                debugger;
             }
         });
 
