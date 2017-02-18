@@ -57,7 +57,7 @@ describe("unsubscribing to a message type", () => {
         transport.subscribe("test1", testData.TestMessage.TYPE);
         expect(transport.subscriberCount(testData.TestMessage.TYPE)).toBe(2);
 
-        // Remove the last subscriber 
+        // Remove the last subscriber
         transport.unsubscribe("test");
         expect(transport.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
     });
@@ -99,7 +99,7 @@ describe("subscribing to a message sub type", () => {
             }
 
             if (message.type === testData.TestMessage2.TYPE) {
-                // Ensures this message wasn't recieved as it wasn't subscribed to
+                // Ensures this message wasn't received as it wasn't subscribed to
                 counter += 1;
             }
         });
@@ -115,7 +115,7 @@ describe("subscribing to a message sub type", () => {
 describe("multiple subscribers to a message", () => {
     var transport = new LocalTransport();
 
-    it("should receive messages for all message types currently registered with supplied type prefix",  () => {
+    it("should receive messages for all message types currently registered with supplied type prefix", () => {
         let counter = 0;
         transport.subscribe("test1", "test.*");
         transport.subscribe("test2", testData.TestMessage.TYPE);
@@ -150,7 +150,7 @@ describe("multiple subscribers to a message", () => {
             }
 
             if (message.type === testData.TestMessage2.TYPE) {
-                // Ensures this message wasn't recieved as it wasn't subscribed to
+                // Ensures this message wasn't received as it wasn't subscribed to
                 counter += 1;
             }
         });

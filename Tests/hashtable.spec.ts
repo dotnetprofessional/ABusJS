@@ -49,7 +49,7 @@ describe("Adding an item to a hashtable", () => {
         expect(foundItems.length).toBe(1);
         expect(foundItems[0]).toBe("test.value");
     });
-    
+
 });
 
 describe("Removing an item from a hashtable", () => {
@@ -102,7 +102,7 @@ describe("Clearing the hashtable", () => {
     });
 })
 
-describe("Updaing an item to a hashtable", () => {
+describe("Updating an item to a hashtable", () => {
     var ht = new Hashtable<string>();
 
     it("should add the item if not found", () => {
@@ -110,7 +110,7 @@ describe("Updaing an item to a hashtable", () => {
         ht.update("test.key", "test.value");
         expect(ht.item("test.key")).toBe("test.value");
     });
-    
+
     it("should update the item if already exist", () => {
         ht.clear();
         ht.add("test.key", "test.value2");

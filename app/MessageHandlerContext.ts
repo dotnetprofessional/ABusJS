@@ -30,7 +30,7 @@ export class MessageHandlerContext implements IMessageHandlerContext {
         this.bus.publishInternal(message, new SendOptions(), this);
     }
 
-    sendAsync<T>(message: IMessage<T> | T, options?: SendOptions): Promise<any> {
+    sendAsync<T>(message: T | IMessage<T>, options?: SendOptions): Promise<any> {
         return this.bus.sendInternalAsync(message, options, this);
     }
 

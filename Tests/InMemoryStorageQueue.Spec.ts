@@ -1,5 +1,5 @@
-import { InMemoryStorageQueue} from '../App/InMemoryStorageQueue'
-import {QueuedMessage} from '../App/QueuedMessage'
+import { InMemoryStorageQueue } from '../App/InMemoryStorageQueue'
+import { QueuedMessage } from '../App/QueuedMessage'
 import TimeSpan from '../App/Timespan'
 import { Utils } from '../App/Utils'
 
@@ -64,9 +64,9 @@ describe('Getting a message from the queue', () => {
         let testMsg = new QueuedMessage("test.message", "Hello World!");
         newQueue.addMessageAsync(testMsg);
         for (let i = 0; i < 5; i++) {
-            var dequedMsg = newQueue.getMessage();
-            newQueue.abandonMessageAsync(dequedMsg.id);
-            expect(dequedMsg.dequeueCount).toBe(i + 1);
+            var dequeuedMsg = newQueue.getMessage();
+            newQueue.abandonMessageAsync(dequeuedMsg.id);
+            expect(dequeuedMsg.dequeueCount).toBe(i + 1);
         }
     });
 })
@@ -76,13 +76,13 @@ describe('Completing a message', () => {
     let msg = new QueuedMessage("test.message", "Hello World!");
     queue.addMessageAsync(msg);
     queue.leasePeriod = TimeSpan.FromMilliseconds(100);
-    let dequedMsg = queue.getMessage();
-    expect(dequedMsg).toBeTruthy();
-    queue.completeMessageAsync(dequedMsg.id);
-    dequedMsg = queue.getMessage();
+    let dequeuedMsg = queue.getMessage();
+    expect(dequeuedMsg).toBeTruthy();
+    queue.completeMessageAsync(dequeuedMsg.id);
+    dequeuedMsg = queue.getMessage();
 
     it("should remove the message permanently from the queue", () => {
-        expect(dequedMsg).toBeFalsy();
+        expect(dequeuedMsg).toBeFalsy();
     });
 
     it("should reduce the message count by 1", () => {
@@ -90,24 +90,24 @@ describe('Completing a message', () => {
     });
 })
 
-describe('Abandoing a message', () => {
+describe('Abandoning a message', () => {
     let queue = new InMemoryStorageQueue();
     let msg = new QueuedMessage("test.message", "Hello World!");
     queue.addMessageAsync(msg);
 
     it("should return the message back to the queue immediately", () => {
-        // First deque msg to make it unavailable
-        let dequedMsg = queue.getMessage();
-        expect(dequedMsg).toBeTruthy();
+        // First dequeue msg to make it unavailable
+        let dequeuedMsg = queue.getMessage();
+        expect(dequeuedMsg).toBeTruthy();
 
         // Validate that the message is unavailable
-        let dequedMsg2 = queue.getMessage();
-        expect(dequedMsg2).toBeFalsy();
+        let dequeuedMsg2 = queue.getMessage();
+        expect(dequeuedMsg2).toBeFalsy();
 
         // Abandon message making it available again
-        queue.abandonMessageAsync(dequedMsg.id);
-        dequedMsg = queue.getMessage();
-        expect(dequedMsg).toBeTruthy();
+        queue.abandonMessageAsync(dequeuedMsg.id);
+        dequeuedMsg = queue.getMessage();
+        expect(dequeuedMsg).toBeTruthy();
     });
 })
 
@@ -118,18 +118,18 @@ describe('Renewing a message lease', () => {
         let msg = new QueuedMessage("test.message", "Hello World!");
         queue.addMessageAsync(msg);
 
-        let dequedMsg = queue.getMessage();
-        expect(dequedMsg).toBeTruthy();
-        dequedMsg = queue.getMessage();
-        expect(dequedMsg).toBeFalsy();
+        let dequeuedMsg = queue.getMessage();
+        expect(dequeuedMsg).toBeTruthy();
+        dequeuedMsg = queue.getMessage();
+        expect(dequeuedMsg).toBeFalsy();
         await Utils.sleep(30);
-        dequedMsg = queue.getMessage();
-        expect(dequedMsg).toBeTruthy();
+        dequeuedMsg = queue.getMessage();
+        expect(dequeuedMsg).toBeTruthy();
 
         // Now extend the lease
-        queue.renewLease(dequedMsg.id, TimeSpan.FromMinutes(1));
-        dequedMsg = queue.getMessage();
-        expect(dequedMsg).toBeFalsy();
+        queue.renewLease(dequeuedMsg.id, TimeSpan.FromMinutes(1));
+        dequeuedMsg = queue.getMessage();
+        expect(dequeuedMsg).toBeFalsy();
     });
 })
 
@@ -177,7 +177,7 @@ describe('Adding an onMessage handler', () => {
     });
 })
 
-describe('Peeking a meessage', () => {
+describe('Peeking a message', () => {
     let queue = new InMemoryStorageQueue();
     queue.addMessageAsync(new QueuedMessage("test.message", "Hello World!"));
 

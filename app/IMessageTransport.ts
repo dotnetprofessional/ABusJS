@@ -12,45 +12,45 @@ export class QueueEndpoint {
 }
 
 /**
- * 
- * 
+ *
+ *
  * @export
  * @interface IMessageTransport
  */
 export interface IMessageTransport {
     /**
      * Publishes an event message to the Endpoint
-     * 
+     *
      * @param {Message} message
-     * 
+     *
      * @memberOf IMessageTransport
      */
     publish(message: IMessage<any>): void;
 
     /**
      * Sends a command message to the Endpoint
-     * 
+     *
      * @param {Message} message
      * @param {TimeSpan} timeToDelay
-     * 
+     *
      * @memberOf IMessageTransport
      */
     send(message: IMessage<any>, timeToDelay?: TimeSpan): void;
 
     /**
-     * Create a subsription on the Endpoint
-     * 
+     * Create a subscription on the Endpoint
+     *
      * @param {string} name
-     * 
+     *
      * @memberOf IMessageTransport
      */
     subscribe(name: string, filter: string): void;
 
     /**
-     * Removes a subsription on the Endpoint
-     * 
+     * Removes a subscription on the Endpoint
+     *
      * @param {string} name
-     * 
+     *
      * @memberOf IMessageTransport
      */
     unsubscribe(name: string): void;
@@ -59,18 +59,18 @@ export interface IMessageTransport {
      * Notifies subscribers when a message arrives indicating which
      * subscription the message is for via the MetaData property
      * Transport.Subscription
-     * 
+     *
      * @param {(message: IMessage<any>)} handler
-     * 
+     *
      * @memberOf IMessageTransport
      */
     onMessage(handler: (message: IMessage<any>) => void);
 
     /**
      * Marks the message as processed and removes it from the queue.
-     * 
+     *
      * @param {string} messageId
-     * 
+     *
      * @memberOf IMessageTransport
      */
     completeMessageAsync(messageId: string);

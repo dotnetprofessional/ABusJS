@@ -58,8 +58,9 @@ export class PerformanceHandler {
 
 describe("LocalTransport", () => {
 
-    describe.skip("Sending an recieving messages", () => {
+    describe.skip("Sending an receiving messages", () => {
         var transport = new LocalTransport();
+        debugger;
 
         it("should be fast!", () => {
             let counter = 0;
@@ -88,19 +89,19 @@ describe("LocalTransport", () => {
 describe.skip("abus", () => {
     let iterations = 1000;
     describe("Sending 1000 message via SendAsync", () => {
-        var p = new PerformanceHandler(iterations);
-        let bus = Bus.instance;
-        p.subscribeHandler1();
-
-        p.start();
-        for (let i = 0; i < iterations; i++) {
-            bus.sendAsync(new testData.TestMessage(""))
-        }
-        p.stop();
-        console.log("operations: " + p.operationsPerSec());
-
+        // NB: Even though this is skipped any code here will get executed
+        //     so all intensive code must live in an 'it' function.
         it("should execute in under x ms", () => {
+            var p = new PerformanceHandler(iterations);
+            let bus = Bus.instance;
+            p.subscribeHandler1();
 
+            p.start();
+            for (let i = 0; i < iterations; i++) {
+                bus.sendAsync(new testData.TestMessage(""))
+            }
+            p.stop();
+            console.log("operations: " + p.operationsPerSec());
         })
     })
 

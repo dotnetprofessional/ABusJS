@@ -20,7 +20,7 @@ describe("Send method", () => {
             }
         });
 
-        it("should add a messageHandlerContext to the handler recieving message being sent", () => {
+        it("should add a messageHandlerContext to the handler receiving message being sent", () => {
             bus.sendAsync(new testData.TestMessage("Johhny Smith"));
             return Utils.sleep(10)
                 .then(() => {
@@ -72,7 +72,7 @@ describe("Send method", () => {
             expect(badMessageHandler).toThrowError('The command test.message must have only one subscriber.');
         });
 
-        it("should throw SubscriberNotFound exception if no subscriber has registerd for message type", () => {
+        it("should throw SubscriberNotFound exception if no subscriber has registered for message type", () => {
             // need to wrap errors in its own function
             var badMessageHandler = () => {
                 bus.sendAsync({ type: testData.TestMessage2.TYPE, message: new testData.TestMessage("") });
@@ -82,19 +82,19 @@ describe("Send method", () => {
         });
 
         it("should send to registered subscriber", () => {
-            let recievedEvent = false;
+            let receivedEvent = false;
             bus.unregisterAll();
             bus.subscribe({
                 messageFilter: testData.TestMessage.TYPE,
                 handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
-                    recievedEvent = true;
+                    receivedEvent = true;
                 }
             });
 
             bus.sendAsync({ type: testData.TestMessage.TYPE, message: new testData.TestMessage("hhh") });
             return Utils.sleep(50)
                 .then(() => {
-                    expect(recievedEvent).toBe(true);
+                    expect(receivedEvent).toBe(true);
                 })
                 .catch(() => {
                     throw new TypeError("no error should have been caught");
@@ -102,13 +102,13 @@ describe("Send method", () => {
         });
 
         it("should invoke reply handler after executing message handler", () => {
-            let recievedEvent = false;
+            let receivedEvent = false;
             bus.unregisterAll();
 
             bus.subscribe({
                 messageFilter: testData.TestMessage.TYPE,
                 handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
-                    recievedEvent = true;
+                    receivedEvent = true;
                     context.reply("Hello World!");
                 }
             });
@@ -131,7 +131,7 @@ describe("Send method", () => {
                 currentHandlerContext = context;
             }
         });
-        it("should add a messageHandlerContext to the handler recieving message being sent", () => {
+        it("should add a messageHandlerContext to the handler receiving message being sent", () => {
             bus.sendAsync(new testData.CustomerData("Johhny Smith"));
             return Utils.sleep(10)
                 .then(() => {
@@ -162,19 +162,19 @@ describe("Send method", () => {
         });
 
         it("should send to registered subscriber", () => {
-            let recievedEvent = false;
+            let receivedEvent = false;
             bus.unregisterAll();
             bus.subscribe({
                 messageFilter: testData.TestMessage.TYPE,
                 handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
-                    recievedEvent = true;
+                    receivedEvent = true;
                 }
             });
 
             bus.sendAsync(new testData.TestMessage("hhh"));
             return Utils.sleep(50)
                 .then(() => {
-                    expect(recievedEvent).toBe(true);
+                    expect(receivedEvent).toBe(true);
                 })
                 .catch(() => {
                     throw new TypeError("no error should have been caught");
@@ -219,7 +219,7 @@ describe("Send method", () => {
                 });
         });
 
-        it("should add a messageHandlerContext to the handler recieving message being sent", () => {
+        it("should add a messageHandlerContext to the handler receiving message being sent", () => {
             expect(secondHandlerContext.messageType).toBe("test.message2");
             expect(secondHandlerContext).toBeDefined();
         });
@@ -280,7 +280,45 @@ describe("Send method", () => {
         });
     });
 
-    describe("sending a defered message inside of a handler", () => {
+    describe("sending a message inside of a handler using derived message with inheritance", () => {
+        var bus = new Bus();
+        var firstMessage: testData.CustomerData;
+        var firstHandlerContext: IMessageHandlerContext;
+
+        var secondMessage: testData.MyException;
+        var secondHandlerContext: IMessageHandlerContext;
+
+        bus.subscribe({
+            messageFilter: testData.CustomerData.TYPE,
+            handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
+                firstMessage = message;
+                firstHandlerContext = context;
+                let msg = new testData.MyException("It went Boom!");
+                context.sendAsync(msg);
+            }
+        });
+
+        bus.subscribe({
+            messageFilter: "Exception.MyException",
+            handler: (message: testData.MyException, context: MessageHandlerContext) => {
+                secondMessage = message;
+                secondHandlerContext = context;
+            }
+        });
+
+        bus.sendAsync(new testData.CustomerData("Johhny Smith"));
+
+        it("should send message to all registered subscribers", () => {
+            // Sleep for 10ms to give the code time to execute handlers
+            return Utils.sleep(10)
+                .then(() => {
+                    expect(secondHandlerContext.messageType).toBe("Exception.MyException");
+                    expect(secondMessage.exceptionMessage).toBe("It went Boom!");
+                });
+        });
+    });
+
+    describe("sending a deferred message inside of a handler", () => {
         var bus = new Bus();
         var firstMessage: testData.CustomerData;
         var firstHandlerContext: IMessageHandlerContext;
@@ -318,7 +356,7 @@ describe("Send method", () => {
             expect(secondHandlerContext).toBeFalsy();
             expect(secondMessage).toBeFalsy();
 
-            // Now wait a bit longer to for the deliverTo to have elasped and the message to be delivered
+            // Now wait a bit longer to for the deliverTo to have elapsed and the message to be delivered
             await Utils.sleep(60);
             expect(secondHandlerContext.messageType).toBe(testData.TestMessage2.TYPE);
             expect(secondMessage.name).toBe("second message");
