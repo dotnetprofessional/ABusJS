@@ -38,7 +38,7 @@ describe("Publish method", () => {
             expect(returnedMessage.name).toBe("Johhny Smith");
         });
 
-        it("should add a messageHandlerContext to the handler recieving message being sent", () => {
+        it("should add a messageHandlerContext to the handler receiving message being sent", () => {
             bus.publish(new testData.TestMessage("Johhny Smith"));
             expect(currentHandlerContext).toBeDefined();
         });
@@ -90,7 +90,7 @@ describe("Publish method", () => {
 
             bus.publish({ type: testData.TestMessage.TYPE, message: new testData.TestMessage("DEBUG ME") });
             await Utils.sleep(10)
-            // by this point no error should have occured and the message handler was called
+            // by this point no error should have occurred and the message handler was called
             expect(msg).toBeDefined();
         });
     });
@@ -130,7 +130,7 @@ describe("Publish method", () => {
                 });
         });
 
-        it("should add a messageHandlerContext to the handler recieving message being sent", () => {
+        it("should add a messageHandlerContext to the handler receiving message being sent", () => {
             expect(secondHandlerContext.messageType).toBe("test.message2");
             expect(secondHandlerContext).toBeDefined();
         });
@@ -190,7 +190,45 @@ describe("Publish method", () => {
         });
     });
 
-   it.skip("should not send the message if the timeout has been reached for a persisted message", () => {
+    describe("publishing a message inside of a handler using derived message with inheritance", () => {
+        var bus = new Bus();
+        var firstMessage: testData.CustomerData;
+        var firstHandlerContext: IMessageHandlerContext;
+
+        var secondMessage: testData.MyException;
+        var secondHandlerContext: IMessageHandlerContext;
+
+        bus.subscribe({
+            messageFilter: testData.CustomerData.TYPE,
+            handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
+                firstMessage = message;
+                firstHandlerContext = context;
+                let msg = new testData.MyException("It went Boom!");
+                context.publish(msg);
+            }
+        });
+
+        bus.subscribe({
+            messageFilter: "Exception.MyException",
+            handler: (message: testData.MyException, context: MessageHandlerContext) => {
+                secondMessage = message;
+                secondHandlerContext = context;
+            }
+        });
+
+        bus.sendAsync(new testData.CustomerData("Johhny Smith"));
+
+        it("should send message to all registered subscribers", () => {
+            // Sleep for 10ms to give the code time to execute handlers
+            return Utils.sleep(10)
+                .then(() => {
+                    expect(secondHandlerContext.messageType).toBe("Exception.MyException");
+                    expect(secondMessage.exceptionMessage).toBe("It went Boom!");
+                });
+        });
+    });
+
+    it.skip("should not send the message if the timeout has been reached for a persisted message", () => {
         // This test only makes sense once persistent timers have been implemented.
     });
 });

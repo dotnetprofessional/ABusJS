@@ -7,7 +7,6 @@ import { SubscriptionInstance } from './SubscriptionInstance'
 import { ReplyHandler } from './ReplyHandler'
 import { IMessageSubscription } from './IMessageSubscription'
 import { MessageHandlerOptions } from './MessageHandlerOptions'
-import { Utils } from './Utils'
 import { IMessage } from './IMessage'
 import { Guid } from './Guid'
 import { SendOptions } from './SendOptions'
@@ -61,12 +60,13 @@ export class Bus {
     private _inBoundMessageTasks = new MessageTasks([]);
     private _replyToMessages = new Hashtable<ReplyHandler>();
     private _messageTransport = new LocalTransport();
+    private _baseOptions = new SendOptions();
 
     public static instance: Bus = new Bus();
 
     /**
      * Makes this Bus instance globally reachable through Bus.instance.
-     * 
+     *
      * @memberOf Bus
      */
     public makeGlobal(): Bus {
@@ -129,7 +129,7 @@ export class Bus {
             throw new TypeError('messageHandler must be a function');
         }
 
-        // A name should be specified if the handler deals with persistant messages,
+        // A name should be specified if the handler deals with persistent messages,
         // however it is optional otherwise so if none is specified a unique one will be generated.
         if (!subscription.name) {
             subscription.name = Guid.newGuid();
@@ -179,11 +179,11 @@ export class Bus {
     /**
      * Returns the passed in message if already of type IMessage<T> otherwise
      * returns a derived IMessage<T> from the message.
-     * 
+     *
      * @private
      * @param {(IMessage<T>|T)} message
      * @returns {IMessage<T>}
-     * 
+     *
      * @memberOf Bus
      */
     private getIMessage<T>(message: IMessage<T> | T): IMessage<T> {
@@ -192,7 +192,8 @@ export class Bus {
         if (!messageCheck.type && !messageCheck.message) {
             // This appears to be an object that is not of type IMessage
             // Synthesize an IMessage from what we know.
-            var name = (message.constructor as any).name;
+            let name = this.getTypeNamespace(message);
+            //var name = (message.constructor as any).name;
             if (!name) {
                 throw TypeError("You must pass either an instance of IMessage<T> or a class. You cannot pass an object literal.");
             }
@@ -201,6 +202,31 @@ export class Bus {
         }
 
         return message as IMessage<T>;
+    }
+
+    /** @internal */
+    public getTypeNamespace(typeOrInstance: any) {
+        var proto = typeOrInstance.prototype || Object.getPrototypeOf(typeOrInstance);
+
+        if (proto.__namespace !== undefined && proto.hasOwnProperty("__namespace")) {
+            return proto.__namespace;
+        }
+
+        var superNamespace = Object.getPrototypeOf(proto).__namespace;
+        if (superNamespace !== undefined) {
+            return proto.__namespace = superNamespace + "." + proto.constructor.name;
+        }
+
+        var nameChain = this.getTypeNamespaceChain(proto, null);
+        nameChain.shift();
+        return proto.__namespace = nameChain.join(".");
+    }
+
+    getTypeNamespaceChain(proto: any, stack: any) {
+        stack = stack || [];
+        stack.unshift(proto.constructor.name);
+        var next = Object.getPrototypeOf(proto);
+        return next && this.getTypeNamespaceChain(next, stack) || stack;
     }
 
     /** @internal */
@@ -216,7 +242,7 @@ export class Bus {
         messageToSend.metaData.messageId = Guid.newGuid();
         messageToSend.metaData.intent = Intents.send;
 
-        options = Utils.assign(new SendOptions(), options);
+        options = { ...this._baseOptions, ...options };
 
         var subscribers = transport.subscriberCount(messageToSend.type);
         if (subscribers > 1) {

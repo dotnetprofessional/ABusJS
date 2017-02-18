@@ -1,5 +1,5 @@
 /*
-    This class is used for tracing handlers and other external logging
+    This class is used for tracing handlers and other external logging for Saga tests
 */
 
 export default class Log {

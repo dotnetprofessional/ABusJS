@@ -5,7 +5,7 @@ import { handler, iHandleMessages } from '../App/Decorators'
 
 import * as testData from './ABus.Sample.Messages'
 
-describe("Subsriptions", () => {
+describe("Subscriptions", () => {
 
     describe("subscribing to a message type", () => {
         var pipeline = new Bus();
@@ -64,7 +64,7 @@ describe("Subsriptions", () => {
             let subscription = pipeline.subscribe({ messageFilter: testData.TestMessage.TYPE, handler: () => { } });
             expect(pipeline.subscriberCount(testData.TestMessage.TYPE)).toBe(2);
 
-            // Remove the last subscriber 
+            // Remove the last subscriber
             pipeline.unsubscribe(subscription);
             expect(pipeline.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
         });
@@ -107,7 +107,7 @@ describe("Subsriptions", () => {
                     }
 
                     if (context.messageType === testData.TestMessage2.TYPE) {
-                        // Ensures this message wasn't recieved as it wasn't subscribed to
+                        // Ensures this message wasn't received as it wasn't subscribed to
                         counter += 1;
                     }
                 }
@@ -180,6 +180,19 @@ export class TestMessageHandler3 {
     };
 }
 
+@iHandleMessages
+export class TestMessageHandlerWithInheritance {
+    public value = 0;
+    constructor(value: number) {
+        this.value = value;
+    }
+
+    @handler(testData.MyException)
+    handler(message: testData.MyException, context: MessageHandlerContext) {
+        this.value = 100 + this.value;
+    };
+}
+
 describe("subscribing to a message type using decorators", () => {
 
     describe("using a string literal to define the messageFilter", () => {
@@ -208,6 +221,21 @@ describe("subscribing to a message type using decorators", () => {
 
         it("should call handler with correct class instance", async () => {
             bus.sendAsync(new testData.CustomerData2(""));
+            expect(handlerClass.value).toBe(150);
+        });
+    });
+
+    describe("using the message type to define the messageFilter that uses inheritance", () => {
+        var bus = new Bus().makeGlobal();
+        // Provide an instance for the handler to attach to
+        let handlerClass = new TestMessageHandlerWithInheritance(50);
+
+        it("should register subscriber for the message type", async () => {
+            expect(bus.subscriberCount("Exception.MyException")).toBe(1);
+        });
+
+        it("should call handler with correct class instance", async () => {
+            bus.sendAsync(new testData.MyException(""));
             expect(handlerClass.value).toBe(150);
         });
     });

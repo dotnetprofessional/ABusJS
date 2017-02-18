@@ -2,14 +2,35 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch",
+            "type": "node2",
+            "request": "launch",
+            // Automatically stop program after launch.
+            "stopOnEntry": false,
+            "name": "Mocha Tests",
+            "cwd": "${workspaceRoot}",
+            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/mocha",
+            "windows": {
+                "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/mocha.cmd"
+            },
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceRoot}/build"
+            ],
+            "internalConsoleOptions": "openOnSessionStart",
+            // Prevents debugger from stepping into this code :)
+            "skipFiles": [
+                "node_modules/**/*.js",
+                "<node_internals>/**/*.js"
+            ]
+        },
+        {
+            "name": "Jest Tests",
             "type": "node",
             "request": "launch",
             "program": "${workspaceRoot}/node_modules/jest-cli/bin/jest.js",
             "stopOnEntry": false,
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "tsc",
-            "runtimeExecutable": null,
             "args": [
                 "--runInBand"
             ],
@@ -20,10 +41,10 @@
             "env": {
                 "NODE_ENV": "development"
             },
-            "console": "integratedTerminal",
+            "internalConsoleOptions": "openOnSessionStart",
             "sourceMaps": true,
             "outFiles": [
-                "${workspaceRoot}/{lib}/**/*.js"
+                "${workspaceRoot}/dist/app"
             ],
             "skipFiles": [
                 "node_modules/**/*.js",

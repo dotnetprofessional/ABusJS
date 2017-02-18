@@ -1,7 +1,7 @@
 {
     "name": "abus",
     "typings": "app/abus.d.ts",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "A service bus implementation for javascript.",
     "main": "app/abus.js",
     "scripts": {

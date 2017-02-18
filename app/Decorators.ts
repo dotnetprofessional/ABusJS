@@ -2,7 +2,7 @@ import { Bus } from './Bus'
 
 /**
  * Defines a function as a message handler which must implement the IMessageHandler interface.
- * 
+ *
  * @export
  * @param {string} type
  * @returns
@@ -10,7 +10,8 @@ import { Bus } from './Bus'
 export function handler(type: string | Function) {
     return function handler_decorator(target: any, key: string) {
         if (typeof (type) === "function") {
-            type = (type as any).name;
+            // Will return the full namespace of the type
+            type = Bus.instance.getTypeNamespace(type);
         }
 
         var handlers = Object.getOwnPropertyDescriptor(target, "__messageHandlers");
@@ -26,8 +27,8 @@ export function handler(type: string | Function) {
 
 /**
  * Defines that this class contains message handlers
- * if no messages handers are defined an exception will be thrown.
- * 
+ * if no messages handlers are defined an exception will be thrown.
+ *
  * @export
  * @param {*} target
  * @returns
@@ -50,6 +51,9 @@ export function iHandleMessages(target: any) {
                 Bus.instance.subscribe({ messageFilter: handler.type, handler: this[handler.handler].bind(this) });
             });
 
+            //NB: These __messageHandlers can't be removed once used as they are on the prototype and
+            //    are required for every class instance that is created.
+
             return constructor.apply(this, args);
         }
         c.prototype = constructor.prototype;
@@ -60,7 +64,7 @@ export function iHandleMessages(target: any) {
     var f: any = function (...args) {
         return construct(original, args);;
     }
-    // copy prototype so intanceof operator still works
+    // copy prototype so instance of operator still works
     f.prototype = original.prototype;
 
     // return new constructor (will override original)

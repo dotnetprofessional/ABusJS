@@ -1,5 +1,5 @@
-describe("Saga Spec", ()=>{
-    it.skip("something", ()=>{
+describe("Saga Spec", () => {
+    it.skip("something", () => {
 
     });
 });
@@ -94,7 +94,7 @@ describe("Saga Spec", ()=>{
 //         // Configure mappings
 //         this.sagaKeyMapping.add(StartOrderCommand.TYPE, (message: StartOrder): string => { return message.orderId; });
 
-//         // Registger handlers
+//         // Register handlers
 //         this.subscribeAsSagaStart({ messageType: StartOrderCommand.TYPE, handler: this.StartOrderCommand_Handler });
 //         this.subscribe({ messageType: PaymentTransactionCompletedCommand.TYPE, handler: this.PaymentTransactionCompletedCommand_Handler });
 //         this.subscribe({ messageType: CompleteOrderCommand.TYPE, handler: this.CompleteOrderCommand_Handler });
@@ -170,7 +170,7 @@ describe("Saga Spec", ()=>{
 // describe("Saga with a timeout defined", () => {
 
 //     //jest.useFakeTimers();
-    
+
 //     it("should execute the timeout handler when the timeout expires if Saga still active", async () => {
 //         let bus = new Bus();
 //         let log = new Log();

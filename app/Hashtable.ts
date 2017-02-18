@@ -1,5 +1,3 @@
-import { Utils } from './Utils'
-
 export class DuplicateException extends Error {
 }
 
@@ -20,7 +18,7 @@ export default class Hashtable<T> {
             }
         }
     }
-    
+
     internalHash() {
         return this._hash;
     }
@@ -98,9 +96,9 @@ export default class Hashtable<T> {
     }
 
     clone(): Hashtable<any> {
-        let copy = Utils.assign({}, this._hash);
-        return new Hashtable(copy);
+        let c = { ...this._hash };
+        return new Hashtable(c);
     }
-    
+
 }
 

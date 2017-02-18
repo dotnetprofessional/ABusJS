@@ -4,7 +4,7 @@ import { IMessageQueue } from './IMessageQueue'
 
 /**
  * An in memory implementation of the StorageQueue interface
- * 
+ *
  * @export
  * @class Queue
  */
@@ -14,7 +14,7 @@ export class InMemoryStorageQueue implements IMessageQueue {
     private _handler: (message: QueuedMessage) => void;
     private _nextScheduledPumpToken: any;
 
-    clear():void {
+    clear(): void {
         this.internalQueue = [];
     }
 
@@ -44,7 +44,7 @@ export class InMemoryStorageQueue implements IMessageQueue {
             message.dequeueCount += 1;
             return this.renewLease(message.id, this.leasePeriod);
         }
-        // No messages that haven't been derred are available
+        // No messages that haven't been deferred are available
         return null;
     }
 
@@ -61,9 +61,9 @@ export class InMemoryStorageQueue implements IMessageQueue {
 
     /**
      * Releases the lease on a message allowing it to return the queue to be processed again.
-     * 
+     *
      * @param {string} messageId
-     * 
+     *
      * @memberOf InMemoryStorageQueue
      */
     abandonMessageAsync(messageId: string): void {
@@ -72,9 +72,9 @@ export class InMemoryStorageQueue implements IMessageQueue {
 
     /**
      * Returns the next available message without taking a lease on it.
-     * 
+     *
      * @returns {QueuedMessage}
-     *  
+     *
      * @memberOf InMemoryStorageQueue
      */
     peekMessage(): QueuedMessage {
@@ -87,10 +87,10 @@ export class InMemoryStorageQueue implements IMessageQueue {
         }
     }
 
-    findMessage(compare: (m:QueuedMessage)=>void): QueuedMessage {
+    findMessage(compare: (m: QueuedMessage) => void): QueuedMessage {
         for (let i = 0; i < this.internalQueue.length; i++) {
             let message = this.internalQueue[i];
-            if(compare(message)) {
+            if (compare(message)) {
                 return message;
             }
         }
