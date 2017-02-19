@@ -166,9 +166,16 @@ export class Bus {
         }
     }
 
-    subscriberCount(messageFilter: string): number {
-        var transport = this.getTransport(messageFilter);
-        return transport.subscriberCount(messageFilter);
+    subscriberCount<T>(messageFilter: string | T): number {
+        let filter = "";
+        if (typeof (messageFilter) === "string") {
+            filter = messageFilter;
+        } else {
+            filter = this.getTypeNamespace(messageFilter);
+        }
+
+        var transport = this.getTransport(filter);
+        return transport.subscriberCount(filter);
     }
 
     sendAsync<T, R>(message: IMessage<T> | T, options?: SendOptions): Promise<R> {

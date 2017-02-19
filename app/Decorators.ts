@@ -18,6 +18,12 @@ export function handler(type: string | Function) {
         if (!handlers) {
             // First handler so create a property to store all the handlers
             Object.defineProperty(target, "__messageHandlers", { value: [] });
+            Object.defineProperty(target, "__messageHandlersSubscriptions", { value: [] });
+            target.unsubscribeHandlers = function () {
+                for (let i = 0; i < this.__messageHandlersSubscriptions.length; i++) {
+                    Bus.instance.unsubscribe(this.__messageHandlersSubscriptions[i]);
+                }
+            }
         }
 
         // Record the details of this handler for later binding.
@@ -43,12 +49,14 @@ export function iHandleMessages(target: any) {
             // Locate any handlers that were defined using @handler
             // then subscribe to the bus with the binding the current class instance
             var handlers = target.prototype["__messageHandlers"] as Array<any>;
+            var handlerSubscriptionKeys = target.prototype["__messageHandlersSubscriptions"] as Array<any>;
             if (!handlers) {
                 throw new TypeError("iHandleMessages defined on class that has no handlers defined.");
             }
 
             handlers.map(handler => {
-                Bus.instance.subscribe({ messageFilter: handler.type, handler: this[handler.handler].bind(this) });
+                // Register a handler and record the subscription key for later removal
+                handlerSubscriptionKeys.push(Bus.instance.subscribe({ messageFilter: handler.type, handler: this[handler.handler].bind(this) }));
             });
 
             //NB: These __messageHandlers can't be removed once used as they are on the prototype and
