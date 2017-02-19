@@ -56,11 +56,10 @@ export class PerformanceHandler {
     }
 }
 
-describe("LocalTransport", () => {
+describe.skip("LocalTransport", () => {
 
     describe.skip("Sending an receiving messages", () => {
         var transport = new LocalTransport();
-        debugger;
 
         it("should be fast!", () => {
             let counter = 0;
