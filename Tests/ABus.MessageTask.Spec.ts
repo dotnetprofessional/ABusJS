@@ -1,7 +1,6 @@
 import { Bus } from '../App/Bus'
 import { MessageHandlerContext } from '../App/MessageHandlerContext'
 import { IMessage } from '../App/IMessage'
-import { IMessageHandlerContext } from '../App/IMessageHandlerContext'
 import { Utils } from '../App/Utils'
 import { IMessageTask } from '../App/Tasks/IMessageTask'
 
@@ -40,7 +39,7 @@ describe("Message Task", () => {
     describe("Adding a message task to pipeline with Sync handlers", () => {
         var pipeline = new Bus();
         var returnedMessage: testData.CustomerData;
-        var currentHandlerContext: IMessageHandlerContext;
+        var currentHandlerContext: MessageHandlerContext;
         var counter = 0;
         var logs = [];
         var messageTask = new TestMessageTask(logs);
@@ -74,7 +73,7 @@ describe("Message Task", () => {
     describe("Adding a message task to pipeline with Async handlers", () => {
         var pipeline = new Bus();
         var returnedMessage: testData.CustomerData;
-        var currentHandlerContext: IMessageHandlerContext;
+        var currentHandlerContext: MessageHandlerContext;
         var counter = 0;
         var logs = [];
         var messageTask = new TestMessageTask(logs);
@@ -94,7 +93,7 @@ describe("Message Task", () => {
         });
 
         /*
-        *    should execute code before calling next() 
+        *    should execute code before calling next()
         *    should execute code after calling next()
         */
         it("should execute code before and after calling next()", async () => {

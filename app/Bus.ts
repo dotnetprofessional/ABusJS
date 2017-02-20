@@ -10,7 +10,7 @@ import { MessageHandlerOptions } from './MessageHandlerOptions'
 import { IMessage } from './IMessage'
 import { Guid } from './Guid'
 import { SendOptions } from './SendOptions'
-import { IMessageHandlerContext } from './IMessageHandlerContext'
+//import { MessageHandlerContext } from './MessageHandlerContext'
 import { MessageHandlerContext } from './MessageHandlerContext'
 import { MetaData, Intents } from './MetaData'
 import { AddStandardMetaDataTask } from './Tasks/AddStandardMetaDataTask'
@@ -237,7 +237,7 @@ export class Bus {
     }
 
     /** @internal */
-    sendInternalAsync<T>(message: IMessage<T> | T, options: SendOptions, context: IMessageHandlerContext): Promise<any> {
+    sendInternalAsync<T>(message: IMessage<T> | T, options: SendOptions, context: MessageHandlerContext): Promise<any> {
         // Ensure we have an IMessage<T>
         let messageToSend = this.getIMessage(message)
 
@@ -279,7 +279,7 @@ export class Bus {
 
     // Typescript doesn't support internal methods yet
     /** @internal */
-    publishInternal<T>(message: IMessage<T> | T, options: SendOptions, context: IMessageHandlerContext) {
+    publishInternal<T>(message: IMessage<T> | T, options: SendOptions, context: MessageHandlerContext) {
         // Ensure we have an IMessage<T>
         message = this.getIMessage(message);
 
@@ -339,7 +339,7 @@ export class Bus {
 
     }
 
-    async dispatchOutboundMessageAsync(message: IMessage<any>, options: SendOptions, context: IMessageHandlerContext, tasks: MessageTasks) {
+    async dispatchOutboundMessageAsync(message: IMessage<any>, options: SendOptions, context: MessageHandlerContext, tasks: MessageTasks) {
         let task = tasks.next;
 
         if (task != null) {

@@ -1,20 +1,37 @@
-import { IMessageHandlerContext } from './IMessageHandlerContext'
 import { MetaData } from './MetaData'
 import { IMessage } from './IMessage'
 import { Bus } from './Bus'
 import { SendOptions } from './SendOptions'
 
-export class MessageHandlerContext implements IMessageHandlerContext {
+/**
+ * Provides additional data about the current message, it also supports
+ * the ability to link incoming messages with outgoing messages when
+ * using the context methods for sending an publishing.
+ *
+ * @export
+ * @class MessageHandlerContext
+ * @implements {IMessageHandlerContext}
+ */
+export class MessageHandlerContext {
     constructor(public bus: Bus, public metaData: MetaData = new MetaData()) {
     }
 
-    get messageType(): string { return this.metaData.messageType; }
-    get messageId(): string { return this.metaData.messageId; }
-    get shouldTerminatePipeline(): boolean { return this.metaData.shouldTerminatePipeline; }
-    get replyTo(): string { return this.metaData.replyTo; }
-    get sagaKey(): string { return this.metaData.sagaKey; }
+    public get messageType(): string { return this.metaData.messageType; }
+    public get messageId(): string { return this.metaData.messageId; }
+    public get shouldTerminatePipeline(): boolean { return this.metaData.shouldTerminatePipeline; }
+    public get replyTo(): string { return this.metaData.replyTo; }
+    public get sagaKey(): string { return this.metaData.sagaKey; }
 
-    getMetaDataValue<T>(key: string): T {
+    /**
+     * Allows getting a value in the messages metaData
+     *
+     * @template T
+     * @param {string} key
+     * @returns {T}
+     *
+     * @memberOf MessageHandlerContext
+     */
+    public getMetaDataValue<T>(key: string): T {
         if (this.metaData.contains(key)) {
             return this.metaData.item(key);
         } else {
@@ -22,25 +39,71 @@ export class MessageHandlerContext implements IMessageHandlerContext {
         }
     }
 
-    setMetaDataValue(key: string, value: any) {
+    /**
+     * Allows setting a value in the messages metaData
+     *
+     * @param {string} key
+     * @param {*} value
+     *
+     * @memberOf MessageHandlerContext
+     */
+    public setMetaDataValue(key: string, value: any) {
         this.metaData.update(key, value);
     }
 
-    publish<T>(message: IMessage<T> | T): void {
+    /**
+     * Publishes a message using the current messages context. This makes the published
+     * message a child of the current message.
+     *
+     * @template T
+     * @param {(IMessage<T> | T)} message
+     *
+     * @memberOf MessageHandlerContext
+     */
+    public publish<T>(message: IMessage<T> | T): void {
         this.bus.publishInternal(message, new SendOptions(), this);
     }
 
-    sendAsync<T>(message: T | IMessage<T>, options?: SendOptions): Promise<any> {
+    /**
+     * Sends a message using the current messages context. This makes the sent
+     * message a child of the current message.
+     *
+     * @template T
+     * @param {(T | IMessage<T>)} message
+     * @param {SendOptions} [options]
+     * @returns {Promise<any>}
+     *
+     * @memberOf MessageHandlerContext
+     */
+    public sendAsync<T>(message: T | IMessage<T>, options?: SendOptions): Promise<any> {
         return this.bus.sendInternalAsync(message, options, this);
     }
 
-    reply<T>(reply: T): void {
+    /**
+     * Sends a reply to the current message back to the originating sender
+     *
+     * @template T
+     * @param {T} reply
+     *
+     * @memberOf MessageHandlerContext
+     */
+    public reply<T>(reply: T): void {
         var msg = { type: this.messageType + ".reply", message: reply } as IMessage<any>;
         msg.metaData = new MetaData();
         // Need to add a replyTo so it can be delivered to the correct handler
         msg.metaData.replyTo = this.metaData.messageId;
         // Here a publish is used instead of a send as only a publish supports wild card subscriptions
-        // this is needed by the Bus to subscribe to all reply messages ie *.reply 
+        // this is needed by the Bus to subscribe to all reply messages ie *.reply
         this.bus.publishInternal(msg, new SendOptions(), this);
+    }
+
+    /**
+     * Stops the additional processing of this message through the pipeline
+     * including sending the message to the handler.
+     *
+     * @memberOf IMessageHandlerContext
+     */
+    public DoNotContinueDispatchingCurrentMessageToHandlers() {
+        this.metaData.shouldTerminatePipeline = true;
     }
 }

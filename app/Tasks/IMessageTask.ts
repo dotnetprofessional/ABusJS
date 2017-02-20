@@ -1,6 +1,6 @@
 import { IMessage } from '../IMessage'
-import { IMessageHandlerContext } from '../IMessageHandlerContext'
+import { MessageHandlerContext } from '../MessageHandlerContext'
 
 export interface IMessageTask {
-    invokeAsync(message: IMessage<any>, context: IMessageHandlerContext, next): Promise<void>;
+    invokeAsync(message: IMessage<any>, context: MessageHandlerContext, next): Promise<void>;
 }

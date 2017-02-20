@@ -1,6 +1,5 @@
 import { Bus } from '../App/Bus'
 import { MessageHandlerContext } from '../App/MessageHandlerContext'
-import { IMessageHandlerContext } from '../App/IMessageHandlerContext'
 import { handler, iHandleMessages } from '../App/Decorators'
 
 import * as testData from './ABus.Sample.Messages'
@@ -76,7 +75,7 @@ describe("Subscriptions", () => {
         it("should receive messages for all message types currently registered with supplied type prefix", () => {
             let counter = 0;
             pipeline.subscribe({
-                messageFilter: "test.*", handler: (message: any, context: IMessageHandlerContext) => {
+                messageFilter: "test.*", handler: (message: any, context: MessageHandlerContext) => {
                     if (context.messageType === testData.TestMessage.TYPE) {
                         counter += 1;
                     } else {
@@ -97,7 +96,7 @@ describe("Subscriptions", () => {
             let counter = 0;
             pipeline.unregisterAll();
             pipeline.subscribe({
-                messageFilter: "*.reply", handler: (message: any, context: IMessageHandlerContext) => {
+                messageFilter: "*.reply", handler: (message: any, context: MessageHandlerContext) => {
                     if (context.messageType === testData.TestMessage1Reply.TYPE) {
                         counter += 1;
                     } else {
