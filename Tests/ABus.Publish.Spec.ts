@@ -1,6 +1,5 @@
 import { Bus } from '../App/Bus'
 import { MessageHandlerContext } from '../App/MessageHandlerContext'
-import { IMessageHandlerContext } from '../App/IMessageHandlerContext'
 import { ThreadingOptions } from '../App/MessageHandlerOptions'
 import { Utils } from '../App/Utils'
 
@@ -11,7 +10,7 @@ describe("Publish method", () => {
     describe("publishing a message outside of a handler", () => {
         var bus = Bus.instance;
         var returnedMessage: testData.CustomerData;
-        var currentHandlerContext: IMessageHandlerContext;
+        var currentHandlerContext: MessageHandlerContext;
         var counter = 0;
 
         bus.subscribe({
@@ -98,10 +97,10 @@ describe("Publish method", () => {
     describe("publishing a message inside of a handler", () => {
         var bus = new Bus();
         var firstMessage: testData.CustomerData;
-        var firstHandlerContext: IMessageHandlerContext;
+        var firstHandlerContext: MessageHandlerContext;
 
         var secondMessage: testData.CustomerData;
-        var secondHandlerContext: IMessageHandlerContext;
+        var secondHandlerContext: MessageHandlerContext;
 
         bus.subscribe({
             messageFilter: testData.TestMessage.TYPE,
@@ -157,10 +156,10 @@ describe("Publish method", () => {
     describe("publishing a message inside of a handler using derived message", () => {
         var bus = new Bus();
         var firstMessage: testData.CustomerData;
-        var firstHandlerContext: IMessageHandlerContext;
+        var firstHandlerContext: MessageHandlerContext;
 
         var secondMessage: testData.CustomerData;
-        var secondHandlerContext: IMessageHandlerContext;
+        var secondHandlerContext: MessageHandlerContext;
 
         bus.subscribe({
             messageFilter: testData.CustomerData.TYPE,
@@ -193,10 +192,10 @@ describe("Publish method", () => {
     describe("publishing a message inside of a handler using derived message with inheritance", () => {
         var bus = new Bus();
         var firstMessage: testData.CustomerData;
-        var firstHandlerContext: IMessageHandlerContext;
+        var firstHandlerContext: MessageHandlerContext;
 
         var secondMessage: testData.MyException;
-        var secondHandlerContext: IMessageHandlerContext;
+        var secondHandlerContext: MessageHandlerContext;
 
         bus.subscribe({
             messageFilter: testData.CustomerData.TYPE,

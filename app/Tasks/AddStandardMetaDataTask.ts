@@ -12,7 +12,7 @@ export class AddStandardMetaDataTask implements IMessageTask {
             message.metaData.conversationId = context.metaData.conversationId;
         }
 
-        // CorrelationId becomes the current messa
+        // CorrelationId becomes the current message
         message.metaData.correlationId = context.messageId;
         message.metaData.messageType = message.type;
 
