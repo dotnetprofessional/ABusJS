@@ -39,13 +39,7 @@
       "!**/typings/**",
       "!**/app/**"
     ],
-    "coverageDirectory": "<rootDir>/coverage",
-    "globals": {
-      "__TS_CONFIG__": {
-        "module": "commonjs",
-        "jsx": "react"
-      }
-    }
+    "coverageDirectory": "<rootDir>/coverage"
   },
   "devDependencies": {
     "electron": "^1.4.15",
