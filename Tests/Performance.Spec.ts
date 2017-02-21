@@ -1,4 +1,4 @@
-import { LocalTransport } from "../app/LocalTransport";
+import { LocalTransport } from "../app/Transports/LocalTransport";
 import { IMessage } from "../app/IMessage";
 import { Bus } from "../app/Bus";
 import { MessageHandlerContext } from "../app/MessageHandlerContext";

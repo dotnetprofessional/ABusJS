@@ -1,4 +1,4 @@
-import { InMemoryStorageQueue } from '../App/InMemoryStorageQueue'
+import { InMemoryStorageQueue } from '../App/Transports/InMemoryStorageQueue'
 import { QueuedMessage } from '../App/QueuedMessage'
 import TimeSpan from '../App/Timespan'
 import { Utils } from '../App/Utils'

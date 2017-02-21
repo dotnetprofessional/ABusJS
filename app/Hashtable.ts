@@ -19,11 +19,12 @@ export default class Hashtable<T> {
         }
     }
 
-    internalHash() {
+    /** @internal */
+    public internalHash() {
         return this._hash;
     }
 
-    add(key: string, value: T): void {
+    public add(key: string, value: T): void {
         if (this.contains(key)) {
             throw new TypeError(`The key ${key} already exists..`);
         }
@@ -33,7 +34,7 @@ export default class Hashtable<T> {
         this._keys.push(key);
     }
 
-    update(key: string, value: T) {
+    public update(key: string, value: T) {
         if (this.contains(key)) {
             this._hash[key] = value;
         } else {
@@ -41,11 +42,11 @@ export default class Hashtable<T> {
         }
     }
 
-    keys(): string[] {
+    public keys(): string[] {
         return this._keys;
     }
 
-    item(key: string): T {
+    public item(key: string): T {
         return this._hash[key];
     }
 
@@ -58,7 +59,7 @@ export default class Hashtable<T> {
             }
         }
     */
-    items() {
+    public items() {
         let items: T[] = [];
         for (var property in this._hash) {
             if (this._hash.hasOwnProperty(property)) {
@@ -68,7 +69,8 @@ export default class Hashtable<T> {
 
         return items;
     }
-    remove(key: string) {
+
+    public remove(key: string) {
         if (this.contains(key)) {
             delete this._hash[key];
             this._count--;
@@ -81,24 +83,23 @@ export default class Hashtable<T> {
         }
     }
 
-    clear(): void {
+    public clear(): void {
         this._hash = {};
         this._count = 0;
         this._keys = [];
     }
 
-    get count(): number {
+    public get count(): number {
         return this._count;
     }
 
-    contains(key: string): boolean {
+    public contains(key: string): boolean {
         return this._hash[key] !== undefined;
     }
 
-    clone(): Hashtable<any> {
+    public clone(): Hashtable<any> {
         let c = { ...this._hash };
         return new Hashtable(c);
     }
-
 }
 

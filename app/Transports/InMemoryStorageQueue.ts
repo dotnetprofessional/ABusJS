@@ -1,6 +1,6 @@
-import TimeSpan from './Timespan'
-import { QueuedMessage } from './QueuedMessage'
-import { IMessageQueue } from './IMessageQueue'
+import TimeSpan from '../Timespan'
+import { QueuedMessage } from '../QueuedMessage'
+import { IMessageQueue } from '../IMessageQueue'
 
 /**
  * An in memory implementation of the StorageQueue interface

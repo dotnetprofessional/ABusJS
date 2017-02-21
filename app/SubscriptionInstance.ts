@@ -1,9 +1,9 @@
-import {IMessageSubscription} from './IMessageSubscription'
-import {MessageHandlerOptions} from './MessageHandlerOptions'
+import { IMessageSubscription } from './IMessageSubscription'
+import { MessageHandlerOptions } from './MessageHandlerOptions'
 
 // Internal interface to track instances of subscriptions
 export class SubscriptionInstance {
-    name: string;
-    messageSubscription: IMessageSubscription<any>;
-    options: MessageHandlerOptions;
+    public name: string;
+    public messageSubscription: IMessageSubscription<any>;
+    public options: MessageHandlerOptions;
 }

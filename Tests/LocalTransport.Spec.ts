@@ -1,4 +1,4 @@
-import { LocalTransport } from '../App/LocalTransport'
+import { LocalTransport } from '../App/Transports/LocalTransport'
 import { IMessage } from '../App/IMessage'
 import * as testData from './ABus.Sample.Messages'
 

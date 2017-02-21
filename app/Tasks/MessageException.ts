@@ -12,7 +12,7 @@ export class MessageException<T> {
     }
 
     // [GM]: See if we can use species to get child class
-    name: string = MessageException.typeName;
+    public name: string = MessageException.typeName;
 
     public static typeName = "Bus.MessageException";
 }

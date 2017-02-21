@@ -4,7 +4,7 @@ import { IMessageTask } from './IMessageTask'
 import { Guid } from '../Guid'
 
 export class AddStandardMetaDataTask implements IMessageTask {
-    async invokeAsync(message: IMessage<any>, context: MessageHandlerContext, next: any) {
+    public async invokeAsync(message: IMessage<any>, context: MessageHandlerContext, next: any) {
         // Add context data to message
         if (!context.metaData.conversationId) {
             message.metaData.conversationId = Guid.newGuid();
