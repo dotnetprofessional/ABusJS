@@ -1,23 +1,22 @@
 module.exports = function (w) {
-
     return {
         files: [
-            'app/**/*.ts'
+            'package.json',
+            'app/**/*.ts',
+            'Tests/**/*.+(ts|json|txt)',
+            '!Tests/**/*.Spec.ts'
         ],
-
         tests: [
-            'Tests/**/*.ts'
+            'Tests/**/*.Spec.ts'
         ],
-
         env: {
             type: 'node',
             runner: 'node'
         },
-
-        // or any other supported testing framework:
-        // https://wallabyjs.com/docs/integration/overview.html#supported-testing-frameworks
         testFramework: 'jest',
-
+        setup: function (wallaby) {
+            wallaby.testFramework.configure(require('./package.json').jest);
+        },
         debug: true
     };
 };
