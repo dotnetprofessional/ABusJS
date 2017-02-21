@@ -1,8 +1,8 @@
 import Hashtable from './Hashtable';
-import { IMessageTask } from './Tasks/IMessageTask'
+import { MessageTasks } from './Tasks/MessageTasks'
 import { MessageExceptionTask } from './Tasks/MessageExceptionTask'
 //import { Saga } from './Saga'
-import { LocalTransport } from './LocalTransport'
+import { LocalTransport } from './Transports/LocalTransport'
 import { SubscriptionInstance } from './SubscriptionInstance'
 import { ReplyHandler } from './ReplyHandler'
 import { IMessageSubscription } from './IMessageSubscription'
@@ -10,49 +10,10 @@ import { MessageHandlerOptions } from './MessageHandlerOptions'
 import { IMessage } from './IMessage'
 import { Guid } from './Guid'
 import { SendOptions } from './SendOptions'
-//import { MessageHandlerContext } from './MessageHandlerContext'
 import { MessageHandlerContext } from './MessageHandlerContext'
 import { MetaData, Intents } from './MetaData'
 import { AddStandardMetaDataTask } from './Tasks/AddStandardMetaDataTask'
-import { IMessageTransport } from './IMessageTransport'
-
-// Class to manage the message task handlers executed for each message
-export class MessageTasks {
-    private _tasks: IMessageTask[];
-    private _iterationCount = 0;
-
-    constructor(tasks: IMessageTask[]) {
-        this._tasks = tasks;
-    }
-
-    // This method is used to get an instance that can be iterated by multiple 'threads'
-    get localInstance(): MessageTasks {
-        return new MessageTasks(this._tasks);
-    }
-    add(task: IMessageTask) {
-        this._tasks.push(task);
-    }
-
-    clear() {
-        this._tasks = [];
-    }
-
-    get first(): IMessageTask {
-        this._iterationCount = 0;
-        return this.next;
-    }
-
-    get next(): IMessageTask {
-        if (this._iterationCount >= this._tasks.length) {
-            return null;
-        }
-        else {
-            let task = this._tasks[this._iterationCount];
-            this._iterationCount++;
-            return task;
-        };
-    }
-}
+import { IMessageTransport } from './Transports/IMessageTransport'
 
 export class Bus {
     private _messageHandlers = new Hashtable<SubscriptionInstance>();
@@ -64,6 +25,14 @@ export class Bus {
 
     public static instance: Bus = new Bus();
 
+    constructor() {
+        this.outBoundMessageTasks.add(new MessageExceptionTask());
+        this.outBoundMessageTasks.add(new AddStandardMetaDataTask());
+        this.inBoundMessageTasks.add(new MessageExceptionTask());
+        this.addSystemSubscriptions();
+        this.registerForTransportEvents();
+    }
+
     /**
      * Makes this Bus instance globally reachable through Bus.instance.
      *
@@ -74,42 +43,15 @@ export class Bus {
         return this;
     }
 
-    private _config = {
-        tracking: false,
-        useConventions: true,
-    };
-
-    constructor() {
-        this.outBoundMessageTasks.add(new MessageExceptionTask());
-        this.outBoundMessageTasks.add(new AddStandardMetaDataTask());
-        this.inBoundMessageTasks.add(new MessageExceptionTask());
-        this.addSystemSubscriptions();
-        this.registerForTransportEvents();
-    }
-
-    private get messageHandlers() {
-        return this._messageHandlers;
-    }
-
-    private getTransport(messageFilter: string) {
-        // Update with logic to pick the correct transport based on message type.
-        messageFilter = ""; // Only to suppress compile errors until this parameter is used.
-        return this._messageTransport;
-    }
-
-    private unregisterAllTransports() {
-        this._messageTransport.unsubscribeAll();
-    }
-
-    get config() {
+    public get config() {
         return this._config;
     }
 
-    get inBoundMessageTasks() {
+    public get inBoundMessageTasks() {
         return this._inBoundMessageTasks;
     }
 
-    get outBoundMessageTasks() {
+    public get outBoundMessageTasks() {
         return this._outBoundMessageTasks;
     }
 
@@ -117,7 +59,7 @@ export class Bus {
     //    return this.messageHandlers.item(messageType);
     //}
 
-    subscribe<T>(subscription: IMessageSubscription<T>, options: MessageHandlerOptions = new MessageHandlerOptions()): string {
+    public subscribe<T>(subscription: IMessageSubscription<T>, options: MessageHandlerOptions = new MessageHandlerOptions()): string {
         if (!subscription) {
             throw new TypeError("Invalid subscription.");
         }
@@ -153,7 +95,7 @@ export class Bus {
         return subscriptionInstance.name;
     }
 
-    unsubscribe(subscriptionName: string) {
+    public unsubscribe(subscriptionName: string) {
         // Locate all subscriptions for this message type
         var subscription = this.messageHandlers.item(subscriptionName);
         if (subscription) {
@@ -166,7 +108,7 @@ export class Bus {
         }
     }
 
-    subscriberCount<T>(messageFilter: string | T): number {
+    public subscriberCount<T>(messageFilter: string | T): number {
         let filter = "";
         if (typeof (messageFilter) === "string") {
             filter = messageFilter;
@@ -178,9 +120,133 @@ export class Bus {
         return transport.subscriberCount(filter);
     }
 
-    sendAsync<T, R>(message: IMessage<T> | T, options?: SendOptions): Promise<R> {
+    /**
+     * Sends a message using the current messages context. This makes the sent
+     * message a child of the current message. This method also support the
+     * reply of a message from the target of the message.
+     *
+     * @template T, R
+     * @param {(T | IMessage<T>)} message
+     * @param {R} return message
+     * @param {SendOptions} [options]
+     * @returns {Promise<any>}
+     *
+     * @memberOf MessageHandlerContext
+     */
+    public sendAsync<T, R>(message: IMessage<T> | T, options?: SendOptions): Promise<R> {
         let context = new MessageHandlerContext(this);
-        return this.sendInternalAsync(message as IMessage<T>, options, context);
+        return this.sendInternalAsync(message as IMessage<T>, options, context, true);
+    }
+
+    /**
+     * Sends a message using the current messages context. This makes the sent
+     * message a child of the current message. This method does not support the
+     * target of a message sending a reply.
+     *
+     * @template T
+     * @param {(T | IMessage<T>)} message
+     * @param {SendOptions} [options]
+     * @returns {Promise<any>}
+     *
+     * @memberOf MessageHandlerContext
+     */
+    public send<T>(message: IMessage<T> | T, options?: SendOptions): void {
+        let context = new MessageHandlerContext(this);
+        this.sendInternalAsync(message as IMessage<T>, options, context, false);
+    }
+
+    /**
+     * Publishes a message using the current messages context. This makes the published
+     * message a child of the current message.
+     *
+     * @template T
+     * @param {(IMessage<T> | T)} message
+     *
+     * @memberOf MessageHandlerContext
+     */
+    public publish<T>(message: IMessage<T> | T): void {
+        let context = new MessageHandlerContext(this);
+        this.publishInternal(message, new SendOptions(), context);
+    }
+
+    public unregisterAll(): void {
+        this.messageHandlers.clear();
+        this.unregisterAllTransports();
+        this.addSystemSubscriptions();
+    }
+
+    /** @internal */
+    public sendInternalAsync<T>(message: IMessage<T> | T, options: SendOptions, context: MessageHandlerContext, withReply: boolean): Promise<any> {
+        // Ensure we have an IMessage<T>
+        let messageToSend = this.getIMessage(message)
+
+        // Get the transport for this message type
+        var transport = this.getTransport(messageToSend.type);
+
+        // Initialize the metaData for the message
+        messageToSend.metaData = new MetaData();
+        messageToSend.metaData.messageId = Guid.newGuid();
+        messageToSend.metaData.intent = Intents.send;
+
+        options = { ...this._baseOptions, ...options };
+
+        var subscribers = transport.subscriberCount(messageToSend.type);
+        if (subscribers > 1) {
+            throw new TypeError(`The command ${messageToSend.type} must have only one subscriber.`);
+        } else if (subscribers === 0) {
+            throw new TypeError(`No subscriber defined for the command ${messageToSend.type}`);
+        }
+
+        let replyHandlerPromise: Promise<any>;
+
+        if (withReply) {
+            let replyHandler = new ReplyHandler();
+            replyHandlerPromise = new Promise((resolve, reject) => {
+                replyHandler.resolve = resolve;
+                replyHandler.reject = reject;
+                replyHandler.replyTo = messageToSend.metaData.messageId;
+                this._replyToMessages.add(replyHandler.replyTo, replyHandler);
+                // Add a timeout here too. This can be a default but also supplied as part of the sendOptions
+            });
+        }
+
+        // Delivery the message to be sent to the transport
+        this.dispatchOutboundMessageAsync(messageToSend, options, context, this.outBoundMessageTasks.localInstance);
+        return replyHandlerPromise;
+    }
+
+    // Typescript doesn't support internal methods yet
+    /** @internal */
+    public publishInternal<T>(message: IMessage<T> | T, options: SendOptions, context: MessageHandlerContext) {
+        // Ensure we have an IMessage<T>
+        message = this.getIMessage(message);
+
+        // Initialize the metaData for the message
+        if (!message.metaData) {
+            message.metaData = new MetaData();
+        }
+        message.metaData.messageId = Guid.newGuid();
+        message.metaData.intent = Intents.publish;
+
+        this.dispatchOutboundMessageAsync(message, options, context, this.outBoundMessageTasks.localInstance);
+    }
+
+    /** @internal */
+    public getTypeNamespace(typeOrInstance: any) {
+        var proto = typeOrInstance.prototype || Object.getPrototypeOf(typeOrInstance);
+
+        if (proto.__namespace !== undefined && proto.hasOwnProperty("__namespace")) {
+            return proto.__namespace;
+        }
+
+        var superNamespace = Object.getPrototypeOf(proto).__namespace;
+        if (superNamespace !== undefined) {
+            return proto.__namespace = superNamespace + "." + proto.constructor.name;
+        }
+
+        var nameChain = this.getTypeNamespaceChain(proto, null);
+        nameChain.shift();
+        return proto.__namespace = nameChain.join(".");
     }
 
     /**
@@ -211,93 +277,11 @@ export class Bus {
         return message as IMessage<T>;
     }
 
-    /** @internal */
-    public getTypeNamespace(typeOrInstance: any) {
-        var proto = typeOrInstance.prototype || Object.getPrototypeOf(typeOrInstance);
-
-        if (proto.__namespace !== undefined && proto.hasOwnProperty("__namespace")) {
-            return proto.__namespace;
-        }
-
-        var superNamespace = Object.getPrototypeOf(proto).__namespace;
-        if (superNamespace !== undefined) {
-            return proto.__namespace = superNamespace + "." + proto.constructor.name;
-        }
-
-        var nameChain = this.getTypeNamespaceChain(proto, null);
-        nameChain.shift();
-        return proto.__namespace = nameChain.join(".");
-    }
-
-    getTypeNamespaceChain(proto: any, stack: any) {
+    private getTypeNamespaceChain(proto: any, stack: any) {
         stack = stack || [];
         stack.unshift(proto.constructor.name);
         var next = Object.getPrototypeOf(proto);
         return next && this.getTypeNamespaceChain(next, stack) || stack;
-    }
-
-    /** @internal */
-    sendInternalAsync<T>(message: IMessage<T> | T, options: SendOptions, context: MessageHandlerContext): Promise<any> {
-        // Ensure we have an IMessage<T>
-        let messageToSend = this.getIMessage(message)
-
-        // Get the transport for this message type
-        var transport = this.getTransport(messageToSend.type);
-
-        // Initialize the metaData for the message
-        messageToSend.metaData = new MetaData();
-        messageToSend.metaData.messageId = Guid.newGuid();
-        messageToSend.metaData.intent = Intents.send;
-
-        options = { ...this._baseOptions, ...options };
-
-        var subscribers = transport.subscriberCount(messageToSend.type);
-        if (subscribers > 1) {
-            throw new TypeError(`The command ${messageToSend.type} must have only one subscriber.`);
-        } else if (subscribers === 0) {
-            throw new TypeError(`No subscriber defined for the command ${messageToSend.type}`);
-        }
-
-        let replyHandler = new ReplyHandler();
-        let replyHandlerPromise = new Promise((resolve, reject) => {
-            replyHandler.resolve = resolve;
-            replyHandler.reject = reject;
-            replyHandler.replyTo = messageToSend.metaData.messageId;
-            this._replyToMessages.add(replyHandler.replyTo, replyHandler);
-            // Add a timeout here too. This can be a default but also supplied as part of the sendOptions
-        });
-
-        // Delivery the message to be sent to the transport
-        this.dispatchOutboundMessageAsync(messageToSend, options, context, this.outBoundMessageTasks.localInstance);
-        return replyHandlerPromise;
-    }
-
-    publish<T>(message: IMessage<T> | T): void {
-        let context = new MessageHandlerContext(this);
-        this.publishInternal(message, new SendOptions(), context);
-    }
-
-    // Typescript doesn't support internal methods yet
-    /** @internal */
-    publishInternal<T>(message: IMessage<T> | T, options: SendOptions, context: MessageHandlerContext) {
-        // Ensure we have an IMessage<T>
-        message = this.getIMessage(message);
-
-        // Initialize the metaData for the message
-        if (!message.metaData) {
-            message.metaData = new MetaData();
-        }
-        message.metaData.messageId = Guid.newGuid();
-        message.metaData.intent = Intents.publish;
-
-        this.dispatchOutboundMessageAsync(message, options, context, this.outBoundMessageTasks.localInstance);
-    }
-
-
-    unregisterAll(): void {
-        this.messageHandlers.clear();
-        this.unregisterAllTransports();
-        this.addSystemSubscriptions();
     }
 
     private addSystemSubscriptions() {
@@ -312,6 +296,25 @@ export class Bus {
             saga.bus = this;
         }
     */
+
+    private _config = {
+        tracking: false,
+        useConventions: true,
+    };
+
+    private get messageHandlers() {
+        return this._messageHandlers;
+    }
+
+    private getTransport(messageFilter: string) {
+        // Update with logic to pick the correct transport based on message type.
+        messageFilter = ""; // Only to suppress compile errors until this parameter is used.
+        return this._messageTransport;
+    }
+
+    private unregisterAllTransports() {
+        this._messageTransport.unsubscribeAll();
+    }
 
     private registerForTransportEvents(): void {
         let transport = this.getTransport("*");
@@ -339,7 +342,7 @@ export class Bus {
 
     }
 
-    async dispatchOutboundMessageAsync(message: IMessage<any>, options: SendOptions, context: MessageHandlerContext, tasks: MessageTasks) {
+    private async dispatchOutboundMessageAsync(message: IMessage<any>, options: SendOptions, context: MessageHandlerContext, tasks: MessageTasks) {
         let task = tasks.next;
 
         if (task != null) {
@@ -364,7 +367,7 @@ export class Bus {
         }
     }
 
-    async dispatchInboundMessageAsync(message: IMessage<any>, context: MessageHandlerContext, tasks: MessageTasks, subscription: SubscriptionInstance, transport: IMessageTransport) {
+    private async dispatchInboundMessageAsync(message: IMessage<any>, context: MessageHandlerContext, tasks: MessageTasks, subscription: SubscriptionInstance, transport: IMessageTransport) {
         let task = tasks.next;
 
         // determine if the task is using a promise and if so wait for it to complete

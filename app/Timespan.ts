@@ -27,7 +27,7 @@ export default class TimeSpan {
         } else if (c != undefined) { // hours, minutes, seconds
             hours = a;
             minutes = b;
-            seconds = c;            
+            seconds = c;
         } else {
             milliseconds = a;
         }
@@ -41,63 +41,62 @@ export default class TimeSpan {
         this._timespan = ms;
     }
 
-    get days():number {
+    public get days(): number {
         return Math.floor(this._timespan / this.daysInMilliseconds);
     }
 
-    get totalHours():number {
+    public get totalHours(): number {
         return Math.floor(this._timespan / this.hoursInMilliseconds);
     }
 
-    get totalMinutes():number {
+    public get totalMinutes(): number {
         return Math.floor(this._timespan / this.minutesInMilliseconds);
     }
 
-    get totalSeconds():number {
+    public get totalSeconds(): number {
         return Math.floor(this._timespan / this.secondsInMilliseconds);
     }
 
-    get totalMilliseconds():number {
+    public get totalMilliseconds(): number {
         return Math.floor(this._timespan);
     }
-    
-    static FromHours(hours: number): TimeSpan {
-        return new TimeSpan(hours,0,0);
+
+    public static FromHours(hours: number): TimeSpan {
+        return new TimeSpan(hours, 0, 0);
     }
-    static FromMinutes(minutes: number): TimeSpan {
-        return new TimeSpan(0,minutes,0);
+    public static FromMinutes(minutes: number): TimeSpan {
+        return new TimeSpan(0, minutes, 0);
     }
-    static FromSeconds(seconds: number): TimeSpan {
-        return new TimeSpan(0,0,seconds);
+    public static FromSeconds(seconds: number): TimeSpan {
+        return new TimeSpan(0, 0, seconds);
     }
 
-    static FromMilliseconds(milliseconds: number): TimeSpan {
+    public static FromMilliseconds(milliseconds: number): TimeSpan {
         return new TimeSpan(milliseconds);
     }
 
     /**
-     * 
+     *
      * Converts the TimeSpan to a point in time based on the current
-     * date and time. The returned value is a time value that is the 
+     * date and time. The returned value is a time value that is the
      * number of milliseconds since 1 January, 1970 UTC.
      * @returns {number}
-     * 
+     *
      * @memberOf TimeSpan
      */
-    getDateTime(): number {
+    public getDateTime(): number {
         return Date.now() + this._timespan;
     }
 
     /**
      * Used to convert the passed in date to a TimeSpan based on the current
      * date and time.
-     * 
+     *
      * @param {number} date
-     * 
+     *
      * @memberOf TimeSpan
      */
-    static getTimeSpan(date: number): TimeSpan {
-        return new TimeSpan(date - Date.now()); 
+    public static getTimeSpan(date: number): TimeSpan {
+        return new TimeSpan(date - Date.now());
     }
-    
 }

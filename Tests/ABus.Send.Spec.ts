@@ -119,6 +119,100 @@ describe("Send method", () => {
         });
     });
 
+    describe("sending a message outside of a handler without a reply", () => {
+        var bus = new Bus();
+        var currentHandlerContext: MessageHandlerContext;
+
+        bus.config.useConventions = false;
+        bus.subscribe({
+            messageFilter: testData.TestMessage.TYPE,
+            handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
+                currentHandlerContext = context;
+            }
+        });
+
+        it("should add a messageHandlerContext to the handler receiving message being sent", () => {
+            bus.send(new testData.TestMessage("Johhny Smith"));
+            return Utils.sleep(10)
+                .then(() => {
+                    expect(currentHandlerContext).toBeDefined();
+                });
+        });
+
+        it("should add messageType to messageHandlerContext", () => {
+            expect(currentHandlerContext.messageType).toBe(testData.TestMessage.TYPE);
+        });
+
+        it("should add messageId to messageHandlerContext", () => {
+            expect(currentHandlerContext.messageId).toBeDefined();
+        });
+
+        it("should set the conversationId on messageHandlerContext", () => {
+            expect(currentHandlerContext.metaData.conversationId).toBeDefined();
+        });
+
+        it("should set the correlationId on messageHandlerContext to undefined", () => {
+            // Messages outside of a handler are not part of an existing conversation
+            expect(currentHandlerContext.metaData.correlationId).toBeUndefined();
+        });
+
+        // The replyTo is added once a reply has been sent and will have the id of the originating message
+        it("should not add replyTo to messageHandlerContext", () => {
+            expect(currentHandlerContext.getMetaDataValue("replyTo")).toBeUndefined();
+        });
+
+        it("should verify there is only one subscriber for message type", () => {
+            // Subscribe twice for the same message. When attempting to use Send this should fail
+            bus.subscribe({
+                messageFilter: testData.TestMessage.TYPE,
+                handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
+                }
+            });
+
+            bus.subscribe({
+                messageFilter: testData.TestMessage.TYPE,
+                handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
+                }
+            });
+
+            // need to wrap errors in its own function
+            var badMessageHandler = () => {
+                bus.send({ type: testData.TestMessage.TYPE, message: new testData.TestMessage("") });
+            }
+
+            expect(badMessageHandler).toThrowError('The command test.message must have only one subscriber.');
+        });
+
+        it("should throw SubscriberNotFound exception if no subscriber has registered for message type", () => {
+            // need to wrap errors in its own function
+            var badMessageHandler = () => {
+                bus.send({ type: testData.TestMessage2.TYPE, message: new testData.TestMessage("") });
+            }
+
+            expect(badMessageHandler).toThrowError('No subscriber defined for the command test.message2');
+        });
+
+        it("should send to registered subscriber", () => {
+            let receivedEvent = false;
+            bus.unregisterAll();
+            bus.subscribe({
+                messageFilter: testData.TestMessage.TYPE,
+                handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
+                    receivedEvent = true;
+                }
+            });
+
+            bus.send({ type: testData.TestMessage.TYPE, message: new testData.TestMessage("hhh") });
+            return Utils.sleep(50)
+                .then(() => {
+                    expect(receivedEvent).toBe(true);
+                })
+                .catch(() => {
+                    throw new TypeError("no error should have been caught");
+                });
+        });
+    });
+
     describe("sending a message outside of a handler using derived message", () => {
         var bus = new Bus();
         var currentHandlerContext: MessageHandlerContext;
@@ -181,7 +275,6 @@ describe("Send method", () => {
         });
     });
 
-
     describe("sending a message inside of a handler", () => {
         var bus = new Bus();
         var firstMessage: testData.CustomerData;
@@ -241,6 +334,67 @@ describe("Send method", () => {
             expect(secondHandlerContext.metaData.correlationId).toBe(firstHandlerContext.messageId);
         });
     });
+
+    describe("sending a message inside of a handler without a reply", () => {
+        var bus = new Bus();
+        var firstMessage: testData.CustomerData;
+        var firstHandlerContext: MessageHandlerContext;
+
+        var secondMessage: testData.CustomerData;
+        var secondHandlerContext: MessageHandlerContext;
+
+        bus.subscribe({
+            messageFilter: testData.TestMessage.TYPE,
+            handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
+                firstMessage = message;
+                firstHandlerContext = context;
+                context.send(new testData.TestMessage2("second message"));
+            }
+        });
+
+        bus.subscribe({
+            messageFilter: testData.TestMessage2.TYPE,
+            handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
+                secondMessage = message;
+                secondHandlerContext = context;
+            }
+        });
+
+        bus.send(new testData.TestMessage("Johhny Smith"));
+
+        it("should send message to all registered subscribers", () => {
+            // Sleep for 10ms to give the code time to execute handlers
+            return Utils.sleep(10)
+                .then(() => {
+                    expect(secondHandlerContext.messageType).toBe("test.message2");
+                    expect(secondMessage.name).toBe("second message");
+                });
+        });
+
+        it("should add a messageHandlerContext to the handler receiving message being sent", () => {
+            expect(secondHandlerContext.messageType).toBe("test.message2");
+            expect(secondHandlerContext).toBeDefined();
+        });
+
+        it("should add messageId to messageHandlerContext which differs from original message", () => {
+            expect(secondHandlerContext.messageType).toBe("test.message2");
+            expect(secondHandlerContext.messageId).toBeDefined();
+            expect(secondHandlerContext.messageId).not.toBe(firstHandlerContext.messageId);
+        });
+
+        it("should set the conversationId on messageHandlerContext to the same as the original message", () => {
+            expect(secondHandlerContext.messageType).toBe("test.message2");
+            expect(secondHandlerContext.metaData.conversationId).toBeDefined();
+            expect(secondHandlerContext.metaData.conversationId).toBe(firstHandlerContext.metaData.conversationId);
+        });
+
+        it("should set the correlationId on messageHandlerContext to the messageId of the original message", () => {
+            expect(secondHandlerContext.messageType).toBe("test.message2");
+            expect(secondHandlerContext.metaData.correlationId).toBeDefined();
+            expect(secondHandlerContext.metaData.correlationId).toBe(firstHandlerContext.messageId);
+        });
+    });
+
 
     describe("sending a message inside of a handler using derived message", () => {
         var bus = new Bus();

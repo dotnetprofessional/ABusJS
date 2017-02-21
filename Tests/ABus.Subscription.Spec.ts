@@ -1,6 +1,7 @@
 import { Bus } from '../App/Bus'
 import { MessageHandlerContext } from '../App/MessageHandlerContext'
-import { handler, iHandleMessages } from '../App/Decorators'
+import { handler } from '../App/Decorators/handler'
+import { iHandleMessages } from '../App/Decorators/iHandleMessages'
 
 import * as testData from './ABus.Sample.Messages'
 

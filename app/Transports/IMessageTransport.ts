@@ -1,15 +1,5 @@
-import TimeSpan from './Timespan'
-import { IMessage } from './IMessage'
-
-
-export class QueueEndpoint {
-    host: string;
-    name: string;
-
-    fullname(): string {
-        return `${this.host}.${this.name}`;
-    }
-}
+import TimeSpan from '../Timespan'
+import { IMessage } from '../IMessage'
 
 /**
  *

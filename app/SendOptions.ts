@@ -1,6 +1,6 @@
 import TimeSpan from './Timespan'
 
 export class SendOptions {
-    deliverIn?: TimeSpan;
+    public deliverIn?: TimeSpan;
     // deliverAt?: Date; // Enable when able to persist messages
 }

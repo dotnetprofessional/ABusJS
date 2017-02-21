@@ -9,9 +9,9 @@ export class QueuedMessage {
         }
 
         // Some meta data is specific to a QueuedMessage
-        // validate that a specific property is set to determine 
+        // validate that a specific property is set to determine
         // if its been correctly initialized
-        if(!this.id) {
+        if (!this.id) {
             this.id = Guid.newGuid();
             this.dequeueCount = 0;
             this.timestamp = Date.now();
@@ -46,7 +46,7 @@ export class QueuedMessage {
         this.metaData.update('deliverAt', value);
     };
 
-    clone(): QueuedMessage {
+    public clone(): QueuedMessage {
         var msg = new QueuedMessage(this.type, this.body);
         msg.metaData = this.metaData.clone();
         return msg;

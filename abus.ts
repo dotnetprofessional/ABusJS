@@ -1,5 +1,6 @@
 export { Bus } from './app/Bus';
-export { handler } from './app/Decorators';
+export { handler } from './app/Decorators/handler';
+export { iHandleMessages } from './app/Decorators/iHandleMessages';
 export { MessageHandlerContext } from './app/MessageHandlerContext';
 export { IMessage } from './app/IMessage'
 export { IMessageTask } from './app/Tasks/IMessageTask'

@@ -66,7 +66,25 @@ export class MessageHandlerContext {
 
     /**
      * Sends a message using the current messages context. This makes the sent
-     * message a child of the current message.
+     * message a child of the current message. This method also support the
+     * reply of a message from the target of the message.
+     *
+     * @template T, R
+     * @param {(T | IMessage<T>)} message
+     * @param {R} return message
+     * @param {SendOptions} [options]
+     * @returns {Promise<any>}
+     *
+     * @memberOf MessageHandlerContext
+     */
+    public sendAsync<T, R>(message: T | IMessage<T>, options?: SendOptions): Promise<R> {
+        return this.bus.sendInternalAsync(message, options, this, true);
+    }
+
+    /**
+     * Sends a message using the current messages context. This makes the sent
+     * message a child of the current message. This method does not support the
+     * target of a message sending a reply.
      *
      * @template T
      * @param {(T | IMessage<T>)} message
@@ -75,8 +93,8 @@ export class MessageHandlerContext {
      *
      * @memberOf MessageHandlerContext
      */
-    public sendAsync<T>(message: T | IMessage<T>, options?: SendOptions): Promise<any> {
-        return this.bus.sendInternalAsync(message, options, this);
+    public send<T>(message: T | IMessage<T>, options?: SendOptions): Promise<any> {
+        return this.bus.sendInternalAsync(message, options, this, false);
     }
 
     /**
