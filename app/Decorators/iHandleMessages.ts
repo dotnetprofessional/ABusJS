@@ -15,6 +15,7 @@ export function iHandleMessages(target: any) {
     // a utility function to generate instances of a class
     function construct(constructor, args) {
         var c: any = function () {
+            let newClass = new target(...args);
             // Locate any handlers that were defined using @handler
             // then subscribe to the bus with the binding the current class instance
             var handlers = target.prototype["__messageHandlers"] as Array<any>;
@@ -25,13 +26,14 @@ export function iHandleMessages(target: any) {
 
             handlers.map(handler => {
                 // Register a handler and record the subscription key for later removal
-                handlerSubscriptionKeys.push(Bus.instance.subscribe({ messageFilter: handler.type, handler: this[handler.handler].bind(this) }));
+                handlerSubscriptionKeys.push(Bus.instance.subscribe({ messageFilter: handler.type, handler: newClass[handler.handler].bind(newClass) }));
             });
 
             //NB: These __messageHandlers can't be removed once used as they are on the prototype and
             //    are required for every class instance that is created.
 
-            return constructor.apply(this, args);
+            //return constructor.apply(this, args);
+            return newClass;
         }
         c.prototype = constructor.prototype;
         return new c();
@@ -46,4 +48,32 @@ export function iHandleMessages(target: any) {
 
     // return new constructor (will override original)
     return f;
+}
+
+
+export function wrap(wrapperMethod) {
+    return (target, key, descriptor) => {
+
+        debugger;
+        if (typeof (target) === 'function') {
+            let newTarget = function (...arg) {
+                var self = this;
+                return function () {
+                    var methodCallback = function () { return new target(arg) };
+                    return wrapperMethod.call(self, methodCallback, arg, target.name, 'class')
+                }()
+            };
+            return newTarget;
+        } else {
+            let orgMethod = descriptor.value;
+            descriptor.value = function (...arg) {
+                var self = this;
+                return function () {
+                    var methodCallback = function () { return orgMethod.apply(self, arg) };
+                    return wrapperMethod.call(self, methodCallback, arg, key, 'function')
+                }()
+            };
+            return descriptor;
+        }
+    }
 }
