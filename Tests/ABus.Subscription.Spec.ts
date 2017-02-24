@@ -208,6 +208,10 @@ describe("subscribing to a message type using decorators", () => {
             bus.sendAsync(new testData.TestMessage(""));
             expect(handlerClass.value).toBe(110);
         });
+
+        it("should still have a valid instance of for the class", () => {
+            expect(handlerClass instanceof TestMessageHandler).toBeTruthy;
+        })
     });
 
     describe("using the message type to define the messageFilter", () => {
