@@ -20,8 +20,8 @@
         "emitDecoratorMetadata": false,
         "stripInternal": true,
         "removeComments": false,
-        "declaration": false,
-        "importHelpers": false
+        "declaration": true,
+        "importHelpers": true
     },
     "exclude": [
         "node_modules"

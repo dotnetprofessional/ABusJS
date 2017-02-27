@@ -17,6 +17,6 @@ module.exports = function (w) {
         setup: function (wallaby) {
             wallaby.testFramework.configure(require('./package.json').jest);
         },
-        debug: true
+        debug: false
     };
 };
