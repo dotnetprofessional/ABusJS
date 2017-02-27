@@ -31,7 +31,6 @@ export class InMemoryStorageQueue implements IMessageQueue {
         if (deliverIn) {
             message.deliverAt = deliverIn.getDateTime();
         }
-
         this.internalQueue.push(message);
 
         // deliver message if handlers defined.

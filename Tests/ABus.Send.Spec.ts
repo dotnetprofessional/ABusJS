@@ -11,6 +11,10 @@ describe("Send method", () => {
         var bus = new Bus();
         var currentHandlerContext: MessageHandlerContext;
 
+        beforeAll(() => {
+            bus.sendAsync(new testData.TestMessage("Johhny Smith"));
+        })
+
         bus.config.useConventions = false;
         bus.subscribe({
             messageFilter: testData.TestMessage.TYPE,
@@ -20,7 +24,6 @@ describe("Send method", () => {
         });
 
         it("should add a messageHandlerContext to the handler receiving message being sent", () => {
-            bus.sendAsync(new testData.TestMessage("Johhny Smith"));
             return Utils.sleep(10)
                 .then(() => {
                     expect(currentHandlerContext).toBeDefined();
@@ -42,6 +45,16 @@ describe("Send method", () => {
         it("should set the correlationId on messageHandlerContext to undefined", () => {
             // Messages outside of a handler are not part of an existing conversation
             expect(currentHandlerContext.metaData.correlationId).toBeUndefined();
+        });
+
+        it("should set the timestamp on messageHandlerContext to defined", () => {
+            // Messages outside of a handler are not part of an existing conversation
+            expect(currentHandlerContext.metaData.timestamp).toBeTruthy();
+        });
+
+        it("should set the deliverAt on messageHandlerContext to undefined", () => {
+            // Messages outside of a handler are not part of an existing conversation
+            expect(currentHandlerContext.metaData.deliverAt).toBeGreaterThan(Date.now());
         });
 
         // The replyTo is added once a reply has been sent and will have the id of the originating message
@@ -478,6 +491,7 @@ describe("Send method", () => {
 
         var secondMessage: testData.CustomerData;
         var secondHandlerContext: MessageHandlerContext;
+        var deliverIn: TimeSpan;
 
         bus.subscribe({
             messageFilter: testData.TestMessage.TYPE,
@@ -485,7 +499,8 @@ describe("Send method", () => {
                 firstMessage = message;
                 firstHandlerContext = context;
                 // defer the sending of the message by 100ms
-                context.sendAsync(new testData.TestMessage2("second message"), { deliverIn: new TimeSpan(100) });
+                deliverIn = new TimeSpan(100);
+                context.sendAsync(new testData.TestMessage2("second message"), { deliverIn: deliverIn });
             }
         });
 
@@ -514,5 +529,13 @@ describe("Send method", () => {
             expect(secondHandlerContext.messageType).toBe(testData.TestMessage2.TYPE);
             expect(secondMessage.name).toBe("second message");
         });
+
+
+        it("should set the deliverAt on messageHandlerContext to the deferred time", () => {
+            // Messages outside of a handler are not part of an existing conversation
+            console.log(secondHandlerContext)
+            expect(secondHandlerContext.metaData.deliverAt).toBeTruthy;
+        });
+
     });
 });
