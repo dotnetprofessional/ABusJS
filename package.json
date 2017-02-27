@@ -42,7 +42,6 @@
     "coverageDirectory": "<rootDir>/coverage"
   },
   "devDependencies": {
-    "electron": "^1.4.15",
     "jest": "^18.0.1",
     "jest-cli": "^18.1.0",
     "ts-jest": "^18.0.3",
