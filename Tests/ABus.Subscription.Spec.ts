@@ -261,11 +261,10 @@ describe("subscribing to a message type using decorators", () => {
         });
 
         it("should remove handlers when calling dynamically defined unsubscribeHandlers", async () => {
-            // This method is added dynamically so typescript is not aware of it, so need to cast to any
-            debugger;
             // Verify the subscriptions exist first
             expect(bus.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
             expect(bus.subscriberCount(testData.CustomerData2)).toBe(1);
+            // This method is added dynamically so typescript is not aware of it, so need to cast to any
             (handlerClass as any).unsubscribeHandlers();
             expect(bus.subscriberCount(testData.TestMessage.TYPE)).toBe(0);
             expect(bus.subscriberCount(testData.CustomerData2)).toBe(0);

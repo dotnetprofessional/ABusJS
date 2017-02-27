@@ -54,7 +54,6 @@ export function iHandleMessages(target: any) {
 export function wrap(wrapperMethod) {
     return (target, key, descriptor) => {
 
-        debugger;
         if (typeof (target) === 'function') {
             let newTarget = function (...arg) {
                 var self = this;

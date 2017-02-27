@@ -187,9 +187,7 @@ export class Bus {
         messageToSend.metaData = new MetaData();
         messageToSend.metaData.messageId = Guid.newGuid();
         messageToSend.metaData.intent = Intents.send;
-
         options = { ...this._baseOptions, ...options };
-
         var subscribers = transport.subscriberCount(messageToSend.type);
         if (subscribers > 1) {
             throw new TypeError(`The command ${messageToSend.type} must have only one subscriber.`);
@@ -198,7 +196,6 @@ export class Bus {
         }
 
         let replyHandlerPromise: Promise<any>;
-
         if (withReply) {
             let replyHandler = new ReplyHandler();
             replyHandlerPromise = new Promise((resolve, reject) => {
