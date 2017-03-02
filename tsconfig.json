@@ -20,7 +20,7 @@
         "emitDecoratorMetadata": false,
         "stripInternal": true,
         "removeComments": false,
-        "declaration": true,
+        "declaration": false,
         "importHelpers": true
     },
     "exclude": [

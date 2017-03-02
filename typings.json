@@ -1,6 +1,0 @@
-{
-  "globalDependencies": {
-    "jest": "registry:dt/jest#16.0.0+20161025131017",
-    "node": "registry:env/node#6.0.0+20161105011511"
-  }
-}
