@@ -42,6 +42,8 @@
     "coverageDirectory": "<rootDir>/coverage"
   },
   "devDependencies": {
+    "@types/jest": "^18.1.1",
+    "@types/node": "^7.0.5",
     "jest": "^18.0.1",
     "jest-cli": "^18.1.0",
     "ts-jest": "^18.0.3",

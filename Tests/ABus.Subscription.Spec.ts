@@ -53,6 +53,16 @@ describe("Subscriptions", () => {
         });
     });
 
+    describe("subscribing to a message type by class type", () => {
+        var pipeline = new Bus();
+
+        it("should register subscriber for the message type", () => {
+            pipeline.unregisterAll();
+            pipeline.subscribe({ messageFilter: testData.TestMessage, handler: (message: any, context: MessageHandlerContext) => { } });
+            expect(pipeline.subscriberCount(testData.TestMessage)).toBe(1);
+        });
+    });
+
     describe("unsubscribing to a message type", () => {
         var pipeline = new Bus();
 

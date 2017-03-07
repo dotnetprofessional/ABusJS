@@ -2,28 +2,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node2",
-            "request": "launch",
-            // Automatically stop program after launch.
-            "stopOnEntry": false,
-            "name": "Mocha Tests",
-            "cwd": "${workspaceRoot}",
-            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/mocha",
-            "windows": {
-                "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/mocha.cmd"
-            },
-            "sourceMaps": true,
-            "outFiles": [
-                "${workspaceRoot}/build"
-            ],
-            "internalConsoleOptions": "openOnSessionStart",
-            // Prevents debugger from stepping into this code :)
-            "skipFiles": [
-                "node_modules/**/*.js",
-                "<node_internals>/**/*.js"
-            ]
-        },
-        {
             "name": "Jest Tests",
             "type": "node",
             "request": "launch",

@@ -67,6 +67,12 @@ export class Bus {
         if (!subscription.messageFilter) {
             throw new TypeError("Invalid messageType " + subscription.messageFilter);
         }
+
+        // Check if the filter is not a string and attempt to get the namespace
+        if (typeof subscription.messageFilter !== "string") {
+            subscription.messageFilter = this.getTypeNamespace(subscription.messageFilter);
+        }
+
         if (typeof subscription.handler !== 'function') {
             throw new TypeError('messageHandler must be a function');
         }
@@ -229,7 +235,7 @@ export class Bus {
     }
 
     /** @internal */
-    public getTypeNamespace(typeOrInstance: any) {
+    public getTypeNamespace(typeOrInstance: any): string {
         var proto = typeOrInstance.prototype || Object.getPrototypeOf(typeOrInstance);
 
         if (proto.__namespace !== undefined && proto.hasOwnProperty("__namespace")) {
