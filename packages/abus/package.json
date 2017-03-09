@@ -6,8 +6,8 @@
   "repository": {
     "url": ""
   },
-  "main": "dist/app/index.js",
-  "typings": "dist/app/index.d.ts",
+  "main": "build/index.js",
+  "typings": "build/index.d.ts",
   "keywords": [
     "abus",
     "service bus",
@@ -18,9 +18,10 @@
   },
   "scripts": {
     "test": "jest",
-    "compile-web": "rimraf out && tsc app/index.ts -d --importHelpers false  --removeComments true -t ES5 -m system --outFile out\\abus.js",
-    "web-minify": "uglifyjs out/abus.js --output out/abus.min.js --compress",
-    "compile": "rimraf dist && tsc -d -t ES5 -p .",
+    "release-web": "npm run compile-web && npm run compile-web-minify",
+    "compile-web": "rimraf out && tsc -p tsconfig.web.json",
+    "compile-web-minify": "uglifyjs out/abus.js --output out/abus.min.js --compress dead_code,drop_debugger,conditionals,booleans,loops,properties,drop_console --mangle --wrap abus",
+    "compile": "rimraf dist && tsc -d -t ES5 -p tsconfig.npm.json",
     "prepublish": "npm run compile"
   },
   "jest": {
