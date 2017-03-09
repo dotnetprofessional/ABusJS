@@ -1,7 +1,0 @@
-/node_modules
-/dist/app
-/typings
-/coverage
-/.vs
-*.user
-npm-debug.log

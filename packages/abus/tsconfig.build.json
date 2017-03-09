@@ -9,20 +9,23 @@
             "es2015.collection",
             "dom"
         ],
+        "outDir": "build",
         "module": "commonjs",
         "experimentalDecorators": true,
         "noImplicitAny": false,
         "sourceMap": true,
-        "outDir": "dist/app",
         "noUnusedParameters": false,
         "noUnusedLocals": true,
         "skipLibCheck": true,
         "emitDecoratorMetadata": false,
         "stripInternal": true,
         "removeComments": false,
-        "declaration": false,
-        "importHelpers": true
+        "declaration": true,
+        "importHelpers": false
     },
+    "include": [
+        "app/**/*.ts"
+    ],
     "exclude": [
         "node_modules"
     ]
