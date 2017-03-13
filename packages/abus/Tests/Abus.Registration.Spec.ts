@@ -1,0 +1,82 @@
+import { Bus } from "../app/Bus";
+import { MessageHandlerContext } from "../app/MessageHandlerContext";
+import { iHandleMessages } from "../app/Decorators/iHandleMessages";
+import { handler } from "../app/Decorators/handler";
+
+class SampleRequest {
+
+}
+
+let instanceCreated = false;
+@iHandleMessages
+class SampleHandler {
+
+    constructor() {
+        instanceCreated = true;
+    }
+    @handler(SampleRequest)
+    handler(message: SampleRequest, context: MessageHandlerContext) {
+
+    }
+}
+
+class SampleHandler2 extends SampleHandler {
+
+}
+
+describe("Registering handlers", () => {
+
+    describe("When registering a handler class", () => {
+        let bus: Bus;
+        beforeAll(() => {
+            bus = new Bus().makeGlobal();
+            bus.registerHandler(SampleHandler);
+        }); describe("When registering a handler", () => {
+
+            it("should create an instance of the handler", () => {
+                expect(instanceCreated).toBe(true);
+            });
+
+            it("should register handlers with the bus", () => {
+                expect(bus.subscriberCount(SampleRequest)).toBe(1);
+            });
+        });
+
+        describe("When unregistering a specific handler class", () => {
+            let bus: Bus;
+            beforeAll(() => {
+                bus = new Bus().makeGlobal();
+                bus.registerHandler(SampleHandler);
+
+                bus.unregisterHandler(SampleHandler);
+            });
+
+            it("should remove the handler instance", () => {
+                expect(instanceCreated).toBe(true);
+            });
+
+            it("unregister subscriptions for handler class", () => {
+                expect(bus.subscriberCount(SampleRequest)).toBe(0);
+            });
+        });
+
+        describe("When unregistering all handler classes", () => {
+            let bus: Bus;
+            beforeAll(() => {
+                bus = new Bus().makeGlobal();
+                bus.registerHandler(SampleHandler);
+                bus.registerHandler(SampleHandler2);
+
+                bus.unregisterAllHandlers();
+            });
+
+            it("should remove the handler instance", () => {
+                expect(instanceCreated).toBe(true);
+            });
+
+            it("unregister subscriptions for handler class", () => {
+                expect(bus.subscriberCount(SampleRequest)).toBe(0);
+            });
+        });
+    });
+});

@@ -1,56 +1,5 @@
 {
-  "name": "abus",
-  "version": "0.0.1",
-  "author": "Garry McGlennon",
-  "description": "A service bus implementation for javascript.",
-  "repository": {
-    "url": ""
-  },
-  "main": "./lib/abus",
-  "keywords": [
-    "abus",
-    "service bus",
-    "queue"
-  ],
-  "engines": {
-    "node": "*"
-  },
-  "scripts": {
-    "test": "jest",
-    "release": "tsc -- -m system --outFile out\\abus.js bus.ts"
-  },
-  "jest": {
-    "transform": {
-      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
-    },
-    "testResultsProcessor": "<rootDir>/node_modules/ts-jest/coverageprocessor.js",
-    "testRegex": "(/__tests__/.*|\\.(test|spec)|Spec)\\.(ts|tsx)$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
-    "verbose": true,
-    "collectCoverage": false,
-    "collectCoverageFrom": [
-      "**/*.{ts,tsx}",
-      "!**/node_modules/**",
-      "!**/vendor/**",
-      "!**/typings/**",
-      "!**/app/**"
-    ],
-    "coverageDirectory": "<rootDir>/coverage"
-  },
   "devDependencies": {
-    "@types/jest": "^18.1.1",
-    "@types/node": "^7.0.5",
-    "jest": "^18.0.1",
-    "jest-cli": "^18.1.0",
-    "ts-jest": "^18.0.3",
-    "tslint": "^4.4.2"
-  },
-  "dependencies": {
-    "tslib": "^1.6.0",
-    "typescript": "^2.1.6"
+    "lerna": "2.0.0-beta.38"
   }
 }

@@ -1,28 +1,21 @@
 {
     "compilerOptions": {
-        "target": "es5",
-        "lib": [
-            "es2015.promise",
-            "es5",
-            "es2015.iterable",
-            "es2017.object",
-            "es2015.collection",
-            "dom"
-        ],
         "module": "commonjs",
         "experimentalDecorators": true,
         "noImplicitAny": false,
         "sourceMap": true,
-        "outDir": "dist/app",
         "noUnusedParameters": false,
         "noUnusedLocals": true,
         "skipLibCheck": true,
         "emitDecoratorMetadata": false,
         "stripInternal": true,
         "removeComments": false,
-        "declaration": false,
-        "importHelpers": true
+        "declaration": true,
+        "importHelpers": false
     },
+    "include": [
+        "app/**/*.ts"
+    ],
     "exclude": [
         "node_modules"
     ]
