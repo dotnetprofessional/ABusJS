@@ -110,6 +110,9 @@ export class InMemoryStorageQueue implements IMessageQueue {
             return;
         }
 
+        // Clear any existing timer before scheduling any new work
+        clearTimeout(this._nextScheduledPumpToken);
+
         do {
             msg = this.getMessage();
             if (msg) {
@@ -117,9 +120,6 @@ export class InMemoryStorageQueue implements IMessageQueue {
                 this._handler(msg);
             }
         } while (msg);
-
-        // Clear any timeouts as a new one will be created later if necessary
-        clearTimeout(this._nextScheduledPumpToken);
 
         // End of messages schedule the next time messages are checked
         if (this.count === 0) {
