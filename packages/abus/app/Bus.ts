@@ -22,6 +22,7 @@ export class Bus {
     private _replyToMessages = new Hashtable<ReplyHandler>();
     private _messageTransport = new LocalTransport();
     private _baseOptions = new SendOptions();
+    private _registeredHandlers = {};
 
     public static instance: Bus = new Bus();
 
@@ -175,10 +176,66 @@ export class Bus {
         this.publishInternal(message, new SendOptions(), context);
     }
 
+    /**
+     * Unregister all subscriptions currently registered with the bus
+     *
+     * @memberOf Bus
+     */
     public unregisterAll(): void {
         this.messageHandlers.clear();
         this.unregisterAllTransports();
         this.addSystemSubscriptions();
+    }
+
+    /**
+     * Registers a class that implements handlers
+     *
+     *  @param {Object} handler
+     *
+     * @memberOf Bus
+     */
+    public registerHandler(handler: Function) {
+        const key = this.getTypeNamespace(handler);
+
+        if (this._registeredHandlers[key]) {
+            throw TypeError(`The type ${key} has already been registered"`)
+        }
+
+        // create an instance of the type and record it
+        this._registeredHandlers[key] = new (<any>handler);
+    }
+
+    /**
+     * Unsubscribes all subscriptions associated with registered handler
+     * removes a reference to the handler instance
+     *
+     * @param {Function} handler
+     *
+     * @memberOf Bus
+     */
+    public unregisterHandler(handler: Function) {
+        const key = this.getTypeNamespace(handler);
+
+        if (!this._registeredHandlers[key]) {
+            throw TypeError(`The type ${key} has not been registered"`)
+        }
+
+        let handlerInstance = this._registeredHandlers[key];
+        this._registeredHandlers[key].delete;
+        (handlerInstance as any).unsubscribeHandlers();
+    }
+
+    /**
+     * Unsubscribes all subscriptions associated with registered handlers
+     * removes a reference to the handler instance
+     *
+     * @memberOf Bus
+     */
+    public unregisterAllHandlers() {
+        for (let p in this._registeredHandlers) {
+            let handlerInstance = this._registeredHandlers[p];
+            (handlerInstance as any).unsubscribeHandlers();
+        }
     }
 
     /** @internal */
