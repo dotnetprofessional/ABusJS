@@ -44,7 +44,7 @@ describe("Registering handlers", () => {
 
         describe("When unregistering a specific handler class", () => {
             let bus: Bus;
-            beforeAll(() => {
+            beforeEach(() => {
                 bus = new Bus().makeGlobal();
                 bus.registerHandler(SampleHandler);
 
@@ -52,7 +52,8 @@ describe("Registering handlers", () => {
             });
 
             it("should remove the handler instance", () => {
-                expect(instanceCreated).toBe(true);
+                // Shouldn't error out as the handler was removed
+                bus.registerHandler(SampleHandler);
             });
 
             it("unregister subscriptions for handler class", () => {
@@ -60,9 +61,10 @@ describe("Registering handlers", () => {
             });
         });
 
-        describe("When unregistering all handler classes", () => {
+        describe.only("When unregistering all handler classes", () => {
             let bus: Bus;
-            beforeAll(() => {
+            beforeEach(() => {
+                debugger;
                 bus = new Bus().makeGlobal();
                 bus.registerHandler(SampleHandler);
                 bus.registerHandler(SampleHandler2);
@@ -71,7 +73,9 @@ describe("Registering handlers", () => {
             });
 
             it("should remove the handler instance", () => {
-                expect(instanceCreated).toBe(true);
+                // Shouldn't error out as the handler was removed
+                bus.registerHandler(SampleHandler);
+                bus.registerHandler(SampleHandler2);
             });
 
             it("unregister subscriptions for handler class", () => {

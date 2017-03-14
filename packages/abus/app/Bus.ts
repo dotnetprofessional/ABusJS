@@ -221,7 +221,7 @@ export class Bus {
         }
 
         let handlerInstance = this._registeredHandlers[key];
-        this._registeredHandlers[key].delete;
+        delete this._registeredHandlers[key];
         (handlerInstance as any).unsubscribeHandlers();
     }
 
@@ -234,8 +234,14 @@ export class Bus {
     public unregisterAllHandlers() {
         for (let p in this._registeredHandlers) {
             let handlerInstance = this._registeredHandlers[p];
-            (handlerInstance as any).unsubscribeHandlers();
+            handlerInstance
+            if (handlerInstance["unsubscribeHandlers"]) {
+                (handlerInstance as any).unsubscribeHandlers();
+            }
         }
+
+        // Clear the object
+        this._registeredHandlers = {};
     }
 
     /** @internal */
