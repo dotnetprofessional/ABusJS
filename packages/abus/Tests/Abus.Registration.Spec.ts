@@ -61,7 +61,7 @@ describe("Registering handlers", () => {
             });
         });
 
-        describe.only("When unregistering all handler classes", () => {
+        describe("When unregistering all handler classes", () => {
             let bus: Bus;
             beforeEach(() => {
                 bus = new Bus().makeGlobal();

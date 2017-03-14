@@ -1,6 +1,7 @@
 import { Bus } from '../App/Bus'
 import { MessageHandlerContext } from '../App/MessageHandlerContext'
 import { handler } from '../App/Decorators/handler'
+import { handlerForSubType } from '../App/Decorators/handlerForSubType'
 import { iHandleMessages } from '../App/Decorators/iHandleMessages'
 
 import * as testData from './ABus.Sample.Messages'
@@ -177,6 +178,19 @@ export class TestMessageHandlerWithInheritance {
     };
 }
 
+@iHandleMessages
+export class TestMessageSubTypeHandlerWithInheritance {
+    public value = 0;
+    constructor(value: number) {
+        this.value = value;
+    }
+
+    @handlerForSubType(testData.Exception)
+    handler(message: testData.MyException, context: MessageHandlerContext) {
+        this.value = 100 + this.value;
+    };
+}
+
 describe("subscribing to a message type using decorators", () => {
 
     describe("using a string literal to define the messageFilter", () => {
@@ -224,6 +238,21 @@ describe("subscribing to a message type using decorators", () => {
 
         it("should call handler with correct class instance", async () => {
             bus.sendAsync(new testData.MyException(""));
+            expect(handlerClass.value).toBe(150);
+        });
+    });
+
+    describe("using the message sub type to define the messageFilter that uses inheritance", () => {
+        var bus = new Bus().makeGlobal();
+        // Provide an instance for the handler to attach to
+        let handlerClass = new TestMessageSubTypeHandlerWithInheritance(50);
+
+        it("should register subscriber for the message type", async () => {
+            expect(bus.subscriberCount("Exception.*")).toBe(1);
+        });
+
+        it("should call handler with correct class instance", async () => {
+            bus.publish(new testData.MyException(""));
             expect(handlerClass.value).toBe(150);
         });
     });
