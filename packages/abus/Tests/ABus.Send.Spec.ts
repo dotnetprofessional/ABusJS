@@ -121,6 +121,7 @@ describe("Send method", () => {
                 messageFilter: testData.TestMessage.TYPE,
                 handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
                     receivedEvent = true;
+                    debugger;
                     context.reply("Hello World!");
                 }
             });
@@ -533,7 +534,6 @@ describe("Send method", () => {
 
         it("should set the deliverAt on messageHandlerContext to the deferred time", () => {
             // Messages outside of a handler are not part of an existing conversation
-            console.log(secondHandlerContext)
             expect(secondHandlerContext.metaData.deliverAt).toBeTruthy;
         });
 

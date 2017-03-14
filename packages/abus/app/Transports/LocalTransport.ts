@@ -117,7 +117,6 @@ export class LocalTransport implements IMessageTransport {
         // Sending a message directly on the transport will result in no-metadata so default to publish
         if (!message.metaData || message.metaData.intent === Intents.publish) {
             subscribers = subscribers.concat(this.getStartsWithSubscribers(message.type) || []);
-            subscribers = subscribers.concat(this.getEndsWithSubscribers(message.type) || []);
 
             subscribers.forEach(s => {
                 // Clone message prior to sending so each subscriber has their own immutable copy
@@ -135,8 +134,6 @@ export class LocalTransport implements IMessageTransport {
                 this._internalQueue.addMessageAsync(transportMessage, deliverIn);
             }
         }
-
-
     }
 
     private getStartsWithSubscribers(messageType: string): Subscription[] {
@@ -146,18 +143,6 @@ export class LocalTransport implements IMessageTransport {
         for (let i = 0; i < subTypes.length - 1; i++) {
             searchType += subTypes[i] + '.';
             subscribers = subscribers.concat(this._subscriptionsByFilter.item(searchType + '*') || []);
-        }
-
-        return subscribers;
-    }
-
-    private getEndsWithSubscribers(messageType: string): Subscription[] {
-        var subTypes = messageType.split('.');
-        var subscribers = [] as Subscription[];
-        var searchType = '';
-        for (let i = subTypes.length - 1; i >= 0; i--) {
-            searchType += '.' + subTypes[i];
-            subscribers = subscribers.concat(this._subscriptionsByFilter.item("*" + searchType) || []);
         }
 
         return subscribers;

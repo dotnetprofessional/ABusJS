@@ -353,7 +353,7 @@ export class Bus {
         // Subscribe for all .reply messages so they can be returned to their callers
         let transport = this.getTransport("*");
 
-        transport.subscribe("replyToHandlerXXX", "*.reply");
+        transport.subscribe("replyToHandlerXXX", "reply.*");
     }
 
     /*

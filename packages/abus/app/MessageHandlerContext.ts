@@ -106,12 +106,12 @@ export class MessageHandlerContext {
      * @memberOf MessageHandlerContext
      */
     public reply<T>(reply: T): void {
-        var msg = { type: this.messageType + ".reply", message: reply } as IMessage<any>;
+        var msg = { type: "reply." + this.messageType, message: reply } as IMessage<any>;
         msg.metaData = new MetaData();
         // Need to add a replyTo so it can be delivered to the correct handler
         msg.metaData.replyTo = this.metaData.messageId;
         // Here a publish is used instead of a send as only a publish supports wild card subscriptions
-        // this is needed by the Bus to subscribe to all reply messages ie *.reply
+        // this is needed by the Bus to subscribe to all reply messages ie reply.*
         this.bus.publishInternal(msg, new SendOptions(), this);
     }
 

@@ -84,32 +84,6 @@ describe("subscribing to a message sub type", () => {
 
         expect(counter).toBe(3);
     });
-
-    it("should receive messages for all message types currently registered with supplied type suffix", () => {
-        let counter = 0;
-        transport.unsubscribeAll();
-        transport.subscribe("test_reply", "*.reply")
-        transport.onMessage((message: IMessage<any>) => {
-            if (message.type === testData.TestMessage1Reply.TYPE) {
-                counter += 1;
-            } else {
-                if (message.type === testData.TestMessage2Reply.TYPE) {
-                    counter += 2;
-                }
-            }
-
-            if (message.type === testData.TestMessage2.TYPE) {
-                // Ensures this message wasn't received as it wasn't subscribed to
-                counter += 1;
-            }
-        });
-
-        transport.send({ type: testData.TestMessage1Reply.TYPE, message: {} });
-        transport.send({ type: testData.TestMessage2Reply.TYPE, message: {} });
-        transport.send({ type: testData.TestMessage2.TYPE, message: {} });
-
-        expect(counter).toBe(3);
-    });
 });
 
 describe("multiple subscribers to a message", () => {
@@ -134,32 +108,6 @@ describe("multiple subscribers to a message", () => {
         transport.send({ type: testData.TestMessage2.TYPE, message: {} });
 
         expect(counter).toBe(4);
-    });
-
-    it("should receive messages for all message types currently registered with supplied type suffix", () => {
-        let counter = 0;
-        transport.unsubscribeAll();
-        transport.subscribe("test_reply", "*.reply")
-        transport.onMessage((message: IMessage<any>) => {
-            if (message.type === testData.TestMessage1Reply.TYPE) {
-                counter += 1;
-            } else {
-                if (message.type === testData.TestMessage2Reply.TYPE) {
-                    counter += 2;
-                }
-            }
-
-            if (message.type === testData.TestMessage2.TYPE) {
-                // Ensures this message wasn't received as it wasn't subscribed to
-                counter += 1;
-            }
-        });
-
-        transport.send({ type: testData.TestMessage1Reply.TYPE, message: {} });
-        transport.send({ type: testData.TestMessage2Reply.TYPE, message: {} });
-        transport.send({ type: testData.TestMessage2.TYPE, message: {} });
-
-        expect(counter).toBe(3);
     });
 });
 
