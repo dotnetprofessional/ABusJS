@@ -234,7 +234,6 @@ export class Bus {
     public unregisterAllHandlers() {
         for (let p in this._registeredHandlers) {
             let handlerInstance = this._registeredHandlers[p];
-            handlerInstance
             if (handlerInstance["unsubscribeHandlers"]) {
                 (handlerInstance as any).unsubscribeHandlers();
             }

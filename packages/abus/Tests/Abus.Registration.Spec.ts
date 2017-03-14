@@ -64,7 +64,6 @@ describe("Registering handlers", () => {
         describe.only("When unregistering all handler classes", () => {
             let bus: Bus;
             beforeEach(() => {
-                debugger;
                 bus = new Bus().makeGlobal();
                 bus.registerHandler(SampleHandler);
                 bus.registerHandler(SampleHandler2);
