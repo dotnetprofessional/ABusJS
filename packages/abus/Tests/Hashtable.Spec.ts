@@ -1,4 +1,7 @@
+import * as chai from "chai";
 import Hashtable from '../App/Hashtable';
+
+const should = chai.should();
 
 describe("Creating instance", () => {
     var ht = new Hashtable<string>();
@@ -7,7 +10,7 @@ describe("Creating instance", () => {
     it("should support generic types", () => {
         let ht = new Hashtable<number>();
         ht.add("key", 2334)
-        expect(ht.count).toBe(1);
+        ht.count.should.be.equal(1);
     });
 })
 
@@ -17,15 +20,15 @@ describe("Adding an item to a hashtable", () => {
     ht.add("test.key", "test.value");
 
     it("should increase the count by 1", () => {
-        expect(ht.count).toBe(1);
+        ht.count.should.be.equal(1);
     });
 
     it("should allow the retrieval of the value by key", () => {
-        expect(ht.item("test.key")).toBe("test.value");
+        ht.item("test.key").should.be.equal("test.value");
     });
 
     it("should contain the key", () => {
-        expect(ht.contains("test.key")).toBe(true);
+        ht.contains("test.key").should.be.equal(true);
     });
 
     it("should throw duplicate exception if key already exists", () => {
@@ -34,11 +37,11 @@ describe("Adding an item to a hashtable", () => {
         var duplicateKey = () => {
             ht.add(key, "");
         }
-        expect(duplicateKey).toThrowError(`The key ${key} already exists.`);
+        should.throw(duplicateKey, `The key ${key} already exists.`);
     });
 
     it("should include the new item in keys collection", () => {
-        expect(ht.keys()[0]).toBe("test.key");
+        ht.keys()[0].should.be.equal("test.key");
     });
 
     it("should be returned in for .. in", () => {
@@ -46,8 +49,8 @@ describe("Adding an item to a hashtable", () => {
         for (let item of ht.items()) {
             foundItems.push(item);
         }
-        expect(foundItems.length).toBe(1);
-        expect(foundItems[0]).toBe("test.value");
+        foundItems.length.should.be.equal(1);
+        foundItems[0].should.be.equal("test.value");
     });
 
 });
@@ -65,19 +68,19 @@ describe("Removing an item from a hashtable", () => {
 
     // Assert
     it("should decrease the count by 1", () => {
-        expect(ht.count).toBe(2);
+        ht.count.should.be.equal(2);
     });
 
     it("should disallow the retrieval of the value by key", () => {
-        expect(ht.item("test.key")).toBe(undefined);
+        should.not.exist(ht.item("test.key"));
     });
 
     it("should not contain the key", () => {
-        expect(ht.contains("test.key")).toBe(false);
+        ht.contains("test.key").should.be.equal(false);
     });
 
     it("should not contain item in keys collection", () => {
-        expect(ht.keys().length).toBe(2);
+        ht.keys().length.should.be.equal(2);
     });
 })
 
@@ -94,11 +97,11 @@ describe("Clearing the hashtable", () => {
 
     // Assert
     it("should have a count of 0", () => {
-        expect(ht.count).toBe(0);
+        ht.count.should.be.equal(0);
     });
 
     it("should have no values for the keys collection", () => {
-        expect(ht.keys().length).toBe(0);
+        ht.keys().length.should.be.equal(0);
     });
 })
 
@@ -108,13 +111,13 @@ describe("Updating an item to a hashtable", () => {
     it("should add the item if not found", () => {
         ht.clear();
         ht.update("test.key", "test.value");
-        expect(ht.item("test.key")).toBe("test.value");
+        ht.item("test.key").should.be.equal("test.value");
     });
 
     it("should update the item if already exist", () => {
         ht.clear();
         ht.add("test.key", "test.value2");
         ht.update("test.key", "test.value");
-        expect(ht.item("test.key")).toBe("test.value");
+        ht.item("test.key").should.be.equal("test.value");
     });
 });

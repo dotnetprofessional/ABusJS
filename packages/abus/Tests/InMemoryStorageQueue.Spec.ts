@@ -1,62 +1,95 @@
+import * as chai from "chai";
+import * as sinon from "sinon";
+
 import { InMemoryStorageQueue } from '../App/Transports/InMemoryStorageQueue'
 import { QueuedMessage } from '../App/QueuedMessage'
 import TimeSpan from '../App/Timespan'
 import { Utils } from '../App/Utils'
 
+const should = chai.should();
+
 describe('Adding a message to the queue', () => {
     let queue = new InMemoryStorageQueue();
-    let msg = new QueuedMessage("test.message", "Hello World!");
-    queue.addMessageAsync(msg);
+    let msg: QueuedMessage;
+    let dateNowSub: sinon.SinonStub;
+
+    before(() => {
+        // Must override Date.now BEFORE creating a message
+        dateNowSub = sinon.stub(Date, "now");
+        dateNowSub.returns(100);
+
+        msg = new QueuedMessage("test.message", "Hello World!");
+        queue.addMessageAsync(msg);
+    })
+
+    after(() => {
+        dateNowSub.restore();
+    });
 
     it("should increment the message count on queue by 1", () => {
-        expect(queue.count).toBe(1);
+        queue.count.should.be.equal(1);
     });
 
     it("should set the message type to the supplied type", () => {
-        expect(msg.type).toBe("test.message");
+        msg.type.should.be.equal("test.message");
     });
 
     it("should set the message timestamp to the current time", () => {
         // Between now and 50ms ago
-        expect(msg.timestamp).toBeGreaterThan(Date.now() - 50);
-        expect(msg.timestamp).toBeLessThanOrEqual(Date.now());
+        const now = Date.now();
+        msg.timestamp.should.be.equal(now);
     });
 
     it("should set the messageId to a unique Guid", () => {
-        expect(msg.id).toBeTruthy();
+        msg.id.should.exist;
     });
 
     it("should set the deliverAt to zero meaning to deliver immediately", () => {
-        expect(msg.deliverAt).toBe(0);
+        msg.deliverAt.should.be.equal(0);
     });
 });
 
 
 describe('Getting a message from the queue', () => {
+    let returnedMessage: QueuedMessage;
     let queue = new InMemoryStorageQueue();
-    let msg = new QueuedMessage("test.message", "Hello World!");
-    queue.addMessageAsync(msg);
-    queue.leasePeriod = TimeSpan.FromMilliseconds(50);
-    let returnedMessage = queue.getMessage();
+    let dateNowSub: sinon.SinonStub;
+
+    before(() => {
+        dateNowSub = sinon.stub(Date, "now");
+        dateNowSub.returns(100);
+        queue.leasePeriod = TimeSpan.FromMilliseconds(10);
+        let msg = new QueuedMessage("test.message", "Hello World!");
+        queue.addMessageAsync(msg);
+        returnedMessage = queue.getMessage();
+    });
+
+    beforeEach(() => {
+    });
+
+    after(() => {
+        dateNowSub.restore();
+    });
 
     it("should return the message", () => {
-        expect(returnedMessage).toBeTruthy();
+        returnedMessage.should.exist;
     });
 
     it("make the message unavailable to other consumers for the configured lease period", () => {
         var nextMessage = queue.getMessage();
-        expect(nextMessage).toBeFalsy();
+        should.not.exist(nextMessage);
     });
 
     it("should return the message back to the queue after the lease period has completed", async () => {
-        await Utils.sleep(60);
+        // Fast forward the time by 100ms!
+        dateNowSub.returns(Date.now() + 100);
 
         var nextMessage = queue.getMessage();
-        expect(nextMessage).toBeTruthy();
+        nextMessage.should.exist;
     });
 
     it("should set the dequeue count to 1 when first dequeued", () => {
-        expect(returnedMessage.dequeueCount).toBe(1);
+        returnedMessage.dequeueCount.should.be.equal(1);
     });
 
     it("should increment the dequeue count on each subsequent dequeue", () => {
@@ -66,7 +99,7 @@ describe('Getting a message from the queue', () => {
         for (let i = 0; i < 5; i++) {
             var dequeuedMsg = newQueue.getMessage();
             newQueue.abandonMessageAsync(dequeuedMsg.id);
-            expect(dequeuedMsg.dequeueCount).toBe(i + 1);
+            dequeuedMsg.dequeueCount.should.be.equal(i + 1);
         }
     });
 })
@@ -77,16 +110,16 @@ describe('Completing a message', () => {
     queue.addMessageAsync(msg);
     queue.leasePeriod = TimeSpan.FromMilliseconds(100);
     let dequeuedMsg = queue.getMessage();
-    expect(dequeuedMsg).toBeTruthy();
+    dequeuedMsg.should.exist;
     queue.completeMessageAsync(dequeuedMsg.id);
     dequeuedMsg = queue.getMessage();
 
     it("should remove the message permanently from the queue", () => {
-        expect(dequeuedMsg).toBeFalsy();
+        should.not.exist(dequeuedMsg);
     });
 
     it("should reduce the message count by 1", () => {
-        expect(queue.count).toBe(0);
+        queue.count.should.be.equal(0);
     });
 })
 
@@ -98,16 +131,16 @@ describe('Abandoning a message', () => {
     it("should return the message back to the queue immediately", () => {
         // First dequeue msg to make it unavailable
         let dequeuedMsg = queue.getMessage();
-        expect(dequeuedMsg).toBeTruthy();
+        dequeuedMsg.should.exist;
 
         // Validate that the message is unavailable
         let dequeuedMsg2 = queue.getMessage();
-        expect(dequeuedMsg2).toBeFalsy();
+        should.not.exist(dequeuedMsg2);
 
         // Abandon message making it available again
         queue.abandonMessageAsync(dequeuedMsg.id);
         dequeuedMsg = queue.getMessage();
-        expect(dequeuedMsg).toBeTruthy();
+        dequeuedMsg.should.exist;
     });
 })
 
@@ -119,17 +152,17 @@ describe('Renewing a message lease', () => {
         queue.addMessageAsync(msg);
 
         let dequeuedMsg = queue.getMessage();
-        expect(dequeuedMsg).toBeTruthy();
+        dequeuedMsg.should.exist;
         dequeuedMsg = queue.getMessage();
-        expect(dequeuedMsg).toBeFalsy();
+        should.not.exist(dequeuedMsg);
         await Utils.sleep(30);
         dequeuedMsg = queue.getMessage();
-        expect(dequeuedMsg).toBeTruthy();
+        dequeuedMsg.should.exist;
 
         // Now extend the lease
         queue.renewLease(dequeuedMsg.id, TimeSpan.FromMinutes(1));
         dequeuedMsg = queue.getMessage();
-        expect(dequeuedMsg).toBeFalsy();
+        should.not.exist(dequeuedMsg);
     });
 })
 
@@ -153,7 +186,7 @@ describe('Adding an onMessage handler', () => {
             queue.addMessageAsync(new QueuedMessage("test.message", "Hello World!"));
         }
 
-        expect(messageCount).toBe(expectedMessageCount);
+        messageCount.should.be.equal(expectedMessageCount);
     });
 
     it("should provide deferred messages when the time up expires", async () => {
@@ -171,9 +204,9 @@ describe('Adding an onMessage handler', () => {
         queue.onMessage(handler);
         // Add several messages
         queue.addMessageAsync(msg, TimeSpan.FromMilliseconds(20));
-        expect(messageCount).toBe(0);
+        messageCount.should.be.equal(0);
         await Utils.sleep(50);
-        expect(messageCount).toBe(1);
+        messageCount.should.be.equal(1);
     });
 })
 
@@ -183,11 +216,11 @@ describe('Peeking a message', () => {
 
     it("should return the next available message", () => {
         var peek = queue.peekMessage();
-        expect(peek).toBeTruthy();
+        peek.should.exist;
     });
 
     it("should not prevent the message from being returned by a getMessage call", () => {
         let message = queue.getMessage();
-        expect(message).toBeTruthy();
+        message.should.exist;
     });
 });

@@ -1,10 +1,13 @@
 import { Bus } from '../App/Bus'
+import * as chai from "chai";
+
 import { MessageHandlerContext } from '../App/MessageHandlerContext'
 import { handler } from '../App/Decorators/handler'
 import { handlerForSubType } from '../App/Decorators/handlerForSubType'
 import { iHandleMessages } from '../App/Decorators/iHandleMessages'
 
 import * as testData from './ABus.Sample.Messages'
+const should = chai.should();
 
 describe("Subscriptions", () => {
 
@@ -14,7 +17,7 @@ describe("Subscriptions", () => {
         it("should register subscriber for the message type", () => {
             pipeline.unregisterAll();
             pipeline.subscribe({ messageFilter: testData.TestMessage.TYPE, handler: (message: any, context: MessageHandlerContext) => { } });
-            expect(pipeline.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
+            pipeline.subscriberCount(testData.TestMessage.TYPE).should.be.equal(1);
         });
 
         it("should throw Invalid subscription exception for null messageHandler", () => {
@@ -25,7 +28,7 @@ describe("Subscriptions", () => {
                 pipeline.subscribe(null);
             }
 
-            expect(badMessageHandler).toThrowError('Invalid subscription.');
+            should.throw(badMessageHandler, 'Invalid subscription.');
         });
 
         it("should throw exception for invalid handler", () => {
@@ -36,7 +39,7 @@ describe("Subscriptions", () => {
                 pipeline.subscribe({ messageFilter: "test", handler: null });
             }
 
-            expect(badMessageHandler).toThrowError('messageHandler must be a function');
+            should.throw(badMessageHandler, 'messageHandler must be a function');
         });
 
         it("should throw exception for invalid message type", () => {
@@ -47,7 +50,7 @@ describe("Subscriptions", () => {
                 pipeline.subscribe({ messageFilter: null, handler: null });
             }
 
-            expect(badMessageHandler).toThrowError('Invalid messageType');
+            should.throw(badMessageHandler, 'Invalid messageType');
         });
 
         it.skip("should publish a subscription created message", () => {
@@ -60,7 +63,7 @@ describe("Subscriptions", () => {
         it("should register subscriber for the message type", () => {
             pipeline.unregisterAll();
             pipeline.subscribe({ messageFilter: testData.TestMessage, handler: (message: any, context: MessageHandlerContext) => { } });
-            expect(pipeline.subscriberCount(testData.TestMessage)).toBe(1);
+            pipeline.subscriberCount(testData.TestMessage).should.be.equal(1);
         });
     });
 
@@ -70,14 +73,14 @@ describe("Subscriptions", () => {
         pipeline.subscribe({ messageFilter: testData.TestMessage.TYPE, handler: (message: any) => { } });
 
         it("removes handler from subscription", () => {
-            expect(pipeline.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
+            pipeline.subscriberCount(testData.TestMessage.TYPE).should.be.equal(1);
             // Add another subscriber
             let subscription = pipeline.subscribe({ messageFilter: testData.TestMessage.TYPE, handler: () => { } });
-            expect(pipeline.subscriberCount(testData.TestMessage.TYPE)).toBe(2);
+            pipeline.subscriberCount(testData.TestMessage.TYPE).should.be.equal(2);
 
             // Remove the last subscriber
             pipeline.unsubscribe(subscription);
-            expect(pipeline.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
+            pipeline.subscriberCount(testData.TestMessage.TYPE).should.be.equal(1);
         });
     });
 
@@ -101,7 +104,7 @@ describe("Subscriptions", () => {
             pipeline.publish({ type: testData.TestMessage.TYPE, message: {} });
             pipeline.publish({ type: testData.TestMessage2.TYPE, message: {} });
 
-            expect(counter).toBe(3);
+            counter.should.be.equal(3);
         });
     });
 
@@ -199,16 +202,16 @@ describe("subscribing to a message type using decorators", () => {
         let handlerClass = new TestMessageHandler(10);
 
         it("should register subscriber for the message type", async () => {
-            expect(bus.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
+            bus.subscriberCount(testData.TestMessage.TYPE).should.be.equal(1);
         });
 
         it("should call handler with correct class instance", async () => {
             bus.sendAsync(new testData.TestMessage(""));
-            expect(handlerClass.value).toBe(110);
+            handlerClass.value.should.be.equal(110);
         });
 
         it("should still have a valid instance of for the class", () => {
-            expect(handlerClass instanceof TestMessageHandler).toBeTruthy;
+            (handlerClass instanceof TestMessageHandler).should.be.true;
         })
     });
 
@@ -218,12 +221,12 @@ describe("subscribing to a message type using decorators", () => {
         let handlerClass = new TestMessageHandler2(50);
 
         it("should register subscriber for the message type", async () => {
-            expect(bus.subscriberCount("CustomerData2")).toBe(1);
+            bus.subscriberCount("CustomerData2").should.be.equal(1);
         });
 
         it("should call handler with correct class instance", async () => {
             bus.sendAsync(new testData.CustomerData2(""));
-            expect(handlerClass.value).toBe(150);
+            handlerClass.value.should.be.equal(150);
         });
     });
 
@@ -233,12 +236,12 @@ describe("subscribing to a message type using decorators", () => {
         let handlerClass = new TestMessageHandlerWithInheritance(50);
 
         it("should register subscriber for the message type", async () => {
-            expect(bus.subscriberCount("Exception.MyException")).toBe(1);
+            bus.subscriberCount("Exception.MyException").should.be.equal(1);
         });
 
         it("should call handler with correct class instance", async () => {
             bus.sendAsync(new testData.MyException(""));
-            expect(handlerClass.value).toBe(150);
+            handlerClass.value.should.be.equal(150);
         });
     });
 
@@ -248,12 +251,12 @@ describe("subscribing to a message type using decorators", () => {
         let handlerClass = new TestMessageSubTypeHandlerWithInheritance(50);
 
         it("should register subscriber for the message type", async () => {
-            expect(bus.subscriberCount("Exception.*")).toBe(1);
+            bus.subscriberCount("Exception.*").should.be.equal(1);
         });
 
         it("should call handler with correct class instance", async () => {
             bus.publish(new testData.MyException(""));
-            expect(handlerClass.value).toBe(150);
+            handlerClass.value.should.be.equal(150);
         });
     });
 
@@ -263,24 +266,24 @@ describe("subscribing to a message type using decorators", () => {
         let handlerClass = new TestMessageHandler3(30);
 
         it("should register subscriber for the message type", async () => {
-            expect(bus.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
-            expect(bus.subscriberCount("CustomerData2")).toBe(1);
+            bus.subscriberCount(testData.TestMessage.TYPE).should.be.equal(1);
+            bus.subscriberCount("CustomerData2").should.be.equal(1);
         });
 
         it("should call handlers with correct class instance", async () => {
             bus.sendAsync(new testData.TestMessage(""));
             bus.sendAsync(new testData.CustomerData2(""));
-            expect(handlerClass.value).toBe(230);
+            handlerClass.value.should.be.equal(230);
         });
 
         it("should remove handlers when calling dynamically defined unsubscribeHandlers", async () => {
             // Verify the subscriptions exist first
-            expect(bus.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
-            expect(bus.subscriberCount(testData.CustomerData2)).toBe(1);
+            bus.subscriberCount(testData.TestMessage.TYPE).should.be.equal(1);
+            bus.subscriberCount(testData.CustomerData2).should.be.equal(1);
             // This method is added dynamically so typescript is not aware of it, so need to cast to any
             (handlerClass as any).unsubscribeHandlers();
-            expect(bus.subscriberCount(testData.TestMessage.TYPE)).toBe(0);
-            expect(bus.subscriberCount(testData.CustomerData2)).toBe(0);
+            bus.subscriberCount(testData.TestMessage.TYPE).should.be.equal(0);
+            bus.subscriberCount(testData.CustomerData2).should.be.equal(0);
         });
     });
 });

@@ -1,9 +1,12 @@
+import * as chai from "chai";
 import { Bus } from '../App/Bus'
 import { MessageHandlerContext } from '../App/MessageHandlerContext'
 import { ThreadingOptions } from '../App/MessageHandlerOptions'
 import { Utils } from '../App/Utils'
 
 import * as testData from './ABus.Sample.Messages'
+
+const should = chai.should();
 
 describe("Publish method", () => {
 
@@ -34,37 +37,37 @@ describe("Publish method", () => {
 
         it("should send message to all registered subscribers", () => {
             bus.publish(new testData.TestMessage("Johhny Smith"));
-            expect(returnedMessage.name).toBe("Johhny Smith");
+            returnedMessage.name.should.be.equal("Johhny Smith");
         });
 
         it("should add a messageHandlerContext to the handler receiving message being sent", () => {
             bus.publish(new testData.TestMessage("Johhny Smith"));
-            expect(currentHandlerContext).toBeDefined();
+            currentHandlerContext.should.exist;
         });
 
         it("should add messageType to messageHandlerContext", () => {
-            expect(currentHandlerContext.messageType).toBe(testData.TestMessage.TYPE);
+            currentHandlerContext.messageType.should.be.equal(testData.TestMessage.TYPE);
         });
 
         it("should add messageId to messageHandlerContext", () => {
-            expect(currentHandlerContext.messageId).toBeDefined();
+            currentHandlerContext.messageId.should.exist;
         });
 
         it("should set the conversationId on messageHandlerContext", () => {
-            expect(currentHandlerContext.metaData.conversationId).toBeDefined();
+            currentHandlerContext.metaData.conversationId.should.exist;
         });
 
         it("should set the correlationId on messageHandlerContext to undefined", () => {
             // Messages outside of a handler are not part of an existing conversation
-            expect(currentHandlerContext.metaData.correlationId).toBeUndefined();
+            should.not.exist(currentHandlerContext.metaData.correlationId);
         });
 
         it("should be fully async and return before subscribers have processed the message", async () => {
             counter = 0;
             bus.publish(new testData.TestMessage2("test"));
-            expect(counter).toBe(0);
+            counter.should.be.equal(0);
             await Utils.sleep(30);
-            expect(counter).toBe(10);
+            counter.should.be.equal(10);
         });
 
         //[GM] This is broken
@@ -90,7 +93,7 @@ describe("Publish method", () => {
             bus.publish({ type: testData.TestMessage.TYPE, message: new testData.TestMessage("DEBUG ME") });
             await Utils.sleep(10)
             // by this point no error should have occurred and the message handler was called
-            expect(msg).toBeDefined();
+            msg.should.exist;
         });
     });
 
@@ -124,32 +127,32 @@ describe("Publish method", () => {
         it("should send message to all registered subscribers", () => {
             return Utils.sleep(10)
                 .then(() => {
-                    expect(secondHandlerContext.messageType).toBe("test.message2");
-                    expect(secondMessage.name).toBe("second message");
+                    secondHandlerContext.messageType.should.be.equal("test.message2");
+                    secondMessage.name.should.be.equal("second message");
                 });
         });
 
         it("should add a messageHandlerContext to the handler receiving message being sent", () => {
-            expect(secondHandlerContext.messageType).toBe("test.message2");
-            expect(secondHandlerContext).toBeDefined();
+            secondHandlerContext.messageType.should.be.equal("test.message2");
+            secondHandlerContext.should.exist;
         });
 
         it("should add messageId to messageHandlerContext which differs from original message", () => {
-            expect(secondHandlerContext.messageType).toBe("test.message2");
-            expect(secondHandlerContext.messageId).toBeDefined();
-            expect(secondHandlerContext.messageId).not.toBe(firstHandlerContext.messageId);
+            secondHandlerContext.messageType.should.be.equal("test.message2");
+            secondHandlerContext.messageId.should.exist;
+            secondHandlerContext.messageId.should.not.be.equal(firstHandlerContext.messageId);
         });
 
         it("should set the conversationId on messageHandlerContext to the same as the original message", () => {
-            expect(secondHandlerContext.messageType).toBe("test.message2");
-            expect(secondHandlerContext.metaData.conversationId).toBeDefined();
-            expect(secondHandlerContext.metaData.conversationId).toBe(firstHandlerContext.metaData.conversationId);
+            secondHandlerContext.messageType.should.be.equal("test.message2");
+            secondHandlerContext.metaData.conversationId.should.exist;
+            secondHandlerContext.metaData.conversationId.should.be.equal(firstHandlerContext.metaData.conversationId);
         });
 
         it("should set the correlationId on messageHandlerContext to the messageId of the original message", () => {
-            expect(secondHandlerContext.messageType).toBe("test.message2");
-            expect(secondHandlerContext.metaData.correlationId).toBeDefined();
-            expect(secondHandlerContext.metaData.correlationId).toBe(firstHandlerContext.messageId);
+            secondHandlerContext.messageType.should.be.equal("test.message2");
+            secondHandlerContext.metaData.correlationId.should.exist;
+            secondHandlerContext.metaData.correlationId.should.be.equal(firstHandlerContext.messageId);
         });
     });
 
@@ -183,8 +186,8 @@ describe("Publish method", () => {
         it("should send message to all registered subscribers", () => {
             return Utils.sleep(10)
                 .then(() => {
-                    expect(secondHandlerContext.messageType).toBe(testData.CustomerData2.TYPE);
-                    expect(secondMessage.name).toBe("second message");
+                    secondHandlerContext.messageType.should.be.equal(testData.CustomerData2.TYPE);
+                    secondMessage.name.should.be.equal("second message");
                 });
         });
     });
@@ -221,8 +224,8 @@ describe("Publish method", () => {
             // Sleep for 10ms to give the code time to execute handlers
             return Utils.sleep(10)
                 .then(() => {
-                    expect(secondHandlerContext.messageType).toBe("Exception.MyException");
-                    expect(secondMessage.exceptionMessage).toBe("It went Boom!");
+                    secondHandlerContext.messageType.should.be.equal("Exception.MyException");
+                    secondMessage.exceptionMessage.should.be.equal("It went Boom!");
                 });
         });
     });
