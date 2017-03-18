@@ -1,6 +1,10 @@
+import * as chai from "chai";
+
 import { LocalTransport } from '../App/Transports/LocalTransport'
 import { IMessage } from '../App/IMessage'
 import * as testData from './ABus.Sample.Messages'
+
+const should = chai.should();
 
 describe("subscribing to a message type", () => {
     var transport = new LocalTransport();
@@ -8,7 +12,7 @@ describe("subscribing to a message type", () => {
     it("should register subscriber for the message type", () => {
         transport.unsubscribeAll();
         transport.subscribe("test", testData.TestMessage.TYPE);
-        expect(transport.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
+        transport.subscriberCount(testData.TestMessage.TYPE).should.be.equal(1);
     });
 
     it("should throw Invalid subscription name exception for null name", () => {
@@ -19,7 +23,7 @@ describe("subscribing to a message type", () => {
             transport.subscribe(null, "*");
         }
 
-        expect(badMessageHandler).toThrowError('Invalid subscription name.');
+        should.throw(badMessageHandler, 'Invalid subscription name.');
     });
 
     it("should throw exception for invalid message filter", () => {
@@ -30,7 +34,7 @@ describe("subscribing to a message type", () => {
             transport.subscribe("test", null);
         }
 
-        expect(badMessageHandler).toThrowError('Invalid filter parameter.');
+        should.throw(badMessageHandler, 'Invalid filter parameter.');
     });
 
     it("should throw exception when subscription name already exists", () => {
@@ -42,7 +46,7 @@ describe("subscribing to a message type", () => {
             transport.subscribe("test", "*");
         }
 
-        expect(badMessageHandler).toThrowError('Subscription with name test already exists.');
+        should.throw(badMessageHandler, 'Subscription with name test already exists.');
     });
 });
 
@@ -52,14 +56,14 @@ describe("unsubscribing to a message type", () => {
     transport.subscribe("test", testData.TestMessage.TYPE);
 
     it("removes handler from subscription", () => {
-        expect(transport.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
+        transport.subscriberCount(testData.TestMessage.TYPE).should.be.equal(1);
         // Add another subscriber
         transport.subscribe("test1", testData.TestMessage.TYPE);
-        expect(transport.subscriberCount(testData.TestMessage.TYPE)).toBe(2);
+        transport.subscriberCount(testData.TestMessage.TYPE).should.be.equal(2);
 
         // Remove the last subscriber
         transport.unsubscribe("test");
-        expect(transport.subscriberCount(testData.TestMessage.TYPE)).toBe(1);
+        transport.subscriberCount(testData.TestMessage.TYPE).should.be.equal(1);
     });
 });
 
@@ -82,7 +86,7 @@ describe("subscribing to a message sub type", () => {
         transport.send({ type: testData.TestMessage.TYPE, message: {} });
         transport.send({ type: testData.TestMessage2.TYPE, message: {} });
 
-        expect(counter).toBe(3);
+        counter.should.be.equal(3);
     });
 });
 
@@ -107,7 +111,7 @@ describe("multiple subscribers to a message", () => {
         // This message is only handled by one of the subscribers
         transport.send({ type: testData.TestMessage2.TYPE, message: {} });
 
-        expect(counter).toBe(4);
+        counter.should.be.equal(4);
     });
 });
 

@@ -28,17 +28,19 @@ describe("Registering handlers", () => {
 
     describe("When registering a handler class", () => {
         let bus: Bus;
-        beforeAll(() => {
+        before(() => {
             bus = new Bus().makeGlobal();
             bus.registerHandler(SampleHandler);
-        }); describe("When registering a handler", () => {
+        });
+
+        describe("When registering a handler", () => {
 
             it("should create an instance of the handler", () => {
-                expect(instanceCreated).toBe(true);
+                instanceCreated.should.be.equal(true);
             });
 
             it("should register handlers with the bus", () => {
-                expect(bus.subscriberCount(SampleRequest)).toBe(1);
+                bus.subscriberCount(SampleRequest).should.be.equal(1);
             });
         });
 
@@ -57,7 +59,7 @@ describe("Registering handlers", () => {
             });
 
             it("unregister subscriptions for handler class", () => {
-                expect(bus.subscriberCount(SampleRequest)).toBe(0);
+                bus.subscriberCount(SampleRequest).should.be.equal(0);
             });
         });
 
@@ -78,7 +80,7 @@ describe("Registering handlers", () => {
             });
 
             it("unregister subscriptions for handler class", () => {
-                expect(bus.subscriberCount(SampleRequest)).toBe(0);
+                bus.subscriberCount(SampleRequest).should.be.equal(0);
             });
         });
     });

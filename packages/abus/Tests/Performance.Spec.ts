@@ -78,8 +78,8 @@ describe.skip("LocalTransport", () => {
             }
 
             let elapsed = timerEnd - timerStart;
-            expect(counter).toBe(1000);
-            expect(elapsed).toBeLessThan(100);
+            counter.should.be.equal(1000);
+            elapsed.should.be.lessThan(100);
         });
 
     });

@@ -6,7 +6,6 @@ import { IMessageTask } from '../App/Tasks/IMessageTask'
 
 import * as testData from './ABus.Sample.Messages'
 
-
 class TestMessageTask implements IMessageTask {
     private _counter: number = 0;
 
@@ -59,14 +58,14 @@ describe("Message Task", () => {
 
         it("should execute code before and after calling next()", async () => {
             messageTask.reset();
-            expect(messageTask.counter).toBe(0);
+            messageTask.counter.should.be.equal(0);
             pipeline.publish(new testData.TestMessage("Task Sync Handler"));
             // Need to wait for the pipeline to complete
             await Utils.sleep(10);
 
-            expect(logs.length).toBe(3);
-            expect(counter).toBe(1);
-            expect(messageTask.counter).toBe(2);
+            logs.length.should.be.equal(3);
+            counter.should.be.equal(1);
+            messageTask.counter.should.be.equal(2);
         });
     });
 
@@ -98,12 +97,12 @@ describe("Message Task", () => {
         */
         it("should execute code before and after calling next()", async () => {
             messageTask.reset();
-            expect(messageTask.counter).toBe(0);
+            messageTask.counter.should.be.equal(0);
             pipeline.publish(new testData.TestMessage("Task Async Handler"));
             await Utils.sleep(10);
-            expect(logs.length).toBe(3);
-            expect(counter).toBe(1);
-            expect(messageTask.counter).toBe(2);
+            logs.length.should.be.equal(3);
+            counter.should.be.equal(1);
+            messageTask.counter.should.be.equal(2);
         });
     });
 

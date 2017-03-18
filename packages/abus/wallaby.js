@@ -13,9 +13,13 @@ module.exports = function (w) {
             type: 'node',
             runner: 'node'
         },
-        testFramework: 'jest',
+        testFramework: 'mocha',
         setup: function (wallaby) {
-            wallaby.testFramework.configure(require('./package.json').jest);
+            // wallaby.testFramework is jasmine/QUnit/mocha object
+            wallaby.testFramework.ui('livedoc-mocha');
+
+            // you can access 'window' object in a browser environment,
+            // 'global' object or require(...) something in node environment
         },
         debug: false
     };
