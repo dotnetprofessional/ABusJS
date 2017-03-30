@@ -6,7 +6,7 @@
             "es5",
             "ES2015.Promise"
         ],
-        "outDir": "build",
+        "outDir": "release",
         "removeComments": false,
         "declaration": true,
         "importHelpers": false

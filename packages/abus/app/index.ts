@@ -10,3 +10,5 @@ export { MessageHandlerOptions } from "./MessageHandlerOptions";
 export { SendOptions } from './SendOptions';
 export { MessageException } from "./Tasks/MessageException";
 export { UnhandledMessageException } from "./Tasks/UnhandledMessageException";
+import TimeSpan from "./Timespan";
+export {TimeSpan};

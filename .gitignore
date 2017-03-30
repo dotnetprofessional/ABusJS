@@ -9,4 +9,4 @@ out
 npm-debug.log
 *.tgz
 *.log
-/release
+/build
