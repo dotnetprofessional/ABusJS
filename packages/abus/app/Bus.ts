@@ -1,24 +1,22 @@
 import Hashtable from './Hashtable';
-import { MessageTasks } from './Tasks/MessageTasks'
-import { MessageExceptionTask } from './Tasks/MessageExceptionTask'
+import * as Tasks from './Tasks';
 //import { Saga } from './Saga'
-import { LocalTransport } from './Transports/LocalTransport'
-import { SubscriptionInstance } from './SubscriptionInstance'
-import { ReplyHandler } from './ReplyHandler'
-import { IMessageSubscription } from './IMessageSubscription'
-import { MessageHandlerOptions } from './MessageHandlerOptions'
-import { IMessage } from './IMessage'
-import { Guid } from './Guid'
-import { SendOptions } from './SendOptions'
-import { MessageHandlerContext } from './MessageHandlerContext'
-import { MetaData, Intents } from './MetaData'
-import { AddStandardMetaDataTask } from './Tasks/AddStandardMetaDataTask'
-import { IMessageTransport } from './Transports/IMessageTransport'
+import { LocalTransport } from './Transports/LocalTransport';
+import { SubscriptionInstance } from './SubscriptionInstance';
+import { ReplyHandler } from './ReplyHandler';
+import { IMessageSubscription } from './IMessageSubscription';
+import { MessageHandlerOptions } from './MessageHandlerOptions';
+import { IMessage } from './IMessage';
+import { Guid } from './Guid';
+import { SendOptions } from './SendOptions';
+import { MessageHandlerContext } from './MessageHandlerContext';
+import { MetaData, Intents } from './MetaData';
+import { IMessageTransport } from './Transports/IMessageTransport';
 
 export class Bus {
     private _messageHandlers = new Hashtable<SubscriptionInstance>();
-    private _outBoundMessageTasks = new MessageTasks([]);
-    private _inBoundMessageTasks = new MessageTasks([]);
+    private _outBoundMessageTasks = new Tasks.MessageTasks([]);
+    private _inBoundMessageTasks = new Tasks.MessageTasks([]);
     private _replyToMessages = new Hashtable<ReplyHandler>();
     private _messageTransport = new LocalTransport();
     private _baseOptions = new SendOptions();
@@ -27,9 +25,10 @@ export class Bus {
     public static instance: Bus = new Bus();
 
     constructor() {
-        this.outBoundMessageTasks.add(new MessageExceptionTask());
-        this.outBoundMessageTasks.add(new AddStandardMetaDataTask());
-        this.inBoundMessageTasks.add(new MessageExceptionTask());
+        this.outBoundMessageTasks.add(new Tasks.MessageExceptionTask());
+        this.outBoundMessageTasks.add(new Tasks.AddOutboundStandardMetaDataTask());
+        this.inBoundMessageTasks.add(new Tasks.MessageExceptionTask());
+        this.inBoundMessageTasks.add(new Tasks.AddInboundStandardMetaDataTask());
         this.addSystemSubscriptions();
         this.registerForTransportEvents();
     }
@@ -198,7 +197,7 @@ export class Bus {
         const key = this.getTypeNamespace(handler);
 
         if (this._registeredHandlers[key]) {
-            throw TypeError(`The type ${key} has already been registered"`)
+            throw TypeError(`The type ${key} has already been registered"`);
         }
 
         // create an instance of the type and record it
@@ -217,7 +216,7 @@ export class Bus {
         const key = this.getTypeNamespace(handler);
 
         if (!this._registeredHandlers[key]) {
-            throw TypeError(`The type ${key} has not been registered"`)
+            throw TypeError(`The type ${key} has not been registered"`);
         }
 
         let handlerInstance = this._registeredHandlers[key];
@@ -246,7 +245,7 @@ export class Bus {
     /** @internal */
     public sendInternalAsync<T>(message: IMessage<T> | T, options: SendOptions, context: MessageHandlerContext, withReply: boolean): Promise<any> {
         // Ensure we have an IMessage<T>
-        let messageToSend = this.getIMessage(message)
+        let messageToSend = this.getIMessage(message);
 
         // Get the transport for this message type
         var transport = this.getTransport(messageToSend.type);
@@ -407,7 +406,7 @@ export class Bus {
 
     }
 
-    private async dispatchOutboundMessageAsync(message: IMessage<any>, options: SendOptions, context: MessageHandlerContext, tasks: MessageTasks) {
+    private async dispatchOutboundMessageAsync(message: IMessage<any>, options: SendOptions, context: MessageHandlerContext, tasks: Tasks.MessageTasks) {
         let task = tasks.next;
 
         if (task != null) {
@@ -432,7 +431,7 @@ export class Bus {
         }
     }
 
-    private async dispatchInboundMessageAsync(message: IMessage<any>, context: MessageHandlerContext, tasks: MessageTasks, subscription: SubscriptionInstance, transport: IMessageTransport) {
+    private async dispatchInboundMessageAsync(message: IMessage<any>, context: MessageHandlerContext, tasks: Tasks.MessageTasks, subscription: SubscriptionInstance, transport: IMessageTransport) {
         let task = tasks.next;
 
         // determine if the task is using a promise and if so wait for it to complete
@@ -453,7 +452,7 @@ export class Bus {
                 // Remove the handler
                 this._replyToMessages.remove(message.metaData.replyTo);
             } else {
-                let handler = subscription.messageSubscription.handler
+                let handler = subscription.messageSubscription.handler;
                 let handlerResult = handler(message.message, context);
                 if (handlerResult && handlerResult["then"]) {
                     (handlerResult as Promise<void>).then(() => {

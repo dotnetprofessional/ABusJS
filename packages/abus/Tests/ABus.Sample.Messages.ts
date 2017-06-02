@@ -14,6 +14,13 @@ export class TestMessage implements IMessage<CustomerData>{
     static TYPE: string = "test.message";
 }
 
+export class Concurrency {
+    constructor(c: number) {
+        this.counter = c;
+    }
+    public counter: number;
+}
+
 export class TestMessage2 extends TestMessage {
     constructor(name: string) {
         super(name);

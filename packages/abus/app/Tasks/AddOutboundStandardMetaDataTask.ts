@@ -3,7 +3,7 @@ import { MessageHandlerContext } from '../MessageHandlerContext'
 import { IMessageTask } from './IMessageTask'
 import { Guid } from '../Guid'
 
-export class AddStandardMetaDataTask implements IMessageTask {
+export class AddOutboundStandardMetaDataTask implements IMessageTask {
     public async invokeAsync(message: IMessage<any>, context: MessageHandlerContext, next: any) {
         // Add context data to message
         if (!context.metaData.conversationId) {

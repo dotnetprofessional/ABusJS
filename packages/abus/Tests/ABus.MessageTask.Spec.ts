@@ -58,7 +58,7 @@ describe("Message Task", () => {
 
         it("should execute code before and after calling next()", async () => {
             messageTask.reset();
-            messageTask.counter.should.be.equal(0);
+            messageTask.counter.should.equal(0);
             pipeline.publish(new testData.TestMessage("Task Sync Handler"));
             // Need to wait for the pipeline to complete
             await Utils.sleep(10);

@@ -23,6 +23,7 @@ describe("Send method", () => {
             messageFilter: testData.TestMessage.TYPE,
             handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
                 currentHandlerContext = context;
+                debugger;
             }
         });
 
@@ -53,6 +54,17 @@ describe("Send method", () => {
         it("should set the timestamp on messageHandlerContext to defined", () => {
             // Messages outside of a handler are not part of an existing conversation
             currentHandlerContext.metaData.timestamp.should.be.greaterThan(1);
+        });
+
+        it("should set the startProcessing on messageHandlerContext to defined", () => {
+            // Messages outside of a handler are not part of an existing conversation
+            currentHandlerContext.metaData.startProcessing.should.be.greaterThan(1);
+        });
+
+        it("should set the endProcessing on messageHandlerContext to defined", async () => {
+            // Messages outside of a handler are not part of an existing conversation
+            console.log("it:", currentHandlerContext.metaData.messageId, JSON.stringify(currentHandlerContext.metaData));
+            currentHandlerContext.metaData.endProcessing.should.be.greaterThan(1);
         });
 
         it("should set the deliverAt on messageHandlerContext to undefined", () => {
@@ -124,7 +136,6 @@ describe("Send method", () => {
                 messageFilter: testData.TestMessage.TYPE,
                 handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
                     receivedEvent = true;
-                    debugger;
                     context.reply("Hello World!");
                 }
             });
@@ -135,6 +146,7 @@ describe("Send method", () => {
                 });
         });
     });
+
 
     describe("sending a message outside of a handler without a reply", () => {
         var bus = new Bus();
@@ -541,3 +553,31 @@ describe("Send method", () => {
         });
     });
 });
+/*
+describe("Feature: Sending messages", () => {
+    var counter = 0;
+
+    describe("Scenario: a handler that doesn't use promises receives messages in rapid succession", () => {
+        var bus = new Bus();
+        const iterations = 10;
+
+        bus.subscribe({
+            messageFilter: "Concurrency",
+            handler: (message: testData.Concurrency, context: MessageHandlerContext) => {
+                counter += message.counter;
+            }
+        });
+
+        it("When: the handler is executed 10 times adding 1 to 10", () => {
+            for (let i = 1; i < iterations + 1; i++) {
+                bus.sendAsync(new testData.Concurrency(i));
+            }
+        });
+
+        it("Then: the sum should be correct", () => {
+            let total = iterations * (iterations + 1) / 2;
+
+        })
+    });
+});
+*/
