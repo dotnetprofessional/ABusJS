@@ -23,7 +23,6 @@ describe("Send method", () => {
             messageFilter: testData.TestMessage.TYPE,
             handler: (message: testData.CustomerData, context: MessageHandlerContext) => {
                 currentHandlerContext = context;
-                debugger;
             }
         });
 

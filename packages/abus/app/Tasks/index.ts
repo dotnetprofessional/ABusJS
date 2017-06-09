@@ -5,3 +5,4 @@ export { MessageException } from "./MessageException";
 export { MessageExceptionTask } from "./MessageExceptionTask";
 export { MessageTasks } from "./MessageTasks";
 export { UnhandledMessageException } from "./UnhandledMessageException";
+export * from "./MessageTracker";

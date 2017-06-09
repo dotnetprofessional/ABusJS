@@ -47,11 +47,11 @@ export class Bus {
         return this._config;
     }
 
-    public get inBoundMessageTasks() {
+    public get inBoundMessageTasks(): Tasks.MessageTasks {
         return this._inBoundMessageTasks;
     }
 
-    public get outBoundMessageTasks() {
+    public get outBoundMessageTasks(): Tasks.MessageTasks {
         return this._outBoundMessageTasks;
     }
 

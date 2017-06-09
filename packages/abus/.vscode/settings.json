@@ -4,5 +4,6 @@
     "typescript.tsdk": "./node_modules/typescript/lib",
     "markdown.styles": [
         ".vscode/markdown.css"
-    ]
+    ],
+    "editor.formatOnSave": true
 }
