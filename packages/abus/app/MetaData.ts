@@ -1,4 +1,4 @@
-import Hashtable from './Hashtable'
+import Hashtable from './Hashtable';
 
 export class MetaData extends Hashtable<any> {
     public get messageType(): string { return this.item("messageType"); }
@@ -12,6 +12,8 @@ export class MetaData extends Hashtable<any> {
     public get subscription(): string { return this.item("subscription"); }
     public get shouldTerminatePipeline(): boolean { return !!(this.item("shouldTerminatePipeline")); }
     public get timestamp(): number { return this.item("timestamp"); }
+    public get startProcessing(): number { return this.item("startProcessing"); }
+    public get endProcessing(): number { return this.item("endProcessing"); }
     public get deliverAt(): number { return this.item("deliverAt"); }
 
     /** @internal  */
@@ -32,6 +34,9 @@ export class MetaData extends Hashtable<any> {
     /** @internal  */
     public set subscription(subscription: string) { this.update("subscription", subscription); }
     public set shouldTerminatePipeline(shouldTerminatePipeline: boolean) { this.update("shouldTerminatePipeline", shouldTerminatePipeline.toString()); }
+
+    public set startProcessing(startProcessing: number) { this.update("startProcessing", startProcessing); }
+    public set endProcessing(endProcessing: number) { this.update("endProcessing", endProcessing); }
 }
 
 export enum Intents {

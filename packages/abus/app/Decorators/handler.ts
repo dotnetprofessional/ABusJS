@@ -8,7 +8,7 @@ import { Bus } from "../Bus";
  * @returns
  */
 export function handler(type: string | Function) {
-    return function handler_decorator(target: any, key: string) {
+    return function handler_decorator(target: any, key: string, descriptor: PropertyDescriptor) {
         if (typeof (type) === "function") {
             // Will return the full namespace of the type
             type = Bus.instance.getTypeNamespace(type);
@@ -28,5 +28,11 @@ export function handler(type: string | Function) {
 
         // Record the details of this handler for later binding.
         target["__messageHandlers"].push({ type: type, handler: key });
+
+        let originalMethod = descriptor.value;
+        descriptor.value = function (...args: any[]) {
+            this.currentHandlerContext = args[1];
+            return originalMethod.apply(this, args);
+        }
     }
 }

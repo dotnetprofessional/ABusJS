@@ -1,6 +1,6 @@
 {
   "name": "abus",
-  "version": "0.3.0",
+  "version": "0.3.3",
   "author": "Garry McGlennon",
   "description": "A service bus implementation for javascript.",
   "repository": {
@@ -32,12 +32,13 @@
     "@types/sinon": "^1.16.35",
     "chai": "^3.5.0",
     "mocha": "^3.2.0",
+    "rimraf": "^2.6.1",
     "sinon": "^2.0.0",
     "tslint": "^4.4.2",
     "uglify-js": "^2.8.7"
   },
   "dependencies": {
     "tslib": "^1.6.0",
-    "typescript": "^2.1.6"
+    "typescript": "2.2.2"
   }
 }
