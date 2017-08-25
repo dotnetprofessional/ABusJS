@@ -62,7 +62,6 @@ describe("Send method", () => {
 
         it("should set the endProcessing on messageHandlerContext to defined", async () => {
             // Messages outside of a handler are not part of an existing conversation
-            console.log("it:", currentHandlerContext.metaData.messageId, JSON.stringify(currentHandlerContext.metaData));
             currentHandlerContext.metaData.endProcessing.should.be.greaterThan(1);
         });
 
@@ -442,7 +441,7 @@ describe("Send method", () => {
         });
 
         bus.subscribe({
-            messageFilter: testData.CustomerData2.TYPE,
+            messageFilter: "CustomerData2",
             handler: (message: testData.CustomerData2, context: MessageHandlerContext) => {
                 secondMessage = message;
                 secondHandlerContext = context;

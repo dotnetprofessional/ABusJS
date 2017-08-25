@@ -203,7 +203,6 @@ export class Bus {
         // create an instance of the type and record it
         this._registeredHandlers[key] = new (<any>handler);
     }
-
     /**
      * Unsubscribes all subscriptions associated with registered handler
      * removes a reference to the handler instance

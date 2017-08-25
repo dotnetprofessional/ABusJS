@@ -10,7 +10,8 @@ import { IMessageQueue } from '../IMessageQueue'
  */
 export class InMemoryStorageQueue implements IMessageQueue {
     private internalQueue: QueuedMessage[] = [];
-    private _leasePeriod = TimeSpan.FromMinutes(60);
+    // this allows a failed message to be reprocessed again if not completed within 3 minutes
+    private _leasePeriod = TimeSpan.FromSeconds(180);
     private _handler: (message: QueuedMessage) => void;
     private _nextScheduledPumpToken: any;
 
@@ -104,7 +105,7 @@ export class InMemoryStorageQueue implements IMessageQueue {
 
     private onMessageProcessor() {
         var msg
-
+        const maxTimeoutAllowed = 10 * 1000; // 10 seconds
         // Check if there is a handler defined first
         if (!this._handler) {
             return;
@@ -134,6 +135,14 @@ export class InMemoryStorageQueue implements IMessageQueue {
                     nextTimeSlot = msg.deliverAt;
                 }
             });
+
+            if (nextTimeSlot > maxTimeoutAllowed) {
+                // react-Native for Android has issues with long timers. The effect of this is that
+                // if a message has to wait longer before being dispatched the timer will just fire a few more times
+                // it won't affect when the message is actually dispatched.
+                // NB: Due to the lease model this code will likely be hit for everytime a message is sent!
+                nextTimeSlot = maxTimeoutAllowed;
+            }
 
             // Schedule next pump and record the timeout token
             this._nextScheduledPumpToken = setTimeout(async () => this.onMessageProcessor(), TimeSpan.getTimeSpan(nextTimeSlot).totalMilliseconds);
