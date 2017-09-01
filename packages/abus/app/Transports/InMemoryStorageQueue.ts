@@ -135,17 +135,17 @@ export class InMemoryStorageQueue implements IMessageQueue {
                     nextTimeSlot = msg.deliverAt;
                 }
             });
-
-            if (nextTimeSlot > maxTimeoutAllowed) {
+            let nextTimeSlotFromNow = TimeSpan.getTimeSpan(nextTimeSlot).totalMilliseconds;
+            if (nextTimeSlotFromNow > maxTimeoutAllowed) {
                 // react-Native for Android has issues with long timers. The effect of this is that
                 // if a message has to wait longer before being dispatched the timer will just fire a few more times
                 // it won't affect when the message is actually dispatched.
                 // NB: Due to the lease model this code will likely be hit for everytime a message is sent!
-                nextTimeSlot = maxTimeoutAllowed;
+                nextTimeSlotFromNow = TimeSpan.FromMilliseconds(maxTimeoutAllowed).totalMilliseconds;
             }
 
             // Schedule next pump and record the timeout token
-            this._nextScheduledPumpToken = setTimeout(async () => this.onMessageProcessor(), TimeSpan.getTimeSpan(nextTimeSlot).totalMilliseconds);
+            this._nextScheduledPumpToken = setTimeout(async () => this.onMessageProcessor(), nextTimeSlotFromNow);
         }
     }
 
