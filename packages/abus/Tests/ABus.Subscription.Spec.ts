@@ -125,7 +125,7 @@ describe("Subscriptions", () => {
 });
 
 // This class handles messages and needs to be exported to prevent compiler errors about not being used.
-@iHandleMessages
+@iHandleMessages()
 export class TestMessageHandler {
     public value = 5;
     constructor(value: number) {
@@ -137,7 +137,7 @@ export class TestMessageHandler {
     };
 }
 
-@iHandleMessages
+@iHandleMessages()
 export class TestMessageHandler2 {
     public value = 5;
     constructor(value: number) {
@@ -150,7 +150,7 @@ export class TestMessageHandler2 {
     };
 }
 
-@iHandleMessages
+@iHandleMessages()
 export class TestMessageHandler3 {
     public value = 0;
     constructor(value: number) {
@@ -168,7 +168,7 @@ export class TestMessageHandler3 {
     };
 }
 
-@iHandleMessages
+@iHandleMessages()
 export class TestMessageHandlerWithInheritance {
     public value = 0;
     constructor(value: number) {
@@ -181,7 +181,7 @@ export class TestMessageHandlerWithInheritance {
     };
 }
 
-@iHandleMessages
+@iHandleMessages()
 export class TestMessageSubTypeHandlerWithInheritance {
     public value = 0;
     constructor(value: number) {

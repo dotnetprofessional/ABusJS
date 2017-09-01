@@ -3,6 +3,7 @@ export { handler } from './Decorators/handler';
 export { handlerForSubType } from './Decorators/handlerForSubType';
 export { iHandleMessages } from './Decorators/iHandleMessages';
 export { trackMethod } from './Decorators/trackMethod';
+export { namespace } from './Decorators/namespace';
 export { MessageHandlerContext } from './MessageHandlerContext';
 export { IMessage } from './IMessage'
 export * from './Tasks';

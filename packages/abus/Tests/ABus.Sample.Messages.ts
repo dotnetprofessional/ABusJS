@@ -1,6 +1,4 @@
-import {
-    IMessage,
-} from '../App/IMessage';
+import { IMessage } from '../App';
 
 export class TestMessage implements IMessage<CustomerData>{
     constructor(public name: string) {
@@ -39,7 +37,6 @@ export class CustomerData {
     }
     name: string;
 }
-
 export class CustomerData2 {
     static TYPE = "CustomerData2";
 

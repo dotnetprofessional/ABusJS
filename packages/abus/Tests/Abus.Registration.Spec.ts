@@ -8,7 +8,7 @@ class SampleRequest {
 }
 
 let instanceCreated = false;
-@iHandleMessages
+@iHandleMessages()
 class SampleHandler {
 
     constructor() {
