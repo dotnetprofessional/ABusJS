@@ -1,7 +1,6 @@
 import Hashtable from './Hashtable';
 import * as Tasks from './Tasks';
 //import { Saga } from './Saga'
-import { LocalTransport } from './Transports/LocalTransport';
 import { SubscriptionInstance } from './SubscriptionInstance';
 import { ReplyHandler } from './ReplyHandler';
 import { IMessageSubscription } from './IMessageSubscription';
@@ -12,6 +11,7 @@ import { SendOptions } from './SendOptions';
 import { MessageHandlerContext } from './MessageHandlerContext';
 import { MetaData, Intents } from './MetaData';
 import { IMessageTransport } from './Transports/IMessageTransport';
+import { LocalTransport } from "./Transports/LocalTransport";
 
 export class Bus {
     private _messageHandlers = new Hashtable<SubscriptionInstance>();

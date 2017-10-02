@@ -8,7 +8,7 @@ import { Subscription } from '../Subscription'
 import { MetaData, Intents } from '../MetaData'
 import { Guid } from "../Guid";
 
-export class LocalTransport implements IMessageTransport {
+export class LocalQueuedTransport implements IMessageTransport {
     // Key = QueueEndpoint.fullname, value = subscription name
     private _subscriptionsByName: Hashtable<Subscription> = new Hashtable<Subscription>();
     private _subscriptionsByFilter: Hashtable<Subscription[]> = new Hashtable<Subscription[]>();
@@ -97,6 +97,8 @@ export class LocalTransport implements IMessageTransport {
     }
 
     public completeMessageAsync(messageId: string) {
+        let internalMessage = this._internalQueue.findMessage(m => m.metaData.item("messageId") === messageId);
+        this._internalQueue.completeMessageAsync(internalMessage.id);
     }
 
     public onMessage(handler: (message: IMessage<any>) => void) {
@@ -151,9 +153,6 @@ export class LocalTransport implements IMessageTransport {
             let msg: IMessage<any> = { type: message.type, message: message.body };
             msg.metaData = new MetaData(message.metaData.internalHash());
 
-            // mark message complete prior to sending so that any failures do not result in a resend of the message
-            let internalMessage = this._internalQueue.findMessage(m => m.metaData.item("messageId") === msg.metaData.messageId);
-            this._internalQueue.completeMessageAsync(internalMessage.id);
             // Add some metaData from the QueuedMessage
             msg.metaData.dequeueCount = message.dequeueCount;
             // Send the message to subscribers

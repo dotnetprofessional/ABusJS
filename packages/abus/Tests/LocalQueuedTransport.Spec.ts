@@ -1,13 +1,13 @@
 import * as chai from "chai";
 
-import { LocalTransport } from '../App/Transports/LocalTransport'
+import { LocalQueuedTransport } from '../App/Transports/LocalQueuedTransport'
 import { IMessage } from '../App/IMessage'
 import * as testData from './ABus.Sample.Messages'
 
 const should = chai.should();
 
-describe("subscribing to a message type using the localTransport", () => {
-    var transport = new LocalTransport();
+describe("subscribing to a message type using the localQueuedTransport", () => {
+    var transport = new LocalQueuedTransport();
 
     it("should register subscriber for the message type", () => {
         transport.unsubscribeAll();
@@ -51,7 +51,7 @@ describe("subscribing to a message type using the localTransport", () => {
 });
 
 describe("unsubscribing to a message type", () => {
-    var transport = new LocalTransport();
+    var transport = new LocalQueuedTransport();
 
     transport.subscribe("test", testData.TestMessage.TYPE);
 
@@ -68,11 +68,10 @@ describe("unsubscribing to a message type", () => {
 });
 
 describe("subscribing to a message sub type", () => {
-    var transport = new LocalTransport();
+    var transport = new LocalQueuedTransport();
 
     it("should receive messages for all message types currently registered with supplied type prefix", () => {
         let counter = 0;
-        debugger;
         transport.subscribe("test", "test.*")
         transport.onMessage((message: IMessage<any>) => {
             if (message.type === testData.TestMessage.TYPE) {
@@ -92,7 +91,7 @@ describe("subscribing to a message sub type", () => {
 });
 
 describe("multiple subscribers to a message", () => {
-    var transport = new LocalTransport();
+    var transport = new LocalQueuedTransport();
 
     it("should receive messages for all message types currently registered with supplied type prefix", () => {
         let counter = 0;

@@ -1,4 +1,4 @@
-import { LocalTransport } from "../app/Transports/LocalTransport";
+import { LocalQueuedTransport } from "../app/Transports/LocalQueuedTransport";
 import { IMessage } from "../app/IMessage";
 import { Bus } from "../app/Bus";
 import { MessageHandlerContext } from "../app/MessageHandlerContext";
@@ -56,10 +56,10 @@ export class PerformanceHandler {
     }
 }
 
-describe.skip("LocalTransport", () => {
+describe.skip("LocalQueuedTransport", () => {
 
     describe.skip("Sending an receiving messages", () => {
-        var transport = new LocalTransport();
+        var transport = new LocalQueuedTransport();
 
         it("should be fast!", () => {
             let counter = 0;

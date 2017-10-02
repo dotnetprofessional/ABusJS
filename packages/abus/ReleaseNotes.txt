@@ -1,5 +1,6 @@
-
-
+0.5.0   *** BREAKING CHANGE ***
+        Changed the default transport to not keep messages queued after dispatching. This means if a handler fails to process the message it WILL NOT be 
+        resent. The original transport is now LocalQueuedTransport. This will be reintroduced as part of the work to support multiply transports.
 0.4.0   *** BREAKING CHANGE ***
         * Existing code will need to change @iHandleMessages to @iHandleMessages()
         Added ability to handle mangling. When mangling code like is done in React-Native release builds, you need to add the
