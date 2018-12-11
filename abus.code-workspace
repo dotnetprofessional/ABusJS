@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "packages\\abus2"
+		},
+		{
+			"path": "packages\\abus"
+		}
+	],
+	"settings": {
+		"typescript.tsdk": "./node_modules/typescript/lib",
+		"cSpell.words": [
+			"Abus",
+			"Hashtable",
+			"Timespan",
+			"livedoc",
+			"yxxx"
+		]
+	}
+}

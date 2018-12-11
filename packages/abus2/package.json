@@ -1,0 +1,40 @@
+{
+  "name": "abus",
+  "version": "0.5.0-alpha-1",
+  "author": "Garry McGlennon",
+  "description": "A service bus implementation for javascript.",
+  "repository": {
+    "url": ""
+  },
+  "main": "release/index.js",
+  "typings": "release/index.d.ts",
+  "keywords": [
+    "abus",
+    "service bus",
+    "queue"
+  ],
+  "engines": {
+    "node": "*"
+  },
+  "scripts": {
+    "test": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec --recursive compile/Features/",
+    "release-web": "npm run compile-web && npm run compile-web-minify",
+    "compile-web": "rimraf out && tsc -p tsconfig.web.json",
+    "compile-web-minify": "uglifyjs out/abus.js --output out/abus.min.js --compress dead_code,drop_debugger,conditionals,booleans,loops,properties,drop_console --mangle --wrap abus",
+    "release": "rimraf release && tsc -d -t ES5 -p tsconfig.npm.json",
+    "prepublish": "npm run release"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.12.10",
+    "chai": "^4.2.0",
+    "livedoc-mocha": "^0.4.0-beta-4",
+    "mocha": "^5.2.0",
+    "rimraf": "^2.6.2",
+    "tslint": "^5.11.0"
+  },
+  "dependencies": {
+    "typescript": "^3.1.6"
+  }
+}
