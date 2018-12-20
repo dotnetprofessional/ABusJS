@@ -1,8 +1,9 @@
 import { Bus } from "../../src/Bus";
 import { MyHandlerByTypeName, MyHandlerByTypeDefinition, PlusTwo, PlusOne, handlerResponse } from "../MessageTypes";
+import { IBus } from "../../src";
 
 feature(`Subscribe to messages using decorators`, () => {
-    let bus: Bus
+    let bus: IBus
 
     background(``, () => {
         given(`abus is configured with the ExpressMemoryTransport`, () => {

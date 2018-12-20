@@ -1,7 +1,7 @@
 import "livedoc-mocha";
 import { ExpressMemoryTransport } from "../../src/Transports/ExpressMemoryTransport";
 import { IMessage } from "../../src/IMessage";
-import TimeSpan from "../../src/Timespan";
+import { TimeSpan } from "../../src/Timespan";
 import { sleep } from "../Utils";
 
 require('chai').should();

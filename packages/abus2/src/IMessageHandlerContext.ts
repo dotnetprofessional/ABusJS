@@ -38,4 +38,20 @@ export interface IMessageHandlerContext extends ISendMessages {
      * @memberof IMessageHandlerContext
      */
     activeMessage: IMessage<any>;
+
+    /**
+     * The message from the handler that send the active message
+     *
+     * @type {IMessage<any>}
+     * @memberof IMessageHandlerContext
+     */
+    parentMessage: IMessage<any>;
+
+    /**
+     * Terminates the processing of the pipeline
+     *
+     * @type {boolean}
+     * @memberof IMessageHandlerContext
+     */
+    shouldTerminatePipeline: boolean;
 }

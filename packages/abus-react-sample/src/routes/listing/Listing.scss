@@ -1,0 +1,12 @@
+.listing {
+	h1 {
+		color: orange;
+	}
+	a {
+		text-decoration: none;
+		padding: 3px;
+		&.active {
+			background-color: aquamarine;
+		}
+	}
+}

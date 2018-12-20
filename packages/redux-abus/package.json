@@ -1,0 +1,35 @@
+{
+  "name": "redux-abus",
+  "version": "0.1.0",
+  "description": "Integrates ABUS with react-redux",
+  "author": "Garry McGlennon",
+  "ts:main": "src/index.ts",
+  "types": "index.ts",
+  "main": "dist/index.js",
+  "scripts": {
+    "watch": "tsc --watch -p .",
+    "release": "tsc -p ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dotnetprofessional/ABusJS.git"
+  },
+  "keywords": [
+    "abus",
+    "react",
+    "redux",
+    "messaging",
+    "TypeScript"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dotnetprofessional/ABusJS/issues"
+  },
+  "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/redux-abus#readme",
+  "devDependencies": {
+    "typescript": "*"
+  },
+  "dependencies": {
+    "abus2": "0.6.0-alpha-1"
+  }
+}

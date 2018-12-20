@@ -1,13 +1,13 @@
 {
-  "name": "abus",
-  "version": "0.5.0-alpha-1",
+  "name": "abus2",
+  "version": "0.6.0-alpha-1",
   "author": "Garry McGlennon",
   "description": "A service bus implementation for javascript.",
   "repository": {
     "url": ""
   },
-  "main": "release/index.js",
-  "typings": "release/index.d.ts",
+  "main": "compile/src/index.js",
+  "typings": "compile/src/index.d.ts",
   "keywords": [
     "abus",
     "service bus",
@@ -28,13 +28,12 @@
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.12.10",
+    "lerna": "^3.6.0",
     "chai": "^4.2.0",
     "livedoc-mocha": "^0.4.0-beta-4",
     "mocha": "^5.2.0",
     "rimraf": "^2.6.2",
-    "tslint": "^5.11.0"
-  },
-  "dependencies": {
-    "typescript": "^3.1.6"
+    "tslint": "^5.11.0",
+    "typescript": "^3.2.2"
   }
 }

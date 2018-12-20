@@ -61,4 +61,12 @@ export interface IBus extends ISendMessages {
      * @memberof IBus
      */
     unsubscribe(subscriptionId: string);
+
+    /**
+     * Registers any event handlers within a class or exported object
+     *
+     * @param {...any[]} classHandlers
+     * @memberof IBus
+     */
+    registerHandlers(...classHandlers: any[]): void;
 }

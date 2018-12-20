@@ -1,6 +1,6 @@
 import { IMessageTransport } from "./IMessageTransport";
 import { IMessage } from "../IMessage";
-import TimeSpan from "../Timespan";
+import { TimeSpan } from "../Timespan";
 
 /**
  * This is the no-frills transport which is the closest to using a simple event emitter.

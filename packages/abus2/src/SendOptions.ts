@@ -1,4 +1,4 @@
-import TimeSpan from './Timespan'
+import { TimeSpan } from './Timespan'
 
 export class SendOptions {
     public deliverIn?: TimeSpan;

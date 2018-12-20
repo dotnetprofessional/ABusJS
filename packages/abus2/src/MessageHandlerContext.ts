@@ -8,9 +8,11 @@ import { Intents } from "./Intents";
 import { Bus } from "./Bus";
 
 export class MessageHandlerContext implements IMessageHandlerContext {
-    constructor(protected bus: IBus, public activeMessage: IMessage<any>) {
+    constructor(protected bus: IBus, public parentMessage: IMessage<any>, public activeMessage: IMessage<any>) {
         this.shouldTerminatePipeline = false;
     }
+
+    public shouldTerminatePipeline: boolean;
 
     public async replyAsync<T>(reply: T): Promise<void> {
         // Ensure the active message has someone listening for a reply
@@ -22,7 +24,7 @@ export class MessageHandlerContext implements IMessageHandlerContext {
         // Need to add a replyTo so it can be delivered to the correct handler
         Bus.applyIntent(msg, Intents.reply);
         msg.metaData.replyTo = this.activeMessage.metaData.messageId;
-        await this.bus.sendAsync(msg);
+        await (this.bus as Bus).sendAsync(msg, null, this.getNewContext(msg));
         return;
     }
 
@@ -31,18 +33,21 @@ export class MessageHandlerContext implements IMessageHandlerContext {
     }
 
     public publishAsync<T>(message: T | IMessage<T>): Promise<void> {
-        return this.bus.publishAsync(message);
+        return (this.bus as Bus).publishAsync(message, this.getNewContext(message));
     }
 
     public sendWithReplyAsync<T, R>(message: T, options?: SendOptions): Promise<ReplyRequest> {
-        return this.bus.sendWithReplyAsync(message, options);
+        return (this.bus as Bus).sendWithReplyAsync(message, options, this.getNewContext(message));
     }
     public sendAsync<T>(message: T | IMessage<T>, options?: SendOptions): Promise<void> {
-        return this.bus.sendAsync(message, options);
+        return (this.bus as Bus).sendAsync(message, options, this.getNewContext(message));
     }
 
     private get activeMessageMetaData(): IBusMetaData {
         return this.activeMessage.metaData as IBusMetaData
     }
-    public shouldTerminatePipeline: boolean;
+
+    private getNewContext(message: any): IMessageHandlerContext {
+        return new MessageHandlerContext(this.bus, Object.assign({}, this.activeMessage), message);
+    }
 }

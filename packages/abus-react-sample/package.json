@@ -1,0 +1,51 @@
+{
+  "name": "fuse-react-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "rimraf ../../.fusebox && rimraf dist && node fuse"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fuse-box/fuse-react-demo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fuse-box/fuse-react-demo/issues"
+  },
+  "homepage": "https://github.com/fuse-box/fuse-react-demo#readme",
+  "devDependencies": {
+    "fuse-box": "*",
+    "node-sass": "*",
+    "typescript": "*",
+    "uglify": "*",
+    "uglify-js": "*",
+    "rimraf": "^2.6.2"
+  },
+  "dependencies": {
+    "fuse-react": "^2.0.1",
+    "react": "*",
+    "react-dom": "^16.6.3",
+    "react-redux": "^6.0.0",
+    "redux": "^4.0.1",
+    "redux-devtools-extension": "^2.13.7",
+    "abus2": "0.6.0-alpha-1",
+    "prop-types": "^15.6.1",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.1.0",
+    "redux-devtools": "*",
+    "react-dock": "*",
+    "@syncfusion/ej2-react-diagrams": "*",
+    "react-router-dom": "^4.1.2",
+    "redux-devtools-log-monitor": "*",
+    "redux-devtools-dock-monitor": "*",
+    "normalizr": "*",
+    "humps": "^2.0.0",
+    "lodash": "^4.17.5",
+    "redux-abus": "0.1.0",
+    "redux-abus-thunk": "0.1.0"
+  }
+}

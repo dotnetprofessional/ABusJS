@@ -9,7 +9,11 @@ export class ExecuteHandlerTask implements IMessageTask {
     }
 
     public async invokeAsync(message: IMessage<any>, context: IMessageHandlerContext, next: any): Promise<void> {
-        await this.handler(message.payload, context);
+        let msg = message.payload;
+        if (!msg) {
+            msg = message;
+        }
+        await this.handler(msg, context);
 
         // This task does not continue the pipeline by calling next as its the last task to be executed
     }

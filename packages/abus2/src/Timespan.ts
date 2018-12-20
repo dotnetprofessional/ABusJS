@@ -1,5 +1,5 @@
 
-export default class TimeSpan {
+export class TimeSpan {
     private _timespan: number;
     private secondsInMilliseconds = 1000;
     private minutesInMilliseconds = 60 * this.secondsInMilliseconds;

@@ -8,7 +8,7 @@ import { PipelineContext } from "./Pipeline";
 import { IRegisteredTransport } from "./IRegisteredTransport";
 import { ExecuteHandlerTask } from "./tasks/ExecuteHandlerTask";
 import { IMessageHandler } from "./IMessageHandler";
-import newGuid from "./Guid";
+import { newGuid } from "./Guid";
 import { IMessageSubscription } from "./IMessageSubscription";
 import { TransportDispatchTask } from "./tasks/TransportDispatchTask";
 import { AbusGrammar, TransportGrammar } from "./fluent/transportGrammar";
@@ -20,6 +20,7 @@ import { ExpressMemoryTransport } from "./Transports/ExpressMemoryTransport";
 import { MessageExceptionTask } from "./tasks/MessageExceptionTask";
 import { MessageException } from "./tasks/MessageException";
 import { getTypeNamespace } from "./Utils";
+import { IMessageHandlerContext } from "./IMessageHandlerContext";
 
 export class Bus implements IBus {
     private registeredTransports: IHashTable<IRegisteredTransport> = {};
@@ -153,12 +154,13 @@ export class Bus implements IBus {
         // }
 
     }
-    public publishAsync<T>(message: T | IMessage<T>): Promise<void> {
+    public publishAsync<T>(message: T | IMessage<T>, context?: IMessageHandlerContext): Promise<void> {
         message = this.convertToIMessageIfNot(message);
-        return this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.publish));
+        context = context || new MessageHandlerContext(this, null, message);
+        return this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.publish), context);
     }
 
-    public async sendWithReplyAsync<T, R>(message: T | IMessage<T>, options?: SendOptions): Promise<ReplyRequest> {
+    public async sendWithReplyAsync<T, R>(message: T | IMessage<T>, options?: SendOptions, context?: IMessageHandlerContext): Promise<ReplyRequest> {
         message = this.convertToIMessageIfNot(message);
         let replyHandler = new ReplyHandler();
         const msg = message as IMessage<T>;
@@ -179,13 +181,16 @@ export class Bus implements IBus {
         }
 
         // Now send the message
-        await this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.sendReply));
+        context = context || new MessageHandlerContext(this, null, message);
+        await this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.sendReply), context);
         return new ReplyRequest(replyHandler, replyHandlerPromise);
     }
 
-    public sendAsync<T>(message: T | IMessage<T>, options?: SendOptions): Promise<void> {
+    public sendAsync<T>(message: T | IMessage<T>, options?: SendOptions, context?: IMessageHandlerContext): Promise<void> {
         message = this.convertToIMessageIfNot(message);
-        return this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.send));
+        context = context || new MessageHandlerContext(this, null, message);
+
+        return this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.send), context);
     }
 
     public DoNotContinueDispatchingCurrentMessageToHandlers(): void {
@@ -230,7 +235,7 @@ export class Bus implements IBus {
         return transport;
     }
 
-    private async processOutboundMessageAsync(message: IMessage<any>): Promise<void> {
+    private async processOutboundMessageAsync(message: IMessage<any>, context: IMessageHandlerContext): Promise<void> {
         // find the transport for this message
         const transport = this.getTransport(message.type);
 
@@ -238,7 +243,6 @@ export class Bus implements IBus {
         const tasks = transport.pipeline.outboundStages;
 
         const pipelineTasks = [...tasks.logicalMessageReceived, ...tasks.transportDispatch, handlerTask];
-        const context = new MessageHandlerContext(this, message);
         this.executePipelineTasks(pipelineTasks, message, context);
     }
 
@@ -280,9 +284,9 @@ export class Bus implements IBus {
                             (s.messageFilter.endsWith("*") && type.startsWith(s.messageFilter.substr(0, s.messageFilter.length - 1)))
                     }));
                 }
-
+                const shouldClone = true;
                 subscribers.forEach(async s => {
-                    await this.processInboundMessage(message, s.handler);
+                    await this.processInboundMessage(shouldClone ? this.cloneMessage(message) : message, s.handler);
                 })
 
             }
@@ -292,6 +296,14 @@ export class Bus implements IBus {
             this.publishAsync({ type: MessageException.type, payload: new MessageException(e.message, message) });
         }
     }
+    private cloneCount = 0;
+    private cloneMessage(message: IMessage<any>): IMessage<any> {
+        const copy = Object.assign({}, message);
+        // Now ensure the child objects are also clones
+        copy.metaData = Object.assign({}, copy.metaData);
+        (copy.metaData as any).cloneCount = ++this.cloneCount;
+        return copy;
+    }
 
     private async processInboundMessage(message: IMessage<any>, handler: IMessageHandler<any>): Promise<void> {
         // find the transport for this message
@@ -300,11 +312,11 @@ export class Bus implements IBus {
         const tasks = transport.pipeline.inboundStages;
 
         const pipelineTasks = [...tasks.transportMessageReceived, ...tasks.logicalMessageReceived, ...tasks.invokeHandlers, handlerTask];
-        const context = new MessageHandlerContext(this, message);
+        const context = new MessageHandlerContext(this, null, message);
         this.executePipelineTasks(pipelineTasks, message, context);
     }
 
-    private async executePipelineTasks(tasks: IMessageTask[], message: IMessage<any>, context: MessageHandlerContext, index: number = 0/*, options: SendOptions,  */) {
+    private async executePipelineTasks(tasks: IMessageTask[], message: IMessage<any>, context: IMessageHandlerContext, index: number = 0/*, options: SendOptions,  */) {
         let task = tasks[index];
         if (task != null) {
             await task.invokeAsync(message, context, async () => {
