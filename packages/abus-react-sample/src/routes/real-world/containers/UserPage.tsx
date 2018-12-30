@@ -12,8 +12,8 @@ import List from '../components/List'
 const zip = require('lodash/zip');
 
 const loadData = ({ login, loadUser, loadStarred }) => {
-  loadUser(login, ['name'])
-  loadStarred(login)
+  loadUser(login, ['name']);
+  loadStarred(login);
 }
 
 class UserPage extends Component<any, any> {

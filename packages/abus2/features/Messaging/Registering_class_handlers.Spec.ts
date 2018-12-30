@@ -1,5 +1,4 @@
 import { Bus } from "../../src/Bus";
-import { MyHandlerByTypeDefinition, handlerResponse } from "../MessageTypes";
 import * as classHandlers from "../MessageTypes";
 
 feature(`Registering class handlers
@@ -15,7 +14,7 @@ feature(`Registering class handlers
 
                 // configure bus
                 bus.start();
-                handlerResponse.value = 0;
+                classHandlers.handlerResponse.value = 0;
             });
         });
 
@@ -24,7 +23,7 @@ feature(`Registering class handlers
             });
 
             when(`passing the class type 'MyHandlerByTypeDefinition' to bus.registerHandlers`, async () => {
-                bus.registerHandlers(MyHandlerByTypeDefinition);
+                bus.registerHandlers(classHandlers.MyHandlerByTypeDefinition);
             });
 
             then(`the registered '2' ares subscribed`, () => {
@@ -40,8 +39,43 @@ feature(`Registering class handlers
                 bus.registerHandlers(classHandlers);
             });
 
-            then(`the registered '4' ares subscribed`, () => {
+            then(`the registered '6' ares subscribed`, () => {
                 (bus as any).messageSubscriptions.length.should.be.equal(stepContext.values[0]);
+            });
+        });
+
+        scenario(`Subscribe using instance of class with handlers`, () => {
+            given(`handlers have been defined in a class`, () => {
+            });
+
+            when(`passing the class type 'MyHandlerByTypeDefinition' to bus.registerHandlers`, async () => {
+                bus.registerHandlers(new classHandlers.MyHandlerByTypeDefinition());
+            });
+
+            then(`the registered '2' ares subscribed`, () => {
+                (bus as any).messageSubscriptions.length.should.be.equal(stepContext.values[0]);
+            });
+        });
+
+        scenario(`Handlers are bound to class instance when subscribing using a class instance`, () => {
+            let instance: classHandlers.HandlersByClassInstance;
+
+            given(`handlers have been defined in a class`, () => {
+                instance = new classHandlers.HandlersByClassInstance();
+                console.log(instance)
+            });
+            and(`the value of count is 10`, () => {
+
+            });
+
+            when(`passing the class type 'HandlersByClassInstance' to bus.registerHandlers`, async () => {
+                bus.registerHandlers(instance);
+            });
+            and(`sending the message 'PlusOne'`, () => {
+                bus.sendAsync(new classHandlers.PlusOne(2))
+            });
+            then(`the count should be '11'`, () => {
+                instance.count.should.be.eql(stepContext.values[0]);
             });
         });
     });

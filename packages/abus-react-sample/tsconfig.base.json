@@ -4,6 +4,7 @@
         "experimentalDecorators": true,
         "noImplicitAny": false,
         "sourceMap": true,
+        "inlineSources": true,
         "noUnusedParameters": false,
         "noUnusedLocals": true,
         "skipLibCheck": true,

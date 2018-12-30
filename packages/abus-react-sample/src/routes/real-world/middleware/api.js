@@ -61,8 +61,8 @@ const userSchema = new schema.Entity('users', {}, {
 const repoSchema = new schema.Entity('repos', {
   owner: userSchema
 }, {
-  idAttribute: repo => repo.fullName.toLowerCase()
-})
+    idAttribute: repo => repo.fullName.toLowerCase()
+  })
 
 // Schemas for Github API responses.
 export const Schemas = {
@@ -109,7 +109,7 @@ export default store => next => action => {
     return finalAction
   }
 
-  const [ requestType, successType, failureType ] = types
+  const [requestType, successType, failureType] = types
   next(actionWith({ type: requestType }))
 
   return callApi(endpoint, schema).then(

@@ -20,7 +20,7 @@ context(
 				hash: this.isProduction,
 				output: "dist/$name.js",
 				useTypescriptCompiler: true,
-				sourceMaps: { project: true, vendor: true },
+				sourceMaps: true,
 				plugins: [
 					JSONPlugin(),
 					CSSPlugin(),

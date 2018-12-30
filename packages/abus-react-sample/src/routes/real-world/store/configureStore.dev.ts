@@ -3,20 +3,21 @@ import thunk from 'redux-thunk'
 import { createLogger } from 'redux-logger'
 import api from '../middleware/api'
 import rootReducer from '../reducers'
-// import reduxAbusThunk from "redux-abus-thunk";
+import reduxAbusThunkMiddleware from "redux-abus-thunk";
+import reduxAbusMiddleware from "redux-abus";
 
-const configureStore = (preloadedState) => {
+const configureStore = (bus, preloadedState) => {
   const store = createStore(
     rootReducer,
     preloadedState,
     compose(
-      applyMiddleware(thunk, api, createLogger())
+      applyMiddleware(reduxAbusThunkMiddleware(bus), api, reduxAbusMiddleware(bus), createLogger())
     )
   )
 
-  if (module.hot) {
+  if ((module as any).hot) {
     // Enable Webpack hot module replacement for reducers
-    module.hot.accept('../reducers', () => {
+    (module as any).hot.accept('../reducers', () => {
       store.replaceReducer(rootReducer)
     })
   }

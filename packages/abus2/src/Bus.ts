@@ -41,8 +41,8 @@ export class Bus implements IBus {
         return this;
     }
 
-    public useTransport(transport: IMessageTransport): TransportGrammar {
-        return this.abusGrammar.useTransport(transport);
+    public usingTransport(transport: IMessageTransport): TransportGrammar {
+        return this.abusGrammar.usingTransport(transport);
     }
 
     /**
@@ -107,7 +107,7 @@ export class Bus implements IBus {
     public start() {
         // Verify if a default transport/message has been defined if not add one
         if (!this.registeredMessageTypes["*"]) {
-            this.useTransport(new ExpressMemoryTransport())
+            this.usingTransport(new ExpressMemoryTransport())
                 .withMessageTypes("*").and
                 .outboundPipeline.useLocalMessagesReceivedTasks(new MessageExceptionTask()).andAlso()
                 .inboundPipeline.useLocalMessagesReceivedTasks(new MessageExceptionTask());
@@ -119,40 +119,60 @@ export class Bus implements IBus {
             const classHandler = classHandlers[i];
 
             if (typeof classHandler === "object") {
-                for (let key in classHandler) {
-                    const handlers = classHandler[key];
-                    if (typeof handlers === "function" &&
-                        handlers.prototype.__messageHandlers) {
-                        this.registerClassHandler(classHandler[key]);
+                // determine if this is a single class instance with handlers or an exported object
+                if (classHandler.__proto__.__messageHandlers) {
+                    // class instance
+                    this.registerClassHandler(classHandler.__proto__, classHandler, false);
+                } else {
+                    for (let key in classHandler) {
+                        const handlers = classHandler[key];
+                        if (typeof handlers === "function" &&
+                            handlers.prototype.__messageHandlers) {
+                            this.registerClassHandler(handlers.prototype, classHandler[key]);
+                        }
                     }
                 }
             } else {
-                this.registerClassHandler(classHandler);
+                // Class Type
+                this.registerClassHandler(classHandler.prototype, classHandler);
             }
         }
     }
 
-    private registerClassHandler(classHandler: any) {
+    private registerClassHandler(proto: any, classHandler: any, createInstance: boolean = true) {
         // verify that the handler has used the decorator to register the handlers
-        const definedHandlers = classHandler.prototype.__messageHandlers;
+        const definedHandlers = proto.__messageHandlers;
         if (!definedHandlers) {
             throw new Error("Must use @handler on method handlers to use this method.");
         }
 
-        const subscriptions = classHandler.prototype.__messageHandlerSubscriptions;
-        const classInstance = new classHandler
+        const subscriptions = proto.__messageHandlerSubscriptions;
+        let classInstance;
+        if (createInstance) {
+            classInstance = new classHandler
+        } else {
+            classInstance = classHandler;
+        }
         definedHandlers.forEach(definition => {
-            subscriptions.push(this.subscribe(definition.type, classInstance[definition.handler].bind(classInstance)));
+            const subscriptionId = this.subscribe(definition.type, classInstance[definition.handler].bind(classInstance));
+            // classInstance.__messageHandlersSubscriptions.push(subscriptionId);
+            classInstance.__subscriptions__ = classInstance.__subscriptions__ || [];
+            classInstance.__subscriptions__.push(subscriptionId);
+            subscriptions.push(subscriptionId);
         });
     }
 
-    public unregisterHandlers(...handlers: Function[]) {
-        // target.unsubscribeHandlers = function () {
-        //     for (let i = 0; i < this.__messageHandlersSubscriptions.length; i++) {
-        //         Bus.instance.unsubscribe(this.__messageHandlersSubscriptions[i]);
-        //     }
-        // }
-
+    public unregisterHandlers(...handlers: any[]): void {
+        for (let i = 0; i < handlers.length; i++) {
+            const handler = handlers[i];
+            // test if this is an instance or an export to iterate
+            if ((handler as any).__subscriptions__) {
+                // class instance
+                (handler as any).__subscriptions__.forEach(s => {
+                    this.unsubscribe(s);
+                })
+            }
+        }
     }
     public publishAsync<T>(message: T | IMessage<T>, context?: IMessageHandlerContext): Promise<void> {
         message = this.convertToIMessageIfNot(message);
@@ -160,7 +180,7 @@ export class Bus implements IBus {
         return this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.publish), context);
     }
 
-    public async sendWithReplyAsync<T, R>(message: T | IMessage<T>, options?: SendOptions, context?: IMessageHandlerContext): Promise<ReplyRequest> {
+    public sendWithReply<T, R>(message: T | IMessage<T>, options?: SendOptions, context?: IMessageHandlerContext): ReplyRequest {
         message = this.convertToIMessageIfNot(message);
         let replyHandler = new ReplyHandler();
         const msg = message as IMessage<T>;
@@ -182,7 +202,7 @@ export class Bus implements IBus {
 
         // Now send the message
         context = context || new MessageHandlerContext(this, null, message);
-        await this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.sendReply), context);
+        this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.sendReply), context);
         return new ReplyRequest(replyHandler, replyHandlerPromise);
     }
 
@@ -284,7 +304,7 @@ export class Bus implements IBus {
                             (s.messageFilter.endsWith("*") && type.startsWith(s.messageFilter.substr(0, s.messageFilter.length - 1)))
                     }));
                 }
-                const shouldClone = true;
+                const shouldClone = subscribers.length > 1;
                 subscribers.forEach(async s => {
                     await this.processInboundMessage(shouldClone ? this.cloneMessage(message) : message, s.handler);
                 })

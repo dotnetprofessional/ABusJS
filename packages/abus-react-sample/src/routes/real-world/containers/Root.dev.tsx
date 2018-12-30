@@ -7,18 +7,20 @@ import UserPage from './UserPage'
 import RepoPage from './RepoPage'
 import { DevTools } from "../../devtools/DevTools";
 
-const Root = ({ store, busDevTools }) => (
-  <Provider store={store}>
-    <div>
-      <Route path="/" component={App} />
-      <Route path="/:login/:name"
-        component={RepoPage} />
-      <Route path="/:login"
-        component={UserPage} />
-      <DevTools bus={busDevTools} />
-    </div>
-  </Provider>
-)
+const Root = ({ store, busDevTools }) => {
+  return (
+    <Provider store={store}>
+      <div>
+        <Route path="/" component={App} />
+        <Route path="/:login/:name"
+          component={RepoPage} />
+        <Route path="/:login"
+          component={UserPage} />
+        <DevTools bus={busDevTools} />
+      </div>
+    </Provider>
+  )
+};
 
 Root.propTypes = {
   store: PropTypes.object.isRequired,

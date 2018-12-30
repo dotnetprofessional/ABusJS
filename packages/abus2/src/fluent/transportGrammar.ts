@@ -23,7 +23,7 @@ export class AbusGrammar extends ConditionalGrammar<Bus>{
         super(parent);
     }
 
-    public useTransport(transport: IMessageTransport): TransportGrammar {
+    public usingTransport(transport: IMessageTransport): TransportGrammar {
         const registeredTransport = this.parent.registerTransport(transport);
 
         return new TransportGrammar(this, this.parent, registeredTransport);

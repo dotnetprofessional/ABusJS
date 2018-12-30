@@ -34,3 +34,20 @@ export class MyHandlerByTypeDefinition {
         handlerResponse.value += message.value;
     }
 }
+
+export class HandlersByClassInstance {
+    public count: number;
+
+    constructor() {
+        this.count = 10;
+    }
+    @handler(PlusOne)
+    plusOne(message: PlusOne) {
+        this.count++;
+    }
+
+    @handler(PlusTwo)
+    plusTwo(message: PlusTwo) {
+        this.count += 2;
+    }
+}

@@ -34,7 +34,7 @@ feature(`Send a message and receive a reply`, () => {
         });
 
         when(`sending a message with type '${type}'`, async () => {
-            const p = await bus.sendWithReplyAsync({ type: type });
+            const p = await bus.sendWithReply({ type: type });
             result = await p.responseAsync<string>();
         });
 
@@ -60,7 +60,7 @@ feature(`Send a message and receive a reply`, () => {
         });
 
         when(`sending a message with type '${type}'`, async () => {
-            const p = await bus.sendWithReplyAsync({ type: type });
+            const p = bus.sendWithReply({ type: type });
             p.cancel();
             result = await p.responseAsync<string>();
         });

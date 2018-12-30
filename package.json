@@ -1,8 +1,13 @@
 {
   "name": "abus-root",
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/mocha"
+    ]
+  },
   "private": true,
   "dependencies": {},
   "devDependencies": {

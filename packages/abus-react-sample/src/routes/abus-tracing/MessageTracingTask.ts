@@ -11,7 +11,7 @@ export class MessageTracingTask implements IMessageTask {
         metaData.conversationId = parentMetaData ? parentMetaData.conversationId : newGuid();
 
         // CorrelationId becomes the current message
-        metaData.correlationId = parentMetaData ? parentMetaData.messageId : undefined;
+        metaData.correlationId = metaData.correlationId || (parentMetaData ? parentMetaData.messageId : undefined);
 
         await next();
     }
