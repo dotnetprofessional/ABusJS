@@ -28,7 +28,7 @@ export interface IMessageHandlerContext extends ISendMessages {
      *
      * @memberOf IMessageHandlerContext
      */
-    DoNotContinueDispatchingCurrentMessageToHandlers();
+    DoNotContinueDispatchingCurrentMessageToHandlers(): void;
 
     /**
      * The currently active message, this is the same message returned as the first

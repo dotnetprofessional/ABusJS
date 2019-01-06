@@ -24,7 +24,7 @@ export interface IMessageTransport {
      *
      * @memberOf IMessageTransport
      */
-    publishAsync(message: IMessage<any>): Promise<void>;
+    publishAsync(message: IMessage<any>, timeToDelay?: TimeSpan): Promise<void>;
 
     /**
      * Sends a command message to the Endpoint

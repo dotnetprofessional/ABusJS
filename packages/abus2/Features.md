@@ -44,9 +44,9 @@ for a given test. This can then be included as part of the test output, in the s
                         
 
   RequestAuthorization:= (AuthorizationRequestMessage-Manager1)
-                        |(AuthorizationRequestMessage-Manager2)
-                        |(OrderStatusUpdatedMessage)
-                        |(TimeoutMessage)                       
+                        =(AuthorizationRequestMessage-Manager2)
+                        =(OrderStatusUpdatedMessage)
+                        =(TimeoutMessage)                       
   
   RequestAuthorization:
    (AuthorizationRequestMessage-Manager1)|(AuthorizationRequestMessage-Manager2)
@@ -65,15 +65,20 @@ for a given test. This can then be included as part of the test output, in the s
   ## Message definitions
   name: type: SUBMIT_ORDER, orderId:123456
   ! - message is supplied by the test
-  | - messages are sent in parallel  
+  = - messages are sent in parallel  
   : - response to a sent message
   * - published message
-  < - send with reply (only )
+  > - send with reply (only )
   !* - published message supplied by the test
   !: - response to a sent message supplied by the test
   - - represents a time period default is 10ms
   [] - Group
-  X - Error
+  
+  error responses:
+  {
+    error: "error description"
+  }
+
   hooks - as some validation can be tricky adding a hookBubble field with a function will allow for custom
           validation. These will be ignored by the JSON.stringify function.
           (message:IMessage<any>, context:IMessageHandlerContext): boolean

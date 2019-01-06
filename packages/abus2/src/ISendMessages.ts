@@ -10,10 +10,11 @@ export interface ISendMessages {
  *
  * @template T
  * @param {(IMessage<T> | T)} message
+ * @param {SendOptions} [options]
  *
  * @memberOf MessageHandlerContext
  */
-    publishAsync<T>(message: IMessage<T> | T): Promise<void>;
+    publishAsync<T>(message: IMessage<T> | T, options?: SendOptions): Promise<void>;
 
     /**
      * Sends a message using the current messages context. This makes the sent

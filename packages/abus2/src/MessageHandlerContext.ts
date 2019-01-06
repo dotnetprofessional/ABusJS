@@ -32,8 +32,8 @@ export class MessageHandlerContext implements IMessageHandlerContext {
         this.shouldTerminatePipeline = true;
     }
 
-    public publishAsync<T>(message: T | IMessage<T>): Promise<void> {
-        return (this.bus as Bus).publishAsync(message, this.getNewContext(message));
+    public publishAsync<T>(message: T | IMessage<T>, options?: SendOptions): Promise<void> {
+        return (this.bus as Bus).publishAsync(message, options, this.getNewContext(message));
     }
 
     public sendWithReply<T, R>(message: T, options?: SendOptions): ReplyRequest {

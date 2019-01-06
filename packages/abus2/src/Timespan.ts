@@ -75,6 +75,10 @@ export class TimeSpan {
         return new TimeSpan(milliseconds);
     }
 
+    public static FromDate(date: number): TimeSpan {
+        return new TimeSpan(date - Date.now());
+    }
+
     /**
      *
      * Converts the TimeSpan to a point in time based on the current

@@ -62,7 +62,6 @@ feature(`Registering class handlers
 
             given(`handlers have been defined in a class`, () => {
                 instance = new classHandlers.HandlersByClassInstance();
-                console.log(instance)
             });
             and(`the value of count is 10`, () => {
 

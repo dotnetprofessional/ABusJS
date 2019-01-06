@@ -174,10 +174,10 @@ export class Bus implements IBus {
             }
         }
     }
-    public publishAsync<T>(message: T | IMessage<T>, context?: IMessageHandlerContext): Promise<void> {
+    public publishAsync<T>(message: T | IMessage<T>, options?: SendOptions, context?: IMessageHandlerContext): Promise<void> {
         message = this.convertToIMessageIfNot(message);
         context = context || new MessageHandlerContext(this, null, message);
-        return this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.publish), context);
+        return this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.publish), context, options);
     }
 
     public sendWithReply<T, R>(message: T | IMessage<T>, options?: SendOptions, context?: IMessageHandlerContext): ReplyRequest {
@@ -202,7 +202,7 @@ export class Bus implements IBus {
 
         // Now send the message
         context = context || new MessageHandlerContext(this, null, message);
-        this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.sendReply), context);
+        this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.sendReply), context, options);
         return new ReplyRequest(replyHandler, replyHandlerPromise);
     }
 
@@ -210,7 +210,7 @@ export class Bus implements IBus {
         message = this.convertToIMessageIfNot(message);
         context = context || new MessageHandlerContext(this, null, message);
 
-        return this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.send), context);
+        return this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.send), context, options);
     }
 
     public DoNotContinueDispatchingCurrentMessageToHandlers(): void {
@@ -255,11 +255,11 @@ export class Bus implements IBus {
         return transport;
     }
 
-    private async processOutboundMessageAsync(message: IMessage<any>, context: IMessageHandlerContext): Promise<void> {
+    private async processOutboundMessageAsync(message: IMessage<any>, context: IMessageHandlerContext, options: SendOptions): Promise<void> {
         // find the transport for this message
         const transport = this.getTransport(message.type);
 
-        const handlerTask = new TransportDispatchTask(transport);
+        const handlerTask = new TransportDispatchTask(transport, options);
         const tasks = transport.pipeline.outboundStages;
 
         const pipelineTasks = [...tasks.logicalMessageReceived, ...tasks.transportDispatch, handlerTask];
@@ -336,7 +336,7 @@ export class Bus implements IBus {
         this.executePipelineTasks(pipelineTasks, message, context);
     }
 
-    private async executePipelineTasks(tasks: IMessageTask[], message: IMessage<any>, context: IMessageHandlerContext, index: number = 0/*, options: SendOptions,  */) {
+    private async executePipelineTasks(tasks: IMessageTask[], message: IMessage<any>, context: IMessageHandlerContext, index: number = 0) {
         let task = tasks[index];
         if (task != null) {
             await task.invokeAsync(message, context, async () => {
@@ -371,7 +371,7 @@ export class Bus implements IBus {
             // This appears to be an object that is not of type IMessage
             // Synthesize an IMessage from what we know.
             let name = getTypeNamespace(message);
-            if (!name) {
+            if (!name || name === "String") {
                 throw TypeError("You must pass either an instance of IMessage<T> or a class. You cannot pass an object literal.");
             }
             // Redefine the parameter as an IMessage

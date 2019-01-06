@@ -15,8 +15,8 @@ export class ExpressMemoryTransport implements IMessageTransport {
 
     public name: string = "ExpressMemoryTransport";
 
-    public publishAsync(message: IMessage<any>): Promise<void> {
-        return this.sendAsync(message);
+    public publishAsync(message: IMessage<any>, timeToDelay?: TimeSpan): Promise<void> {
+        return this.sendAsync(message, timeToDelay);
     }
 
     public async sendAsync(message: IMessage<any>, timeToDelay?: TimeSpan): Promise<void> {

@@ -3,6 +3,8 @@ import { IMessage } from "../IMessage";
 import { IBubble, IDelayBubble, IBubbleFlowResult, IBubbleResult } from "./Bubble";
 import chalk, { Chalk } from "chalk";
 import * as diff from "diff";
+import { MessageException } from "../tasks/MessageException";
+import { TimeSpan } from "../Timespan";
 
 export interface ColorTheme {
     statusPass: Chalk;
@@ -25,7 +27,7 @@ export class Bubbles {
     private bubbleFlowResult: IBubbleFlowResult[] = [];
     private bubbleFlow: IBubble[];
     private bubbleFlowIndex: number = 0;
-    private executionPromise: Object;
+    private executionPromise: { resolve: any, reject: any };
     protected colorTheme: ColorTheme = { statusFail: chalk.redBright, statusPass: chalk.greenBright };
 
     constructor(protected bus?: IBus) {
@@ -34,23 +36,43 @@ export class Bubbles {
         }
 
         // add the bubbles task to the bus pipeline
-        // TOOD: This needs to be applied to all transports defined
+        // TODO: This needs to be applied to all transports defined
         bus.usingRegisteredTransportToMessageType("*")
             .outboundPipeline.useTransportMessageReceivedTasks(new BubblesTask(this));
     }
-    public async execute(workflow: string, messages: IBubbleMessage[] = []): Promise<IBubbleFlowResult[]> {
-        this.messages = messages;
-        this.validateMessages();
 
-        this.processWorkflowDefinition(workflow);
+    public async executeAsync(workflow: string, messages: IBubbleMessage[] = []): Promise<IBubbleFlowResult[]> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                this.executionPromise = { resolve, reject };
 
-        // 3. Execute workflow/bubble flow
-        return this.executeBubbleFlowAsync();
+                this.messages = messages;
+                this.processWorkflowDefinition(workflow);
+                this.validateDefinition();
+
+                // 3. Execute workflow/bubble flow
+                await this.executeBubbleFlowAsync();
+            } catch (e) {
+                reject(e);
+            }
+        });
     }
 
-    private validateResult(expected: IMessage<any>, message: IMessage<any>): IBubbleResult {
+    private validateResult(expected: IMessage<any>, message: IMessage<any>, bubble: IBubble): IBubbleResult {
         // check if the message is a reply as they do not send a full IMessage<T> just the payload
-        const actual = this.trimToExpected(expected, message.type.endsWith(".reply") ? message.payload : message);
+        // also ensure that expected is not a full IMessage<T>
+        let actual: Object;
+        if (message.type.endsWith(".reply")) {
+            // a reply
+            if (expected.type) {
+                throw new Error(`[Bubble: ${bubble.name}] Bubble definitions for a reply should contain just the payload.`);
+            }
+            actual = this.trimToExpected(expected, message.payload);
+        } else if (message.type === MessageException.type) {
+            actual = this.trimToExpected(expected, message.payload)
+        } else {
+            actual = this.trimToExpected(expected, message);
+        }
         let diff = "";
         const match = JSON.stringify(expected) === JSON.stringify(actual);
         if (!match) {
@@ -63,7 +85,10 @@ export class Bubbles {
         for (let i = 0; i < this.bubbleFlowResult.length; i++) {
             const bubbleResult = this.bubbleFlowResult[i];
             if (!bubbleResult.result.isValid) {
-                const errorMessage = `bubble: ${bubbleResult.bubble.name}\n${bubbleResult.result.diff}`
+                let errorMessage = `bubble: ${bubbleResult.bubble.name}\n${bubbleResult.result.diff}`
+                if (bubbleResult.actual.type === MessageException.type) {
+                    errorMessage += `\n${MessageException.type}:${bubbleResult.actual.payload.error}`
+                }
                 throw new Error(errorMessage);
             }
         }
@@ -107,24 +132,29 @@ export class Bubbles {
     }
 
     public async messageHandlerAsync(message: IMessage<any>, context: IMessageHandlerContext): Promise<boolean> {
-        const bubble = this.bubbleFlow[this.bubbleFlowIndex];
+        try {
+            const bubble = this.bubbleFlow[this.bubbleFlowIndex];
 
-        this.bubbleFlowIndex++;
-        const expected = this.getMessage(bubble.name).message;
-        const result = this.validateResult(expected, message);
-        this.bubbleFlowResult.push({ bubble, actual: message, expected, result });
+            this.bubbleFlowIndex++;
+            const expected = this.getMessage(bubble.name).message;
+            const result = this.validateResult(expected, message, bubble);
+            this.bubbleFlowResult.push({ bubble, actual: message, expected, result });
 
-        // determine if this message should be auto handled
-        const nextBubble = this.bubbleFlow[this.bubbleFlowIndex];
-        if (nextBubble && (nextBubble.source === BubbleSource.supplied)) {
-            this.handleBubbleMessage(nextBubble, context);
-            return true;
-        } else {
-            if (this.bubbleFlowIndex >= this.bubbleFlow.length) {
-                (this.executionPromise as any).resolve(this.bubbleFlowResult);
+            // determine if this message should be auto handled
+            const nextBubble = this.bubbleFlow[this.bubbleFlowIndex];
+            if (nextBubble && (nextBubble.source === BubbleSource.supplied)) {
+                this.handleBubbleMessage(nextBubble, context);
                 return true;
+            } else {
+                if (this.bubbleFlowIndex >= this.bubbleFlow.length) {
+                    this.executionPromise.resolve(this.bubbleFlowResult);
+                    return true;
+                }
+                return false;
             }
-            return false;
+        } catch (e) {
+            context.DoNotContinueDispatchingCurrentMessageToHandlers()
+            this.executionPromise.reject(e);
         }
     }
 
@@ -138,30 +168,26 @@ export class Bubbles {
         this.extractMessageDefinitions(blockReader);
     }
 
-    private async executeBubbleFlowAsync(): Promise<IBubbleFlowResult[]> {
+    private async executeBubbleFlowAsync(): Promise<void> {
         const firstBubble = this.bubbleFlow[0];
         if (firstBubble.source != BubbleSource.supplied) {
-            throw new Error("First bubble must be supplied");
+            throw new Error("The first bubble in a definition must be marked as supplied ie (!my-first-bubble)");
         }
 
         this.handleBubbleMessage(firstBubble);
-
-        return new Promise((resolve, reject) => {
-            this.executionPromise = { resolve, reject };
-        });
     }
 
-    private handleBubbleMessage(bubble: IBubble, context?: IMessageHandlerContext) {
+    private handleBubbleMessage(bubble: IBubble, context?: IMessageHandlerContext, delay?: number) {
         const msg = this.getMessage(bubble.name).message;
         switch (bubble.type) {
             case BubbleType.publish:
-                this.bus.sendAsync(msg);
+                this.bus.publishAsync(msg, { timeToDelay: new TimeSpan(delay) });
                 break;
             case BubbleType.send:
-                this.bus.sendAsync(msg);
+                this.bus.sendAsync(msg, { timeToDelay: new TimeSpan(delay) });
                 break;
             case BubbleType.sendReply:
-                this.bus.sendWithReply(msg);
+                this.bus.sendWithReply(msg, { timeToDelay: new TimeSpan(delay) });
                 break;
             case BubbleType.reply:
                 context.replyAsync(msg);
@@ -176,10 +202,24 @@ export class Bubbles {
         return bus;
     }
 
-    private validateMessages() {
+    private validateDefinition() {
+        // Ensure each message has at least a type defined for it
         (this.messages || []).forEach(m => {
-            if (!m.message.type) {
-                throw new Error("messages must have a type defined.");
+        });
+
+        // Validate that every bubble has an associated definition
+        this.bubbleFlow.forEach(b => {
+            if (b.type === BubbleType.delay) {
+                return;
+            }
+
+            const msg = this.getMessage(b.name);
+            if (!msg) {
+                throw new Error("Unable to locate a bubble definition for: " + b.name);
+            }
+
+            if (b.type !== BubbleType.reply && !msg.message["error"] && !msg.message.type) {
+                throw new Error(`[Bubble: ${b.name}] messages must have a type defined.`);
             }
         });
     }
@@ -209,8 +249,9 @@ export class Bubbles {
         }
     }
 
-    private getMessage(name: string) {
-        return this.messages.filter(m => m.name === name)[0];
+    private getMessage(name: string): IBubbleMessage {
+        const message = this.messages.filter(m => m.name === name)[0];
+        return message
     }
 
     private getWorkflowDefinition(blockReader: TextBlockReader): any[] {
@@ -256,7 +297,7 @@ export class Bubbles {
             case "*":
                 type = BubbleType.publish;
                 break;
-            case "<":
+            case ">":
                 type = BubbleType.sendReply;
                 break;
             default:

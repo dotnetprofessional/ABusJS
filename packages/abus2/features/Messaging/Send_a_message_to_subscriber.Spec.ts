@@ -3,7 +3,7 @@ import { IMessageHandlerContext } from "../../src/IMessageHandlerContext";
 import { IMessage } from "../../src/IMessage";
 
 feature(`Send a message to a subscriber`, () => {
-    let bus: Bus
+    let bus: Bus;
     const type = "UNIT_TEST";
     let messageReceived: IMessage<any>;
 

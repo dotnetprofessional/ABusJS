@@ -1,6 +1,11 @@
 import { TimeSpan } from './Timespan'
 
 export class SendOptions {
-    public deliverIn?: TimeSpan;
-    // deliverAt?: Date; // Enable when able to persist messages
+    /**
+     * specifies the amount of time that should elapse before the message is actually sent
+     *
+     * @type {TimeSpan}
+     * @memberof SendOptions
+     */
+    public timeToDelay?: TimeSpan;
 }
