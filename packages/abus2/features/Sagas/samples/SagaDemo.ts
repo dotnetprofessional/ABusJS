@@ -25,11 +25,11 @@ export class SagaDemo extends Saga<any> {
 
     @handler("CANCEL_ORDER")
     public cancelOrder(message: any, context: IMessageHandlerContext) {
-        this.complete();
+        this.completeAsync();
     }
 
     public sagaNotFound(message: IMessage<any>, context: IMessageHandlerContext) {
-        console.log("saga not found for type: " + context.activeMessage.type);
+        // console.log("saga not found for type: " + context.activeMessage.type);
         super.sagaNotFound(message, context);
     }
 }

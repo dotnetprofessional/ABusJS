@@ -65,7 +65,6 @@ feature(`Starting a Saga
                 """
                 `, async () => {
                     const result = await bubbles.executeAsync(stepContext.docString);
-                    debugger;
                 });
 
             then(`the saga handler for the start message is executed`, () => {

@@ -4,9 +4,9 @@ import { IMessageHandler } from "../IMessageHandler";
 import { newGuid } from "../Guid";
 
 export interface IPersistSagaData {
-    save(key: string, data: Object): void;
-    get(key: string): Object;
-    remove(key: string): void;
+    saveAsync(key: string, data: Object): Promise<void>;
+    getAsync(key: string): Promise<Object>;
+    removeAsync(key: string): Promise<void>;
 }
 interface ISagaData {
     eTag?: string,
@@ -28,7 +28,7 @@ export class InMemoryKeyValueStore implements IPersistSagaData {
         InMemoryKeyValueStore.storage = {};
     }
 
-    public save(key: string, data: Object): void {
+    public async saveAsync(key: string, data: Object): Promise<void> {
         // Check the etag to ensure it hasn't changed before saving
         const eTag = data["eTag"];
         const persistedETag = InMemoryKeyValueStore.storage[key] ? InMemoryKeyValueStore.storage[key].eTag : eTag;
@@ -41,11 +41,11 @@ export class InMemoryKeyValueStore implements IPersistSagaData {
         InMemoryKeyValueStore.storage[key] = data;
     }
 
-    public get(key: string): Object {
+    public async getAsync(key: string): Promise<Object> {
         return Object.assign({}, InMemoryKeyValueStore.storage[key]);
     }
 
-    public remove(key: string): void {
+    public async removeAsync(key: string): Promise<void> {
         delete InMemoryKeyValueStore.storage[key];
     }
 }
@@ -75,7 +75,7 @@ export abstract class Saga<T> {
 
     private sagaMessageHandler(originalHandler: IMessageHandler<any>) {
         const sagaInstance = this;
-        return (message: any, context: IMessageHandlerContext) => {
+        return async (message: any, context: IMessageHandlerContext) => {
             // create a new saga instance
             const sagaKey = this.configureSagaKey(context.activeMessage);
             if (sagaInstance.startSagaWithType === context.activeMessage.type) {
@@ -83,16 +83,16 @@ export abstract class Saga<T> {
                     throw new Error("Saga key not defined for message: " + context.activeMessage.type);
                 }
 
-                if (this.getSagaData(sagaKey).sagaKey) {
+                if ((await this.getSagaDataAsync(sagaKey)).sagaKey) {
                     throw new Error(`Saga with key ${sagaKey} already exists. Can't start saga twice.`);
                 }
                 this.sagaData.sagaKey = sagaKey;
                 // save the default version of the data which only has an eTag
-                this.saveSagaData();
+                await this.saveSagaDataAsync();
             }
 
             // dehydrate existing saga instance
-            const data = this.getSagaData(sagaKey);
+            const data = await this.getSagaDataAsync(sagaKey);
             if (!data.eTag) {
                 // a message arrived for a saga that doesn't exist
                 sagaInstance.sagaNotFound(message, context);
@@ -105,7 +105,7 @@ export abstract class Saga<T> {
                 handler(message, context);
                 // now persist the data again
                 if (this.sagaData.sagaKey !== "complete") {
-                    newSagaInstance.saveSagaData();
+                    await newSagaInstance.saveSagaDataAsync();
                 }
             } catch (e) {
                 // handle exception here
@@ -164,22 +164,26 @@ export abstract class Saga<T> {
      *
      * @memberof Saga
      */
-    public complete() {
-        this.removeSagaData();
+    public async completeAsync() {
+        await this.removeSagaDataAsync();
         // update the local sagaData to signify its been deleted
         this.sagaData.sagaKey = "complete";
     }
 
-    private getSagaData(key: string): ISagaData {
-        return this.storage.get(key) as ISagaData;
+    public isCompleted(): boolean {
+        return false;
     }
 
-    private saveSagaData() {
-        this.storage.save(this.sagaData.sagaKey, this.sagaData);
+    private async getSagaDataAsync(key: string): Promise<ISagaData> {
+        return await this.storage.getAsync(key) as ISagaData;
     }
 
-    private removeSagaData() {
-        this.storage.remove(this.sagaData.sagaKey);
+    private async saveSagaDataAsync(): Promise<void> {
+        return this.storage.saveAsync(this.sagaData.sagaKey, this.sagaData);
+    }
+
+    private removeSagaDataAsync(): Promise<void> {
+        return this.storage.removeAsync(this.sagaData.sagaKey);
     }
 }
 

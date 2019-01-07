@@ -3,7 +3,7 @@ import { InMemoryKeyValueStore } from "../../src/sagas/saga";
 import { Bus } from "../../src";
 import { SagaDemo } from "./samples/SagaDemo";
 
-feature.only(`Cancelling a Saga
+feature(`Cancelling a Saga
 
     Saga's can be cancelled by calling the 'complete' method. This will prevent further processing of the
     Saga instance. If a message arrives for the Saga instance that is not one that creates a new instance then

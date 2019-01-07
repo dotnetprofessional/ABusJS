@@ -155,7 +155,7 @@ export class ABusMonitor extends React.PureComponent<{ bus: IBus }, { isVisible:
         <DiagramComponent id="diagram"
           ref={diagram => { this.diagramInstance = diagram }}
           width={'100%'}
-          height={490}
+          height={800}
           snapSettings={{
             horizontalGridlines: gridlines,
             verticalGridlines: gridlines
