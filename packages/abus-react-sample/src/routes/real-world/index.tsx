@@ -2,7 +2,7 @@ import * as React from 'react'
 import { BrowserRouter as Router } from 'react-router-dom'
 import Root from './containers/Root.dev'
 import configureStore from './store/configureStore'
-import { DevToolsTask } from "../devtools/DevTools";
+import { DevToolsTask } from "../devtools";
 import { Bus } from 'abus2';
 import { MessageTracingTask } from '../abus-tracing/MessageTracingTask';
 import { MessagePerformanceTask } from '../abus-tracing/MessagePerformanceTask';

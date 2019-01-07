@@ -5,13 +5,19 @@ import api from '../middleware/api'
 import rootReducer from '../reducers'
 import reduxAbusThunkMiddleware from "redux-abus-thunk";
 import reduxAbusMiddleware from "redux-abus";
+import { composeWithDevTools } from 'redux-devtools-extension';
+
+const composeEnhancers = composeWithDevTools({
+  name: 'ABUS SAMPLES: Real World', actionsBlacklist: []
+});
 
 const configureStore = (bus, preloadedState) => {
+  const middleware = [reduxAbusThunkMiddleware(bus), api, reduxAbusMiddleware(bus), createLogger()];
   const store = createStore(
     rootReducer,
     preloadedState,
-    compose(
-      applyMiddleware(reduxAbusThunkMiddleware(bus), api, reduxAbusMiddleware(bus), createLogger())
+    composeEnhancers(
+      applyMiddleware(...middleware)
     )
   )
 

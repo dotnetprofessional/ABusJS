@@ -1,252 +1,180 @@
-/*
-    DevTools for use with ABUS
-*/
-import * as React from "react";
-import * as ReactDom from "react-dom";
-import Dock from "react-dock";
-import { IBus, IMessageHandlerContext, IMessage, newGuid, IMessageTask, handler } from "abus2";
-import "../../devTools.scss";
-import {
-  Diagram,
-  DiagramComponent,
-  NodeModel,
-  ConnectorModel,
-  Node,
-  DataBinding,
-  HierarchicalTree,
-  DiagramTools,
-  Inject,
-  GridlinesModel,
-  DiagramConstraints,
-  NodeConstraints
-} from "@syncfusion/ej2-react-diagrams";
-import JSONTree from 'react-json-tree'
+import * as React from 'react';
+import { cloneElement, Children, Component } from 'react';
+import * as PropTypes from 'prop-types';
+import Dock from 'react-dock';
+import { toggleVisibility, changeMonitor, changePosition, changeSize } from './actions';
+import reducer from './reducers';
+const parseKey = require('parse-key');
+import { POSITIONS } from './constants';
+import { IBus } from 'abus2';
+import { ABusMonitor } from './Abus-Monitor';
 
-import {
-  DataManager
-} from '@syncfusion/ej2-data';
-
-export class DevTools extends React.PureComponent<{ bus: IBus }, { isVisible: boolean, toggle: boolean }> {
-  private messages: IMessage<any>[] = [];
-  private diagramInstance: DiagramComponent;
-  private subscriptionId: string;
-  private wasMounted: boolean = false;
-
-  private interval: number[] = [
-    1,
-    9,
-    0.25,
-    9.75,
-    0.25,
-    9.75,
-    0.25,
-    9.75,
-    0.25,
-    9.75,
-    0.25,
-    9.75,
-    0.25,
-    9.75,
-    0.25,
-    9.75,
-    0.25,
-    9.75,
-    0.25,
-    9.75
-  ];
-  constructor(props) {
-    super(props)
-    this.props.bus.start();
-    this.updateDiagram = this.updateDiagram.bind(this);
-    this.processCompletedMessage = this.processCompletedMessage.bind(this);
-    this.handleSizeChange = this.handleSizeChange.bind(this);
-    this.state = { isVisible: true, toggle: false };
-    this.messages.push({ type: "root", messageId: "root", correlationid: "", metaData: {} } as any);
-  }
-
-  componentWillUnmount() {
-    this.props.bus.unregisterHandlers(this);
-  }
-
-  componentDidMount() {
-    this.props.bus.registerHandlers(this);
-    this.wasMounted = true;
-  }
-
-  @handler("abus-devtools-message")
-  processCompletedMessage(message: any, context: IMessageHandlerContext) {
-    message.messageId = message.metaData.messageId;
-    message.correlationId = message.metaData.correlationId || "root";
-    this.messages.push(message);
-    this.updateDiagram();
-  }
-
-  handleSizeChange() {
-    // this.updateDiagram();
-  }
-
-  updateDiagram() {
-    if (this.wasMounted) {
-      this.setState({ toggle: !this.state.toggle });
-      // this.diagramInstance.dataBind();
+export class DevTools extends React.PureComponent<{ bus: IBus }> {
+    // toggleVisibilityKey = 'ctrl-h'
+    // changePositionKey = 'ctrl-q'
+    // changeMonitorKey = 'ctrl-m'
+    render() {
+        const monitor = <ABusMonitor bus={this.props.bus} />;
+        return (
+            <DockMonitor toggleVisibilityKey='ctrl-h'
+                changePositionKey='ctrl-q'
+                changeMonitorKey='ctrl-m'
+                fluid={true}
+            // monitorState={{
+            //     isVisible: true,
+            //     position: 'right',
+            //     size: 0.3,
+            //     fluid: true
+            // }}
+            >
+                {monitor}
+            </DockMonitor>
+        )
     }
-  }
-
-  render() {
-    let messageElements: JSX.Element[] = [];
-    // for (let i = 0; i < this.messages.length; i++) {
-    //   const msg = this.messages[i];
-    //   messageElements.push(<div key={newGuid()}>{msg.type}</div>);
-    // }
-
-    let gridlines: GridlinesModel = {
-      lineColor: "#e0e0e0",
-      lineIntervals: this.interval
-    };
-
-    const getNodeData = (node: Node): IMessage<any> => {
-      return this.messages.filter((m: any) => m.messageId === node.data["messageId"])[0];
-    }
-    function getContent(data: IMessage<any>): HTMLElement {
-      let tooltipContent: HTMLElement = document.createElement('div');
-      let content = (
-        <React.Fragment>
-          <div>TYPE: {data.type} </div>
-          <JSONTree data={data} />
-        </React.Fragment>
-      );
-      ReactDom.render(content, tooltipContent)
-      return tooltipContent;
-    }
-
-    return (
-      <div >
-        <Dock position='right' isVisible={this.state.isVisible} dimMode="none" onSizeChange={this.handleSizeChange}
-          fluid={true}>
-          {/* you can pass a function as a child here */}
-          <div onClick={() => this.setState({ isVisible: !this.state.isVisible })}>X</div>
-          <div>ABUS Dev Tools!!!</div>
-          {messageElements}
-          <DiagramComponent id="diagram"
-            ref={diagram => { this.diagramInstance = diagram }}
-            width={'100%'}
-            height={490}
-            snapSettings={{
-              horizontalGridlines: gridlines,
-              verticalGridlines: gridlines
-            }}
-            click={(args) => {
-              debugger;
-            }}
-            //Configures data source
-            dataSourceSettings={
-              {
-                id: 'messageId',
-                parentId: 'correlationId',
-                dataManager: new DataManager(this.messages),
-                //binds the external data with node
-                doBinding: (nodeModel: NodeModel, data: any, diagram: Diagram) => {
-                  // debugger;
-                  nodeModel.annotations = [{
-                    /* tslint:disable:no-string-literal */
-                    margin: {
-                      top: 10,
-                      left: 10,
-                      right: 10,
-                      bottom: 10
-                    },
-                    style: {
-                      color: 'black'
-                    }
-                  }];
-                  /* tslint:disable:no-string-literal */
-                  nodeModel.style = {
-                    strokeColor: '#f5d897',
-                    strokeWidth: 1,
-                  };
-                  nodeModel.constraints = NodeConstraints.Default | NodeConstraints.Tooltip
-                }
-              }
-            }
-            //Configrues HierarchicalTree layout
-            layout={
-              {
-                type: 'HierarchicalTree',
-                horizontalSpacing: 15,
-                verticalSpacing: 50,
-                orientation: "LeftToRight",
-                margin: {
-                  top: 10,
-                  left: 10,
-                  right: 10,
-                  bottom: 0
-                },
-              }
-            }
-
-            //Sets the default values of nodes
-            getNodeDefaults={
-              (obj: Node, diagram: Diagram) => {
-                const msg = getNodeData(obj);
-                //Initialize shape
-                obj.shape = {
-                  type: 'Basic',
-                  shape: 'Rectangle'
-                };
-                obj.style = {
-                  strokeWidth: 1,
-                  fill: msg.metaData["isSynthetic"] ? 'lightblue' : '#ffeec7',
-                };
-                obj.height = 30;
-                obj.annotations = [{
-                  content: msg.type,
-                }]
-                obj.width = msg.type.length * 10;
-                obj.tooltip = {
-                  //Sets the content of the Tooltip
-                  content: getContent(msg),
-                  //Sets the position of the Tooltip
-                  position: 'BottomCenter',
-                  //Sets the tooltip position relative to the node
-                  relativeMode: 'Object'
-                }
-
-              }
-            }
-            //Sets the default values of connectors
-            getConnectorDefaults={
-              (connector: ConnectorModel, diagram: Diagram) => {
-                connector.type = 'Orthogonal';
-                connector.style.strokeColor = '#4d4d4d';
-                connector.targetDecorator.shape = 'None';
-              }
-            }
-            //Disables all interactions except zoom/pan
-            tool={
-              DiagramTools.ZoomPan
-            }
-
-            constraints={
-              DiagramConstraints.Default | DiagramConstraints.Tooltip
-            }
-          ><Inject services={
-            [DataBinding, HierarchicalTree]
-          }
-            />
-          </DiagramComponent>
-        </Dock>
-      </div >
-    );
-  }
 }
 
-export class DevToolsTask implements IMessageTask {
-  constructor(protected bus: IBus) {
 
-  }
-  async invokeAsync(message: IMessage<any>, context: IMessageHandlerContext, next: any): Promise<void> {
-    await next();
-    // Now that handlers have completed sent the message to the devTools.
-    this.bus.publishAsync({ type: "abus-devtools-message", payload: message });
-  }
+export class DockMonitor extends React.PureComponent<{ toggleVisibilityKey: string, changePositionKey: string, changeMonitorKey: string, fluid: boolean }, { isVisible: boolean }>{
+    static update = reducer;
+
+    static propTypes = {
+        // defaultPosition: PropTypes.oneOf(POSITIONS),
+        // defaultIsVisible: PropTypes.bool.isRequired,
+        // defaultSize: PropTypes.number.isRequired,
+        toggleVisibilityKey: PropTypes.string.isRequired,
+        changePositionKey: PropTypes.string.isRequired,
+        changeMonitorKey: PropTypes.string,
+        fluid: PropTypes.bool,
+
+        // dispatch: PropTypes.func,
+        // monitorState: PropTypes.shape({
+        //     position: PropTypes.oneOf(POSITIONS).isRequired,
+        //     size: PropTypes.number.isRequired,
+        //     isVisible: PropTypes.bool.isRequired,
+        //     childMonitorState: PropTypes.any
+        // })
+    };
+
+    // static defaultProps = {
+    //     defaultIsVisible: true,
+    //     defaultPosition: 'right',
+    //     defaultSize: 0.3,
+    //     fluid: true
+    // };
+
+    constructor(props) {
+        super(props);
+        this.handleKeyDown = this.handleKeyDown.bind(this);
+        this.handleSizeChange = this.handleSizeChange.bind(this);
+        this.state = { isVisible: false };
+        const childrenCount = Children.count(props.children);
+        if (childrenCount === 0) {
+            console.error(
+                '<DockMonitor> requires at least one monitor inside. ' +
+                'Why don’t you try <LogMonitor>? You can get it at ' +
+                'https://github.com/gaearon/redux-devtools-log-monitor.'
+            );
+        } else if (childrenCount > 1 && !props.changeMonitorKey) {
+            console.error(
+                'You specified multiple monitors inside <DockMonitor> ' +
+                'but did not provide `changeMonitorKey` prop to change them. ' +
+                'Try specifying <DockMonitor changeMonitorKey="ctrl-m" /> ' +
+                'and then press Ctrl-M.'
+            );
+        }
+    }
+
+    componentDidMount() {
+        window.addEventListener('keydown', this.handleKeyDown);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('keydown', this.handleKeyDown);
+    }
+
+    matchesKey(key, event) {
+        if (!key) {
+            return false;
+        }
+
+        const charCode = event.keyCode || event.which;
+        const char = String.fromCharCode(charCode);
+        return key.name.toUpperCase() === char.toUpperCase() &&
+            key.alt === event.altKey &&
+            key.ctrl === event.ctrlKey &&
+            key.meta === event.metaKey &&
+            key.shift === event.shiftKey;
+    }
+
+    handleKeyDown(e) {
+        // Ignore regular keys when focused on a field
+        // and no modifiers are active.
+        if ((
+            !e.ctrlKey && !e.metaKey && !e.altKey
+        ) && (
+                e.target.tagName === 'INPUT' ||
+                e.target.tagName === 'SELECT' ||
+                e.target.tagName === 'TEXTAREA' ||
+                e.target.isContentEditable
+            )) {
+            return;
+        }
+
+        const visibilityKey = parseKey(this.props.toggleVisibilityKey);
+        const positionKey = parseKey(this.props.changePositionKey);
+
+        let monitorKey;
+        if (this.props.changeMonitorKey) {
+            monitorKey = parseKey(this.props.changeMonitorKey);
+        }
+
+        if (this.matchesKey(visibilityKey, e)) {
+            e.preventDefault();
+            this.setState({ isVisible: !this.state.isVisible });
+            // this.props.dispatch(toggleVisibility());
+        } else if (this.matchesKey(positionKey, e)) {
+            e.preventDefault();
+            // this.props.dispatch(changePosition());
+        } else if (this.matchesKey(monitorKey, e)) {
+            e.preventDefault();
+            // this.props.dispatch(changeMonitor());
+        }
+    }
+
+    handleSizeChange(requestedSize) {
+        // this.props.dispatch(changeSize(requestedSize));
+    }
+
+    renderChild(child, index, otherProps) {
+        // const { monitorState } = this.props;
+        // const { childMonitorIndex, childMonitorStates } = monitorState;
+
+        // if (index !== childMonitorIndex) {
+        //     return null;
+        // }
+
+        return cloneElement(child, {
+            // monitorState: childMonitorStates[index],
+            ...otherProps
+        });
+    }
+
+    render() {
+        const { children, fluid, ...rest } = this.props;
+        const { isVisible } = this.state;
+        // const { position, isVisible, size } = monitorState;
+
+        return (
+            <Dock position="right"
+                isVisible={isVisible}
+                // size={.3}
+                fluid={fluid}
+                onSizeChange={this.handleSizeChange}
+                dimMode='none'>
+                {Children.map(children, (child, index) =>
+                    this.renderChild(child, index, rest)
+                )}
+            </Dock>
+        );
+    }
 }

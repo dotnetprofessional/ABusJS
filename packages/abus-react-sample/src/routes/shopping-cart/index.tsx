@@ -8,7 +8,7 @@ import { getAllProducts } from './actions'
 import { Bus, IBus, IMessageTask, IMessage, IMessageHandlerContext, IBusMetaData, newGuid, Intents } from "abus2";
 import App from './containers/App'
 import { composeWithDevTools } from 'redux-devtools-extension';
-import { DevTools, DevToolsTask } from "../devtools/DevTools";
+import { DevTools, DevToolsTask } from "../devtools";
 import reduxAbusMiddleware from "redux-abus";
 import reduxAbusThunkMiddleware from "redux-abus-thunk";
 import { MessageTracingTask } from '../abus-tracing/MessageTracingTask';
@@ -16,12 +16,14 @@ import { MessagePerformanceTask } from '../abus-tracing/MessagePerformanceTask';
 
 const bus = new Bus();
 const busDevTools = new Bus();
+busDevTools.start();
 bus.start();
 bus.usingRegisteredTransportToMessageType("*")
   .outboundPipeline.useLocalMessagesReceivedTasks(new MessageTracingTask()).andAlso()
   .inboundPipeline.useTransportMessageReceivedTasks(new DevToolsTask(busDevTools)).andAlso()
   .inboundPipeline.useLocalMessagesReceivedTasks(new MessagePerformanceTask());
 
+debugger;
 const devTools = <DevTools bus={busDevTools} />;
 
 

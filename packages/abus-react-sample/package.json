@@ -47,6 +47,7 @@
     "lodash": "^4.17.5",
     "redux-abus": "0.1.0",
     "redux-abus-thunk": "0.1.0",
-    "react-json-tree": "*"
+    "react-json-tree": "*",
+    "parse-key": "*"
   }
 }
