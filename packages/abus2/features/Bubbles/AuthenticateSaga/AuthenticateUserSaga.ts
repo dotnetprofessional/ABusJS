@@ -19,9 +19,8 @@ export class UserLoginSaga extends Saga<any>{
     }
     public configureSagaKey(message: IMessage<any>): string {
         switch (message.type) {
-            case AuthenticateUserRequest.name {
+            case AuthenticateUserRequest.name:
                 return (message.payload as LoginRequest).user;
-            }
             default:
                 throw new Error("Unknown message type: " + message.type);
         }

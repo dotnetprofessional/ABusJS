@@ -6,6 +6,7 @@ import { ReplyRequest } from "./ReplyRequest";
 import { IBusMetaData } from "./IBusMetaData";
 import { Intents } from "./Intents";
 import { Bus } from "./Bus";
+import { MessageException } from "./tasks/MessageException";
 
 export class MessageHandlerContext implements IMessageHandlerContext {
     constructor(protected bus: IBus, public parentMessage: IMessage<any>, public activeMessage: IMessage<any>) {
@@ -13,6 +14,11 @@ export class MessageHandlerContext implements IMessageHandlerContext {
     }
 
     public shouldTerminatePipeline: boolean;
+
+    public async replyWithExceptionAsync(reply: Error): Promise<void> {
+        const exception = new MessageException(reply.name, reply);
+        return this.replyAsync(exception);
+    }
 
     public async replyAsync<T>(reply: T): Promise<void> {
         // Ensure the active message has someone listening for a reply

@@ -134,7 +134,7 @@ feature(`Linear message flows
 
                 request: {"type":"request"}
                 response: {"type": "response", "unittest": true}
-                """        
+                """
             `, async () => {
                     bubblesResult = await bubbles.executeAsync(stepContext.docString);
                 });
