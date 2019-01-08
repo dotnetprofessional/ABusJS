@@ -5,6 +5,7 @@ import chalk, { Chalk } from "chalk";
 import * as diff from "diff";
 import { MessageException } from "../tasks/MessageException";
 import { TimeSpan } from "../Timespan";
+import { Intents } from "../Intents";
 
 export interface ColorTheme {
     statusPass: Chalk;
@@ -58,7 +59,7 @@ export class Bubbles {
         });
     }
 
-    private validateResult(expected: IMessage<any>, message: IMessage<any>, bubble: IBubble): IBubbleResult {
+    private validateResult(expected: any, message: any, bubble: IBubble): IBubbleResult {
         // check if the message is a reply as they do not send a full IMessage<T> just the payload
         // also ensure that expected is not a full IMessage<T>
         let actual: Object;
@@ -67,9 +68,13 @@ export class Bubbles {
             if (expected.type) {
                 throw new Error(`[Bubble: ${bubble.name}] Bubble definitions for a reply should contain just the payload.`);
             }
-            actual = this.trimToExpected(expected, message.payload);
+            if (this.isMessageExceptionReply(message)) {
+                actual = this.trimToExpected(expected, { error: message.payload.description })
+            } else {
+                actual = this.trimToExpected(expected, message.payload);
+            }
         } else if (message.type === MessageException.type) {
-            actual = this.trimToExpected(expected, message.payload)
+            actual = this.trimToExpected(expected, { error: message.payload.description })
         } else {
             actual = this.trimToExpected(expected, message);
         }
@@ -98,7 +103,7 @@ export class Bubbles {
 
     }
 
-    private trimToExpected(expected: IMessage<any>, actual: IMessage<any>): Object {
+    private trimToExpected(expected: Object, actual: Object): Object {
         // expected drives the comparison
         const copy = function (primary: Object, secondary: Object): Object {
             let result;
@@ -218,7 +223,7 @@ export class Bubbles {
                 throw new Error("Unable to locate a bubble definition for: " + b.name);
             }
 
-            if (b.type !== BubbleType.reply && !msg.message["error"] && !msg.message.type) {
+            if (b.type !== BubbleType.reply && !msg.message["error"] && !(msg.message as any).type) {
                 throw new Error(`[Bubble: ${b.name}] messages must have a type defined.`);
             }
         });
@@ -361,6 +366,13 @@ export class Bubbles {
                 .join('\n')
         );
     }
+
+    private isMessageExceptionReply(message: IMessage<any>): boolean {
+        return message.metaData.intent === Intents.reply
+            && message.payload
+            && typeof message.payload === "object"
+            && message.payload.constructor.name === "MessageException"
+    }
 }
 
 /*
@@ -425,5 +437,5 @@ export class TextBlockReader {
 
 export interface IBubbleMessage {
     name: string,
-    message: IMessage<any>
+    message: any
 }

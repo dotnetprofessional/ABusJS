@@ -1,6 +1,5 @@
 import { ISendMessages } from "./ISendMessages";
 import { IMessage } from "./IMessage";
-import { MessageException } from "./tasks/MessageException";
 
 /**
  * Provides additional data about the current message, it also supports
@@ -22,15 +21,6 @@ export interface IMessageHandlerContext extends ISendMessages {
      * @memberOf MessageHandlerContext
      */
     replyAsync<T>(reply: T): Promise<void>;
-
-    /* Sends a reply to the current message as an exception
-    *
-    * @template T
-    * @param {T} reply
-    *
-    * @memberOf MessageHandlerContext
-    */
-    replyWithExceptionAsync<T>(reply: Error): Promise<void>;
 
     /**
      * Stops the additional processing of this message through the pipeline

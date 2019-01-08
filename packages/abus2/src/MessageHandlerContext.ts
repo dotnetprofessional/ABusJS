@@ -15,18 +15,19 @@ export class MessageHandlerContext implements IMessageHandlerContext {
 
     public shouldTerminatePipeline: boolean;
 
-    public async replyWithExceptionAsync(reply: Error): Promise<void> {
-        const exception = new MessageException(reply.name, reply);
-        return this.replyAsync(exception);
-    }
-
     public async replyAsync<T>(reply: T): Promise<void> {
         // Ensure the active message has someone listening for a reply
         if (!this.activeMessageMetaData || this.activeMessageMetaData.intent !== Intents.sendReply) {
             throw new Error(`Unable to reply to a message that wasn't sent with the ${Intents.sendReply} intent`);
         }
 
-        var msg: IMessage<any> = { type: this.activeMessage.type + ".reply", payload: reply };
+        let replyMessage: any = reply;
+        if (typeof replyMessage === "object" && replyMessage.name === "Error") {
+            // upgrade to an exception message
+            const error = replyMessage as Error;
+            replyMessage = new MessageException(error.message, (reply as unknown) as Error);
+        }
+        var msg: IMessage<any> = { type: this.activeMessage.type + ".reply", payload: replyMessage };
         // Need to add a replyTo so it can be delivered to the correct handler
         Bus.applyIntent(msg, Intents.reply);
         msg.metaData.replyTo = this.activeMessage.metaData.messageId;

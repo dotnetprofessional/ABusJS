@@ -1,6 +1,5 @@
-
 export class MessageException {
-    constructor(public error: string, public message) {
+    constructor(public description: string, public error: Error) {
     }
 
     public static type = "Bus.Error";

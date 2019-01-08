@@ -61,7 +61,7 @@ feature(`Starting a Saga
                 start: {"type": "START_SAGA", "payload":{"id":"test1"}}
                 start-again: {"type": "START_SAGA", "payload":{"id":"test1"}}
                 started: {"type": "SAGA_STARTED"}
-                error: {"error":"Saga with key test1 already exists. Can't start saga twice."}
+                error: {"error":"Saga with key SagaDemo:test1 already exists. Can't start saga twice."}
                 """
                 `, async () => {
                     const result = await bubbles.executeAsync(stepContext.docString);

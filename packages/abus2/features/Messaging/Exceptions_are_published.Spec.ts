@@ -33,7 +33,7 @@ feature(`Exceptions are published`, () => {
         });
 
         then(`an exception with the message 'Blowed Up!' is published`, () => {
-            exceptionMessage.error.should.be.equal(stepContext.values[0])
+            exceptionMessage.description.should.be.equal(stepContext.values[0])
         });
     });
 });

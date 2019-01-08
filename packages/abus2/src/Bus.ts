@@ -277,7 +277,11 @@ export class Bus implements IBus {
                 handler = () => {
                     const replyHandler = this.messageReplyHandlers[message.metaData.replyTo];
                     if (!replyHandler.isCancelled) {
-                        replyHandler.resolve(message.payload);
+                        if (message.payload && message.payload.constructor && message.payload.constructor.name === MessageException.name) {
+                            replyHandler.reject(message.payload);
+                        } else {
+                            replyHandler.resolve(message.payload);
+                        }
                     } else {
                         replyHandler.resolve();
                     }
@@ -313,7 +317,7 @@ export class Bus implements IBus {
         } catch (e) {
             // Due to the async nature of inbound messages there's no way for exceptions
             // to bubble up to the calling app. As such an error is published on the bus
-            this.publishAsync({ type: MessageException.type, payload: new MessageException(e.message, message) });
+            this.publishAsync({ type: MessageException.type, payload: new MessageException(e.message, e) });
         }
     }
     private cloneCount = 0;

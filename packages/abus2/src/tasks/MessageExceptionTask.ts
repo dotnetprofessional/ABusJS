@@ -14,7 +14,7 @@ export class MessageExceptionTask implements IMessageTask {
             message.metaData = message.metaData || {};
             message.metaData[this.errorKey] = error;
             message.metaData[this.errorCount] = (message.metaData[this.errorCount] || 0) + 1;
-            context.publishAsync({ type: MessageException.type, payload: new MessageException(error.message, message) });
+            context.publishAsync({ type: MessageException.type, payload: new MessageException(error.message, error) });
         }
     }
 }

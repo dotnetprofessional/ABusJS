@@ -46,7 +46,7 @@ feature(`Unsubscribing handlers`, () => {
         });
 
         and(`an error is published 'No subscriber defined for the command UNIT_TEST'`, () => {
-            exception.error.should.be.eq(stepContext.values[0]);
+            exception.description.should.be.eq(stepContext.values[0]);
         });
     });
 

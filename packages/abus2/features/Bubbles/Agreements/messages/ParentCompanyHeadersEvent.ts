@@ -1,6 +1,8 @@
 import { AgreementHeader } from "../model/AgreementHeader";
 
 export class ParentCompanyHeadersEvent {
-    public tpid: string;
-    public agreementHeaders: AgreementHeader[];
+    constructor(
+        public tpid: string,
+        public lastPageKey: string,
+        public agreementHeaders: AgreementHeader[]) { }
 }

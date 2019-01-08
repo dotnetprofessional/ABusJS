@@ -77,12 +77,14 @@ export abstract class Saga<T> {
         const sagaInstance = this;
         return async (message: any, context: IMessageHandlerContext) => {
             // create a new saga instance
-            const sagaKey = this.configureSagaKey(context.activeMessage);
+            let sagaKey = this.configureSagaKey(context.activeMessage);
             if (sagaInstance.startSagaWithType === context.activeMessage.type) {
                 if (!sagaKey) {
                     throw new Error("Saga key not defined for message: " + context.activeMessage.type);
                 }
 
+                // To ensure uniqueness for keys add the name of the Saga to the key
+                sagaKey = this.constructor.name + ":" + sagaKey;
                 if ((await this.getSagaDataAsync(sagaKey)).sagaKey) {
                     throw new Error(`Saga with key ${sagaKey} already exists. Can't start saga twice.`);
                 }
