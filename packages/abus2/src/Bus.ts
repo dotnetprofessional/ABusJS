@@ -174,13 +174,13 @@ export class Bus implements IBus {
             }
         }
     }
-    public publishAsync<T>(message: T | IMessage<T>, options?: SendOptions, context?: IMessageHandlerContext): Promise<void> {
+    public publishAsync<T>(message: T | IMessage<T>, options?: SendOptions, parentMessage?: IMessage<any>): Promise<void> {
         message = this.convertToIMessageIfNot(message);
-        context = context || new MessageHandlerContext(this, null, message);
+        const context = new MessageHandlerContext(this, parentMessage, message);
         return this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.publish), context, options);
     }
 
-    public sendWithReply<T, R>(message: T | IMessage<T>, options?: SendOptions, context?: IMessageHandlerContext): ReplyRequest {
+    public sendWithReply<T, R>(message: T | IMessage<T>, options?: SendOptions, parentMessage?: IMessage<any>): ReplyRequest {
         message = this.convertToIMessageIfNot(message);
         let replyHandler = new ReplyHandler();
         const msg = message as IMessage<T>;
@@ -201,14 +201,14 @@ export class Bus implements IBus {
         }
 
         // Now send the message
-        context = context || new MessageHandlerContext(this, null, message);
+        const context = new MessageHandlerContext(this, parentMessage, message);
         this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.sendReply), context, options);
         return new ReplyRequest(replyHandler, replyHandlerPromise);
     }
 
-    public sendAsync<T>(message: T | IMessage<T>, options?: SendOptions, context?: IMessageHandlerContext): Promise<void> {
+    public sendAsync<T>(message: T | IMessage<T>, options?: SendOptions, parentMessage?: IMessage<any>): Promise<void> {
         message = this.convertToIMessageIfNot(message);
-        context = context || new MessageHandlerContext(this, null, message);
+        const context = new MessageHandlerContext(this, parentMessage, message);
 
         return this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.send), context, options);
     }

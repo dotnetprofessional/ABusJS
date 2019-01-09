@@ -6,9 +6,10 @@ import * as diff from "diff";
 import { MessageException } from "../tasks/MessageException";
 import { TimeSpan } from "../Timespan";
 import { Intents } from "../Intents";
-// import { MessageTracingTask } from "../tasks/abus-tracing/MessageTracingTask";
-// import { IMessageTracing } from "../tasks/abus-tracing/MessagePerformanceTask";
-// import { DebugLoggingTask } from "../tasks/DebugLoggingTask";
+import { MessageTracingTask } from "../tasks/abus-tracing/MessageTracingTask";
+import { IMessageTracing } from "../tasks/abus-tracing/MessagePerformanceTask";
+import { DebugLoggingTask } from "../tasks/DebugLoggingTask";
+import { IBusMetaData } from "../IBusMetaData";
 
 export interface ColorTheme {
     statusPass: Chalk;
@@ -43,9 +44,9 @@ export class Bubbles {
         // as for transports that go off device you won't get access to the inbound pipeline
         // TODO: This needs to be applied to all transports defined
         this.bus.usingRegisteredTransportToMessageType("*")
-            .outboundPipeline.useTransportMessageReceivedTasks(new BubblesTask(this));
-        // .useTransportMessageReceivedTasks(new DebugLoggingTask("outbound:")).and
-        // .useLocalMessagesReceivedTasks(new MessageTracingTask()).and
+            .outboundPipeline
+            .useLocalMessagesReceivedTasks(new MessageTracingTask()).and
+            .useTransportMessageReceivedTasks(new BubblesTask(this)).and
         // .andAlso()
         // .inboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("inbound:")).andAlso()
         // .outboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("outbound:"));
@@ -129,8 +130,8 @@ export class Bubbles {
         return this.bubbleFlowResult;
     }
 
-    public toMermaid(): string {
-        let output = "";
+    public toMermaidFlowDiagram(): string {
+        let output = "graph TD\n";
 
         // define the processes
         const processes: Set<string> = new Set();
@@ -149,21 +150,73 @@ export class Bubbles {
         this.bubbleFlowResult.forEach(bubble => {
             const actual = bubble.actual;
             // lookup the parent process based on the correlationId
-            const messageId = actual.metaData.messageId;
-            const parentProcess = this.bubbleFlowResult.filter(r => (r.actual.metaData as IMessageTracing).correlationId === messageId);
-            let parentProcessIdentifier: string;
-            if (!parentProcess) {
-                parentProcessIdentifier = "unknown";
-            } else {
-                parentProcessIdentifier = parentProcessIdentifier[0];
+            const parentProcessIdentifier = this.getParentIdentifier(bubble);
+
+            if (actual.metaData.intent === Intents.reply) {
+                actual.metaData.receivedBy = this.getParentIdentifier(this.getParentBubble(bubble));
             }
 
-            const event = `${parentProcessIdentifier} --> |${actual.type}| ${actual.metaData.receivedBy}`;
+            const event = `${parentProcessIdentifier} --> |${actual.type}| ${actual.metaData.receivedBy || "unhandled"}`;
             // at this point can add syles too
             output += "\n" + event;
         });
 
         return output;
+    }
+
+    public toMermaidSequenceDiagram(): string {
+        let output = "sequenceDiagram\nparticipant start";
+
+        // define the processes
+        const processes: Set<string> = new Set();
+        this.bubbleFlowResult.forEach(bubble => {
+            if (bubble.actual.metaData.receivedBy) {
+                processes.add(bubble.actual.metaData.receivedBy);
+            }
+        });
+
+        processes.forEach(process => {
+            // at this point can add styles too
+            output += "\nparticipant " + process;
+        });
+
+        // associate messages with processes
+        this.bubbleFlowResult.forEach(bubble => {
+            const actual = bubble.actual;
+            // lookup the parent process based on the correlationId
+            const parentProcessIdentifier = this.getParentIdentifier(bubble);
+
+            let event: string;
+            if (actual.metaData.intent === Intents.reply) {
+                actual.metaData.receivedBy = this.getParentIdentifier(this.getParentBubble(bubble));
+                event = `${parentProcessIdentifier}-->>${actual.metaData.receivedBy || "unhandled"}:${actual.type}`;
+            } else {
+                event = `${parentProcessIdentifier}->>${actual.metaData.receivedBy || "unhandled"}:${actual.type}`;
+
+            }
+            // const event = `${parentProcessIdentifier} --> |${actual.type}| ${actual.metaData.receivedBy || "unhandled"}`;
+
+            // at this point can add syles too
+            output += "\n" + event;
+        });
+
+        return output;
+    }
+
+    private getParentBubble(bubble: IBubbleFlowResult): IBubbleFlowResult {
+        const parentProcess = this.bubbleFlowResult.filter(r => (r.actual.metaData as IMessageTracing).messageId === (bubble.actual.metaData as IMessageTracing).correlationId);
+        return parentProcess[0];
+    }
+
+    private getParentIdentifier(bubble: IBubbleFlowResult): string {
+        const parentProcess = this.getParentBubble(bubble);
+        let parentProcessIdentifier: string;
+        if (!parentProcess) {
+            parentProcessIdentifier = "start";
+        } else {
+            parentProcessIdentifier = parentProcess.actual.metaData.receivedBy;
+        }
+        return parentProcessIdentifier
     }
 
     private trimToExpected(expected: Object, actual: Object): Object {
@@ -250,6 +303,11 @@ export class Bubbles {
 
     private handleBubbleMessage(bubble: IBubble, context?: IMessageHandlerContext, delay?: number) {
         let msg = this.getMessage(bubble.name).message;
+
+        if (bubble.type !== BubbleType.reply) {
+            msg.metaData = msg.metaData || {};
+            (msg.metaData as IBusMetaData).receivedBy = "Bubbles";
+        }
 
         if (msg.error) {
             // this is an error so we need to convert it to a bus exception

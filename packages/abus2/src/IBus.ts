@@ -51,7 +51,7 @@ export interface IBus extends ISendMessages {
      * @returns {string} the subscriptionId, needed to unsubscribe
      * @memberof IBus
      */
-    subscribe(filter: string, handler: IMessageHandler<any>): string;
+    subscribe(filter: string, handler: IMessageHandler<any>, identifier?: string): string;
 
     /**
      * Unsubscribes handler for messages. Requires subscriptionId returned

@@ -31,7 +31,7 @@ export class MessageHandlerContext implements IMessageHandlerContext {
         // Need to add a replyTo so it can be delivered to the correct handler
         Bus.applyIntent(msg, Intents.reply);
         msg.metaData.replyTo = this.activeMessage.metaData.messageId;
-        await (this.bus as Bus).sendAsync(msg, null, this.getNewContext(msg));
+        await (this.bus as Bus).sendAsync(msg, null, this.activeMessage);
         return;
     }
 
@@ -40,21 +40,21 @@ export class MessageHandlerContext implements IMessageHandlerContext {
     }
 
     public publishAsync<T>(message: T | IMessage<T>, options?: SendOptions): Promise<void> {
-        return (this.bus as Bus).publishAsync(message, options, this.getNewContext(message));
+        return (this.bus as Bus).publishAsync(message, options, this.activeMessage);
     }
 
     public sendWithReply<T, R>(message: T, options?: SendOptions): ReplyRequest {
-        return (this.bus as Bus).sendWithReply(message, options, this.getNewContext(message));
+        return (this.bus as Bus).sendWithReply(message, options, this.activeMessage);
     }
     public sendAsync<T>(message: T | IMessage<T>, options?: SendOptions): Promise<void> {
-        return (this.bus as Bus).sendAsync(message, options, this.getNewContext(message));
+        return (this.bus as Bus).sendAsync(message, options, this.activeMessage);
     }
 
     private get activeMessageMetaData(): IBusMetaData {
         return this.activeMessage.metaData as IBusMetaData
     }
 
-    private getNewContext(message: any): IMessageHandlerContext {
-        return new MessageHandlerContext(this.bus, Object.assign({}, this.activeMessage), message);
-    }
+    // private getNewContext(message: any): IMessageHandlerContext {
+    //     return new MessageHandlerContext(this.bus, Object.assign({}, this.activeMessage), message);
+    // }
 }

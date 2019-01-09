@@ -14,7 +14,7 @@ feature.only(`Agreements Process`, () => {
         });
     });
 
-    scenario.skip(`Retrieve agreement headers for TPID`, () => {
+    scenario(`Retrieve agreement headers for TPID`, () => {
         when(`requesting the agreement headers the following flow occurs
             """
             (!request-headers)(*status-executing)(api-request)(:api-response)(*request-headers-event)(*status-complete)
@@ -29,7 +29,7 @@ feature.only(`Agreements Process`, () => {
             `, async () => {
                 await bubbles.executeAsync(stepContext.docString);
 
-                // const mermaid = bubbles.toMermaid();
+                const mermaid = bubbles.toMermaidSequenceDiagram();
                 debugger;
             });
 

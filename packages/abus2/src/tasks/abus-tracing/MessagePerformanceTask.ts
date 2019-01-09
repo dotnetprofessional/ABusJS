@@ -1,4 +1,4 @@
-import { IMessageHandlerContext, IMessage, IBusMetaData } from "../..";
+import { IMessageHandlerContext, IMessage, IBusMetaData, IMessageTask } from "../..";
 
 export interface IMessageTracing extends IBusMetaData {
     conversationId: string;

@@ -7,12 +7,11 @@ export class MessageTracingTask implements IMessageTask {
         const metaData = context.activeMessage.metaData as IMessageTracing;
         const parentMetaData: IMessageTracing = context.parentMessage ? context.parentMessage.metaData as IMessageTracing : undefined;
 
-        // metaData.messageId = newGuid();
-        // metaData.conversationId = parentMetaData ? parentMetaData.conversationId : newGuid();
-        // (metaData as any).XYX = "hello";
+        metaData.messageId = metaData.messageId || newGuid();
+        metaData.conversationId = parentMetaData ? parentMetaData.conversationId : newGuid();
 
-        // // CorrelationId becomes the current message
-        // metaData.correlationId = metaData.correlationId || (parentMetaData ? parentMetaData.messageId : undefined);
+        // CorrelationId becomes the current message
+        metaData.correlationId = metaData.correlationId || (parentMetaData ? parentMetaData.messageId : undefined);
 
         await next();
     }
