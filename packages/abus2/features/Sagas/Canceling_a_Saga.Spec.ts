@@ -45,7 +45,7 @@ feature(`Cancelling a Saga
             error: {"error":"Unable to find Saga instance for key: test1. This may be due to the Saga not being started or being already complete."}
             """
             `, async () => {
-                    const result = await bubbles.executeAsync(stepContext.docString);
+                    await bubbles.executeAsync(stepContext.docString);
                 });
 
             and(`sending another message to the Saga`, () => {
@@ -69,7 +69,7 @@ feature(`Cancelling a Saga
             error: {"error":"Unable to find Saga instance for key: test1. This may be due to the Saga not being started or being already complete."}
             """
             `, async () => {
-                    const result = await bubbles.executeAsync(stepContext.docString);
+                    await bubbles.executeAsync(stepContext.docString);
                 });
 
             then(`the Saga thrown an exception`, () => {

@@ -42,7 +42,7 @@ feature(`Validate bubbles works with more complex workflows`, () => {
                 authorize-user-reply: "<authorized-user-reply>"
                 """        
             `, async () => {
-                    let bubblesResult = await bubbles.executeAsync(stepContext.docString);
+                    await bubbles.executeAsync(stepContext.docString);
                 });
 
             then(`the message flow matches
@@ -91,7 +91,7 @@ feature(`Validate bubbles works with more complex workflows`, () => {
                 authorize-user-reply: "<authorized-user-reply>"
                 """        
             `, async () => {
-                    let bubblesResult = await bubbles.executeAsync(stepContext.docString);
+                    await bubbles.executeAsync(stepContext.docString);
                 });
 
             then(`the message flow matches

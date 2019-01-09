@@ -1,4 +1,5 @@
 import { Bus } from "../../src/Bus";
+require("chai").should();
 
 feature(`Subscribing to handlers`, () => {
     let bus: Bus

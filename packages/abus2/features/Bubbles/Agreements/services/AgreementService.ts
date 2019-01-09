@@ -24,7 +24,6 @@ export class AgreementService {
     @handler(GetAgreementHeadersRequest)
     public async getAgreementHeaders(message: GetAgreementHeadersRequest, context: IMessageHandlerContext): Promise<void> {
         // pages are kept really small to make testing easier :)
-        debugger;
         // find tpid data
         const agreements = this.testData[message.tpid];
         if (!agreements) {

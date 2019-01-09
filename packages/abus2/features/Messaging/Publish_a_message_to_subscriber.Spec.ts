@@ -1,4 +1,5 @@
 import { Bus } from "../../src/Bus";
+require("chai").should();
 
 feature(`Publish a message to a subscriber`, () => {
     let bus: Bus

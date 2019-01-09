@@ -27,7 +27,7 @@ export class UserLoginSaga extends Saga<any>{
     }
 
     @handler(LoginRequest)
-    private async authenticate(message: LoginRequest, context: IMessageHandlerContext) {
+    public async authenticate(message: LoginRequest, context: IMessageHandlerContext) {
         // Authenticate with the authentication service
         const response = await context.sendWithReply(new AuthenticateUserRequest(message.user)).responseAsync<AuthenticateUserResponse>();
 

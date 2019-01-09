@@ -1,7 +1,6 @@
 import { Bus } from "../../src/Bus";
 import { IMessageHandlerContext } from "../../src/IMessageHandlerContext";
 import * as chai from "chai";
-
 chai.should();
 
 feature(`Sending a message using MessageContext`, () => {

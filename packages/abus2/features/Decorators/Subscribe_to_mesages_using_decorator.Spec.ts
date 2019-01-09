@@ -1,6 +1,7 @@
 import { Bus } from "../../src/Bus";
 import { MyHandlerByTypeName, MyHandlerByTypeDefinition, PlusTwo, PlusOne, handlerResponse } from "../MessageTypes";
 import { IBus } from "../../src";
+require("chai").should();
 
 feature(`Subscribe to messages using decorators`, () => {
     let bus: IBus

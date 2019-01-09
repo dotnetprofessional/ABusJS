@@ -42,7 +42,7 @@ feature(`Starting a Saga
                 started: {"type": "SAGA_STARTED"}
                 """
                 `, async () => {
-                    const result = await bubbles.executeAsync(stepContext.docString);
+                    await bubbles.executeAsync(stepContext.docString);
                 });
 
             then(`the saga handler for the start message is executed`, () => {
@@ -64,7 +64,7 @@ feature(`Starting a Saga
                 error: {"error":"Saga with key SagaDemo:test1 already exists. Can't start saga twice."}
                 """
                 `, async () => {
-                    const result = await bubbles.executeAsync(stepContext.docString);
+                    await bubbles.executeAsync(stepContext.docString);
                 });
 
             then(`the saga handler for the start message is executed`, () => {

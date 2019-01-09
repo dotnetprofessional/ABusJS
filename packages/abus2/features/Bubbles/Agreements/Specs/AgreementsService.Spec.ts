@@ -51,7 +51,7 @@ feature(`Agreements Service`, () => {
             Unable to locate tpid: XXXX
             """
             `, () => {
-                exception.description.should.be.eq(stepContext.docString)
+                exception.description.should.be.eq(stepContext.docString);
             });
     });
 

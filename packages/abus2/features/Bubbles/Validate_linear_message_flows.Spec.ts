@@ -1,7 +1,7 @@
 import { Bubbles } from "../../src/bubbles/Bubbles";
 import { IBus, Bus, IMessageHandlerContext } from "../../src";
 import { IBubbleFlowResult } from "../../src/bubbles/Bubble";
-import "chai";
+require("chai").should();
 
 feature(`Linear message flows
     Provides the ability to validate simple linear message flows
@@ -59,7 +59,8 @@ feature(`Linear message flows
                 request: {"type":"request"}
                 """        
             `, async () => {
-                    bubblesResult = await bubbles.executeAsync(stepContext.docString);
+                    await bubbles.executeAsync(stepContext.docString);
+                    bubblesResult = bubbles.result();
                 });
 
             then(`the message flow matches
@@ -97,7 +98,8 @@ feature(`Linear message flows
                 response: {"type": "response"} 
                 """        
             `, async () => {
-                    bubblesResult = await bubbles.executeAsync(stepContext.docString);
+                    await bubbles.executeAsync(stepContext.docString);
+                    bubblesResult = bubbles.result();
                 });
 
             then(`the message flow matches
@@ -120,7 +122,6 @@ feature(`Linear message flows
             given(`a registered handler for 'request' sends the message 'response'`, () => {
                 bus = new Bus();
                 bus.start();
-                const msg = { type: stepContext.values[1] };
                 bus.subscribe(stepContext.values[0], (m, c: IMessageHandlerContext) => {
                     throw new Error("This should not be hit as bubbles overrides the handler!");
                 });
@@ -136,7 +137,8 @@ feature(`Linear message flows
                 response: {"type": "response", "unittest": true}
                 """
             `, async () => {
-                    bubblesResult = await bubbles.executeAsync(stepContext.docString);
+                    await bubbles.executeAsync(stepContext.docString);
+                    bubblesResult = bubbles.result();
                 });
 
             then(`the message flow matches
@@ -164,7 +166,7 @@ feature(`Linear message flows
                 bus = new Bus();
                 bus.start();
                 bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
-                    const response = await context.sendWithReply({ type: "api-call" }).responseAsync();
+                    await context.sendWithReply({ type: "api-call" }).responseAsync();
                 });
 
                 bus.subscribe("api-call", (message: any, context: IMessageHandlerContext) => {
@@ -183,7 +185,8 @@ feature(`Linear message flows
                 api-call-reply: {"orderId":"123456"}
                 """        
             `, async () => {
-                    bubblesResult = await bubbles.executeAsync(stepContext.docString);
+                    await bubbles.executeAsync(stepContext.docString);
+                    bubblesResult = bubbles.result();
                 });
 
             then(`the message flow matches
@@ -220,7 +223,8 @@ feature(`Linear message flows
                 response: "response"
                 """        
             `, async () => {
-                    bubblesResult = await bubbles.executeAsync(stepContext.docString);
+                    await bubbles.executeAsync(stepContext.docString);
+                    bubblesResult = bubbles.result();
                 });
 
             then(`the message flow matches
@@ -257,7 +261,8 @@ feature(`Linear message flows
                 response: "response"
                 """        
                 `, async () => {
-                    bubblesResult = await bubbles.executeAsync(stepContext.docString);
+                    await bubbles.executeAsync(stepContext.docString);
+                    bubblesResult = bubbles.result();
                 });
 
             then(`the message flow matches
@@ -294,7 +299,8 @@ feature(`Linear message flows
                 response: {"type": "response"}
                 """        
                 `, async () => {
-                    bubblesResult = await bubbles.executeAsync(stepContext.docString);
+                    await bubbles.executeAsync(stepContext.docString);
+                    bubblesResult = bubbles.result();
                 });
 
             then(`the message flow matches
@@ -331,7 +337,8 @@ feature(`Linear message flows
                 response: {"type": "response"}
                 """        
                 `, async () => {
-                    bubblesResult = await bubbles.executeAsync(stepContext.docString);
+                    await bubbles.executeAsync(stepContext.docString);
+                    bubblesResult = bubbles.result();
                 });
 
             then(`the message flow matches
@@ -362,13 +369,14 @@ feature(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (!request)(response))
+                (!request)(response)
 
                 request: {"type":"request"}
                 response: {"error":"I'm blowing up on purpose!"}
                 """        
                 `, async () => {
-                    bubblesResult = await bubbles.executeAsync(stepContext.docString);
+                    await bubbles.executeAsync(stepContext.docString);
+                    bubblesResult = bubbles.result();
                 });
 
             then(`the message flow matches

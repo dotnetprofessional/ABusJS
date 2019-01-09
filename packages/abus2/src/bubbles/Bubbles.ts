@@ -6,6 +6,9 @@ import * as diff from "diff";
 import { MessageException } from "../tasks/MessageException";
 import { TimeSpan } from "../Timespan";
 import { Intents } from "../Intents";
+// import { MessageTracingTask } from "../tasks/abus-tracing/MessageTracingTask";
+// import { IMessageTracing } from "../tasks/abus-tracing/MessagePerformanceTask";
+// import { DebugLoggingTask } from "../tasks/DebugLoggingTask";
 
 export interface ColorTheme {
     statusPass: Chalk;
@@ -31,18 +34,30 @@ export class Bubbles {
     private executionPromise: { resolve: any, reject: any };
     protected colorTheme: ColorTheme = { statusFail: chalk.redBright, statusPass: chalk.greenBright };
 
-    constructor(protected bus?: IBus) {
+    constructor(public bus?: IBus) {
         if (!bus) {
-            bus = this.initializeBus();
+            this.bus = this.initializeBus();
         }
 
-        // add the bubbles task to the bus pipeline
+        // add the bubbles task to the bus pipeline. This needs to be the outbound pipeline
+        // as for transports that go off device you won't get access to the inbound pipeline
         // TODO: This needs to be applied to all transports defined
-        bus.usingRegisteredTransportToMessageType("*")
+        this.bus.usingRegisteredTransportToMessageType("*")
             .outboundPipeline.useTransportMessageReceivedTasks(new BubblesTask(this));
+        // .useTransportMessageReceivedTasks(new DebugLoggingTask("outbound:")).and
+        // .useLocalMessagesReceivedTasks(new MessageTracingTask()).and
+        // .andAlso()
+        // .inboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("inbound:")).andAlso()
+        // .outboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("outbound:"));
+
     }
 
-    public async executeAsync(workflow: string, messages: IBubbleMessage[] = []): Promise<IBubbleFlowResult[]> {
+    public async executeAsync(workflow: string, messages: IBubbleMessage[] = []): Promise<void> {
+        // ensure we have a workflow being passed in
+        if (!workflow) {
+            throw new Error("No workflow definition defined");
+        }
+
         return new Promise(async (resolve, reject) => {
             try {
                 this.executionPromise = { resolve, reject };
@@ -74,9 +89,20 @@ export class Bubbles {
                 actual = this.trimToExpected(expected, message.payload);
             }
         } else if (message.type === MessageException.type) {
-            actual = this.trimToExpected(expected, { error: message.payload.description })
+            // We maybe trying to validate an exceptin or there just may have been an 
+            // unexpected one so need to treat those differently
+            if (!expected.type) {
+                actual = this.trimToExpected(expected, { error: message.payload.description });
+            } else {
+                throw new Error(`[Bubble: ${bubble.name}] An error occurred processing the flow. \n${JSON.stringify(message, null, 2)}`);
+            }
         } else {
-            actual = this.trimToExpected(expected, message);
+            // check that the expected type matches the actual, if not seems we got a different message so no need to compare them
+            if (expected.type === message.type) {
+                actual = this.trimToExpected(expected, message);
+            } else {
+                actual = message;
+            }
         }
         let diff = "";
         const match = JSON.stringify(expected) === JSON.stringify(actual);
@@ -90,17 +116,54 @@ export class Bubbles {
         for (let i = 0; i < this.bubbleFlowResult.length; i++) {
             const bubbleResult = this.bubbleFlowResult[i];
             if (!bubbleResult.result.isValid) {
-                let errorMessage = `bubble: ${bubbleResult.bubble.name}\n${bubbleResult.result.diff}`
+                let errorMessage = `bubble: ${bubbleResult.bubble.name}\n${bubbleResult.result.diff}`;
                 if (bubbleResult.actual.type === MessageException.type) {
-                    errorMessage += `\n${MessageException.type}:${bubbleResult.actual.payload.error}`
+                    errorMessage += `\n${MessageException.type}:${bubbleResult.actual.payload.error}`;
                 }
                 throw new Error(errorMessage);
             }
         }
     }
 
-    public toMermaid(): string {
+    public result(): IBubbleFlowResult[] {
+        return this.bubbleFlowResult;
+    }
 
+    public toMermaid(): string {
+        let output = "";
+
+        // define the processes
+        const processes: Set<string> = new Set();
+        this.bubbleFlowResult.forEach(bubble => {
+            if (bubble.actual.metaData.receivedBy) {
+                processes.add(bubble.actual.metaData.receivedBy);
+            }
+        });
+
+        processes.forEach(process => {
+            // at this point can add styles too
+            output += "\n" + process;
+        });
+
+        // associate messages with processes
+        this.bubbleFlowResult.forEach(bubble => {
+            const actual = bubble.actual;
+            // lookup the parent process based on the correlationId
+            const messageId = actual.metaData.messageId;
+            const parentProcess = this.bubbleFlowResult.filter(r => (r.actual.metaData as IMessageTracing).correlationId === messageId);
+            let parentProcessIdentifier: string;
+            if (!parentProcess) {
+                parentProcessIdentifier = "unknown";
+            } else {
+                parentProcessIdentifier = parentProcessIdentifier[0];
+            }
+
+            const event = `${parentProcessIdentifier} --> |${actual.type}| ${actual.metaData.receivedBy}`;
+            // at this point can add syles too
+            output += "\n" + event;
+        });
+
+        return output;
     }
 
     private trimToExpected(expected: Object, actual: Object): Object {
@@ -125,6 +188,9 @@ export class Bubbles {
                         if (typeof primary[key] === "object") {
                             result[key] = copy(primary[key], secondary[key]);
                         } else {
+                            if (!secondary) {
+                                throw new Error(`Missing property '${key}' in actual expected ${JSON.stringify(result)}`);
+                            }
                             result[key] = secondary[key];
                         }
                     }
@@ -152,13 +218,13 @@ export class Bubbles {
                 return true;
             } else {
                 if (this.bubbleFlowIndex >= this.bubbleFlow.length) {
-                    this.executionPromise.resolve(this.bubbleFlowResult);
+                    this.executionPromise.resolve();
                     return true;
                 }
                 return false;
             }
         } catch (e) {
-            context.DoNotContinueDispatchingCurrentMessageToHandlers()
+            context.DoNotContinueDispatchingCurrentMessageToHandlers();
             this.executionPromise.reject(e);
         }
     }
@@ -183,7 +249,13 @@ export class Bubbles {
     }
 
     private handleBubbleMessage(bubble: IBubble, context?: IMessageHandlerContext, delay?: number) {
-        const msg = this.getMessage(bubble.name).message;
+        let msg = this.getMessage(bubble.name).message;
+
+        if (msg.error) {
+            // this is an error so we need to convert it to a bus exception
+            const error = new Error(msg.error);
+            msg = new MessageException(error.message, error);
+        }
         switch (bubble.type) {
             case BubbleType.publish:
                 this.bus.publishAsync(msg, { timeToDelay: new TimeSpan(delay) });
@@ -240,9 +312,15 @@ export class Bubbles {
         const messageReader = new TextBlockReader(workflowBlock);
         let isNext = messageReader.next();
         while (isNext) {
+            let message: any;
             const definition = messageReader.line;
             const name = definition.substring(0, definition.indexOf(":"));
-            const message = JSON.parse(definition.substring(definition.indexOf(":") + 1));
+            const jsonDefition = definition.substring(definition.indexOf(":") + 1);
+            try {
+                message = JSON.parse(jsonDefition);
+            } catch (e) {
+                throw new Error(`Unable to parse:\n${definition}\n\n${e}`);
+            }
             const existingMessage = this.getMessage(name);
             if (existingMessage) {
                 // merge definition with existing one

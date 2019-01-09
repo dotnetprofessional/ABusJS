@@ -1,8 +1,8 @@
 import { IMessageHandlerContext, handler } from "../../../src";
-import { ChangeActiveParentCompanyCommand, ParentCompanyHeadersEvent, GetAgreementHeadersCommand } from "./messages";
 import { GetAgreementHeadersResponse } from "./services/GetAgreementHeadersResponse";
 import { GetAgreementHeadersRequest } from "./services/GetAgreementHeadersRequest";
-import { AgreementHeader } from "./model/AgreementHeader";
+import { AgreementProcessStatusEvent } from "./messages/AgreementProcessStatusEvent";
+import { GetAgreementHeadersCommand, ParentCompanyHeadersEvent } from "./messages";
 
 
 export class AgreementProcessData {
@@ -22,16 +22,11 @@ export class GetAgreementsCommand implements IAgreementsSagaKey {
 export class AgreementsProcess {
     private data: AgreementProcessData = new AgreementProcessData();
 
-    @handler(ChangeActiveParentCompanyCommand)
-    public async changeActiveParentCompany(message: ChangeActiveParentCompanyCommand, context: IMessageHandlerContext) {
-
-    }
-
     @handler(GetAgreementHeadersCommand)
-    public async getAgreementHeaders(message: GetAgreementHeadersCommand, context: IMessageHandlerContext) {
+    public async getAgreementHeaders(message: GetAgreementHeadersCommand, context: IMessageHandlerContext): Promise<void> {
         try {
             const { tpid, sortOrder, nextPageKey } = message;
-
+            context.publishAsync(new AgreementProcessStatusEvent("GetAgreementHeadersCommand", "EXECUTING"));
             // check the cache for the request
             let apiResponse = this.getAgreementsFromCache(message);
             if (!apiResponse) {
@@ -46,12 +41,16 @@ export class AgreementsProcess {
             }
             const response = new ParentCompanyHeadersEvent(apiResponse.tpid, apiResponse.lastPageKey, apiResponse.agreementHeaders);
             context.publishAsync(response);
+            context.publishAsync(new AgreementProcessStatusEvent("GetAgreementHeadersCommand", "COMPLETE"));
         } catch (e) {
-            context.replyAsync(e);
+            context.publishAsync(new AgreementProcessStatusEvent("GetAgreementHeadersCommand", "ERROR", e.description));
         }
     }
 
     private getAgreementsFromCache(message: GetAgreementHeadersCommand): GetAgreementHeadersResponse {
+        if (!this.data.tpids) {
+            this.data.tpids = {};
+        }
         const tpidCache = this.data.tpids[message.tpid];
         if (tpidCache && tpidCache[message.nextPageKey]) {
             return tpidCache[message.nextPageKey];

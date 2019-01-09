@@ -1,6 +1,7 @@
 import { Bus } from "../../src/Bus";
 import { IMessageHandlerContext } from "../../src/IMessageHandlerContext";
 import { IMessage } from "../../src/IMessage";
+require("chai").should();
 
 feature(`Send a message to a subscriber`, () => {
     let bus: Bus;

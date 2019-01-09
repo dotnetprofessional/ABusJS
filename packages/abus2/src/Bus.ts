@@ -154,7 +154,7 @@ export class Bus implements IBus {
             classInstance = classHandler;
         }
         definedHandlers.forEach(definition => {
-            const subscriptionId = this.subscribe(definition.type, classInstance[definition.handler].bind(classInstance));
+            const subscriptionId = this.subscribe(definition.type, classInstance[definition.handler].bind(classInstance), classInstance.constructor.name);
             // classInstance.__messageHandlersSubscriptions.push(subscriptionId);
             classInstance.__subscriptions__ = classInstance.__subscriptions__ || [];
             classInstance.__subscriptions__.push(subscriptionId);
@@ -217,7 +217,7 @@ export class Bus implements IBus {
         throw new Error("Method not implemented.");
     }
 
-    public subscribe(filter: string, handler: IMessageHandler<any>): string {
+    public subscribe(filter: string, handler: IMessageHandler<any>, identifier?: string): string {
         if (!filter) {
             throw new TypeError("A subscription requires a valid filter, such as a message type.");
         }
@@ -228,7 +228,7 @@ export class Bus implements IBus {
 
         const subscriptionId = newGuid();
 
-        this.messageSubscriptions.push({ messageFilter: filter, handler, subscriptionId });
+        this.messageSubscriptions.push({ messageFilter: filter, handler, subscriptionId, identifier });
         return subscriptionId;
     }
 
@@ -287,7 +287,7 @@ export class Bus implements IBus {
                     }
                     // remove handler now its been completed
                     delete this.messageReplyHandlers[message.metaData.replyTo];
-                }
+                };
                 await this.processInboundMessage(message, handler);
             } else {
                 // Locate the handlers for the message
@@ -310,8 +310,12 @@ export class Bus implements IBus {
                 }
                 const shouldClone = subscribers.length > 1;
                 subscribers.forEach(async s => {
+                    // tag message with the identifer if it exists
+                    if (s.identifier) {
+                        message.metaData.receivedBy = s.identifier;
+                    }
                     await this.processInboundMessage(shouldClone ? this.cloneMessage(message) : message, s.handler);
-                })
+                });
 
             }
         } catch (e) {
