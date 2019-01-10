@@ -151,12 +151,14 @@ export class Bubbles {
             const actual = bubble.actual;
             // lookup the parent process based on the correlationId
             const parentProcessIdentifier = this.getParentIdentifier(bubble);
-
+            let event: string;
             if (actual.metaData.intent === Intents.reply) {
                 actual.metaData.receivedBy = this.getParentIdentifier(this.getParentBubble(bubble));
+                event = `${parentProcessIdentifier} -.-> |${actual.type}| ${actual.metaData.receivedBy || "unhandled"}`;
+            } else {
+                event = `${parentProcessIdentifier} --> |${actual.type}| ${actual.metaData.receivedBy || "unhandled"}`;
             }
 
-            const event = `${parentProcessIdentifier} --> |${actual.type}| ${actual.metaData.receivedBy || "unhandled"}`;
             // at this point can add syles too
             output += "\n" + event;
         });
