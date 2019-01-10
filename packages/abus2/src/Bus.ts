@@ -21,6 +21,7 @@ import { MessageExceptionTask } from "./tasks/MessageExceptionTask";
 import { MessageException } from "./tasks/MessageException";
 import { getTypeNamespace } from "./Utils";
 import { IMessageHandlerContext } from "./IMessageHandlerContext";
+import { ISubscriptionOptions } from "./ISubscriptionOptions";
 
 export class Bus implements IBus {
     private registeredTransports: IHashTable<IRegisteredTransport> = {};
@@ -217,7 +218,7 @@ export class Bus implements IBus {
         throw new Error("Method not implemented.");
     }
 
-    public subscribe(filter: string, handler: IMessageHandler<any>, identifier?: string): string {
+    public subscribe(filter: string, handler: IMessageHandler<any>, options?: ISubscriptionOptions): string {
         if (!filter) {
             throw new TypeError("A subscription requires a valid filter, such as a message type.");
         }
@@ -228,7 +229,7 @@ export class Bus implements IBus {
 
         const subscriptionId = newGuid();
 
-        this.messageSubscriptions.push({ messageFilter: filter, handler, subscriptionId, identifier });
+        this.messageSubscriptions.push({ messageFilter: filter, handler, subscriptionId, options });
         return subscriptionId;
     }
 
@@ -311,8 +312,8 @@ export class Bus implements IBus {
                 const shouldClone = subscribers.length > 1;
                 subscribers.forEach(async s => {
                     // tag message with the identifer if it exists
-                    if (s.identifier) {
-                        message.metaData.receivedBy = s.identifier;
+                    if (s.options && s.options.identifier) {
+                        message.metaData.receivedBy = s.options.identifier;
                     }
                     await this.processInboundMessage(shouldClone ? this.cloneMessage(message) : message, s.handler);
                 });

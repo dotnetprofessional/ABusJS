@@ -1,6 +1,7 @@
 import { ISendMessages } from "./ISendMessages";
 import { IMessageHandler } from "./IMessageHandler";
 import { TransportGrammar } from "./fluent/transportGrammar";
+import { ISubscriptionOptions } from "./ISubscriptionOptions";
 
 export interface IBus extends ISendMessages {
     /**
@@ -51,7 +52,7 @@ export interface IBus extends ISendMessages {
      * @returns {string} the subscriptionId, needed to unsubscribe
      * @memberof IBus
      */
-    subscribe(filter: string, handler: IMessageHandler<any>, identifier?: string): string;
+    subscribe(filter: string, handler: IMessageHandler<any>, options?: ISubscriptionOptions): string;
 
     /**
      * Unsubscribes handler for messages. Requires subscriptionId returned

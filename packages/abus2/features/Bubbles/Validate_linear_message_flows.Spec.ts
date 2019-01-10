@@ -390,6 +390,102 @@ feature(`Linear message flows
             });
         });
 
+        scenario(`Bubble flow can include delays in the middle of flow`, () => {
+            let bubbles: Bubbles;
+            let bus: IBus;
+            let bubblesResult: IBubbleFlowResult[];
+            let executionTime: number;
+
+            given(`a registered handler for 'request' returns a reply`, () => {
+                bus = new Bus();
+                bus.start();
+                bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
+                    context.sendAsync({ type: "response" });
+                });
+
+                bubbles = new Bubbles(bus);
+            });
+
+            when(`sending the message 'request'
+                """
+                (!request)----(response)
+
+                request: {"type":"request"}
+                response: {"type": "response"}
+                """        
+                `, async () => {
+                    debugger;
+                    const startTime = Date.now();
+                    await bubbles.executeAsync(stepContext.docString);
+                    executionTime = Date.now() - startTime;
+                    bubblesResult = bubbles.result();
+                    debugger;
+                });
+
+            then(`the message flow matches
+                `, () => {
+                    bubbles.validate();
+                });
+
+            and(`the flow result has the correct message types`, () => {
+                const expectedMessageTypes = ["request", "response"];
+                validateMessageTypes(expectedMessageTypes, bubblesResult);
+            });
+
+            and(`the response message was delayed by '40' ms`, () => {
+                executionTime.should.be.greaterThan(stepContext.values[0]);
+            });
+
+        });
+
+        scenario(`Bubble flow can include delays at the end of flow`, () => {
+            let bubbles: Bubbles;
+            let bus: IBus;
+            let bubblesResult: IBubbleFlowResult[];
+            let executionTime: number;
+
+            given(`a registered handler for 'request' returns a reply`, () => {
+                bus = new Bus();
+                bus.start();
+                bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
+                    context.sendAsync({ type: "response" });
+                });
+
+                bubbles = new Bubbles(bus);
+            });
+
+            when(`sending the message 'request'
+                """
+                (!request)-(response)-----
+
+                request: {"type":"request"}
+                response: {"type": "response"}
+                """        
+                `, async () => {
+                    debugger;
+                    const startTime = Date.now();
+                    await bubbles.executeAsync(stepContext.docString);
+                    executionTime = Date.now() - startTime;
+                    bubblesResult = bubbles.result();
+                    debugger;
+                });
+
+            then(`the message flow matches
+                `, () => {
+                    bubbles.validate();
+                });
+
+            and(`the flow result has the correct message types`, () => {
+                const expectedMessageTypes = ["request", "response"];
+                validateMessageTypes(expectedMessageTypes, bubblesResult);
+            });
+
+            and(`the response message was delayed by '60' ms`, () => {
+                executionTime.should.be.greaterThan(stepContext.values[0]);
+            });
+
+        });
+
         function validateMessageTypes(messageTypes: string[], results: IBubbleFlowResult[]) {
             // ensure we have the same number of messages
             if (messageTypes.length != results.length) {

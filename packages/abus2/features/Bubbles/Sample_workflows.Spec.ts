@@ -22,12 +22,12 @@ feature(`Validate bubbles works with more complex workflows`, () => {
                 bus.subscribe(stepContext.values[0], async (m, c: IMessageHandlerContext) => {
                     const result = await c.sendWithReply({ type: "authorize", payload: { authorizedUser: m.user } }).responseAsync<string>();
                     c.replyAsync(result);
-                }, "AuthenticationService");
+                }, { identifier: "AuthenticationService" });
 
                 bus.subscribe("authorize", (message: any, context: IMessageHandlerContext) => {
                     const result = message.authorizedUser === "user1" ? "authorized" : "unauthorized";
                     context.replyAsync(result);
-                }, "AuthorizationService");
+                }, { identifier: "AuthenticationService" });
 
                 bubbles = new Bubbles(bus);
             });

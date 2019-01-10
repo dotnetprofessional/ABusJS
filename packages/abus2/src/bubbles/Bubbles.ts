@@ -10,6 +10,7 @@ import { MessageTracingTask } from "../tasks/abus-tracing/MessageTracingTask";
 import { IMessageTracing } from "../tasks/abus-tracing/MessagePerformanceTask";
 import { DebugLoggingTask } from "../tasks/DebugLoggingTask";
 import { IBusMetaData } from "../IBusMetaData";
+import { sleep } from "../../features/Utils";
 
 export interface ColorTheme {
     statusPass: Chalk;
@@ -262,25 +263,42 @@ export class Bubbles {
             const bubble = this.bubbleFlow[this.bubbleFlowIndex];
 
             this.bubbleFlowIndex++;
+
             const expected = this.getMessage(bubble.name).message;
             const result = this.validateResult(expected, message, bubble);
             this.bubbleFlowResult.push({ bubble, actual: message, expected, result });
 
+            // Are we at the end yet???
+            if (this.handleEndIfEndOfFlow()) {
+                return true;
+            }
+
             // determine if this message should be auto handled
-            const nextBubble = this.bubbleFlow[this.bubbleFlowIndex];
+            let nextBubble = this.bubbleFlow[this.bubbleFlowIndex];
+            const nextNextBubble = this.bubbleFlow[this.bubbleFlowIndex + 1];
+            if (nextBubble.type === BubbleType.delay) {
+                this.bubbleFlowIndex++;
+                await sleep((nextBubble as IDelayBubble).delay);
+                nextBubble = nextNextBubble;
+            }
             if (nextBubble && (nextBubble.source === BubbleSource.supplied)) {
                 this.handleBubbleMessage(nextBubble, context);
                 return true;
             } else {
-                if (this.bubbleFlowIndex >= this.bubbleFlow.length) {
-                    this.executionPromise.resolve();
-                    return true;
-                }
-                return false;
+                return this.handleEndIfEndOfFlow();
             }
         } catch (e) {
             context.DoNotContinueDispatchingCurrentMessageToHandlers();
             this.executionPromise.reject(e);
+        }
+    }
+
+    private handleEndIfEndOfFlow(): boolean {
+        if (this.bubbleFlowIndex >= this.bubbleFlow.length) {
+            this.executionPromise.resolve();
+            return true;
+        } else {
+            return false
         }
     }
 
