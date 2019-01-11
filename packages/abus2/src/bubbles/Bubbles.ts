@@ -282,16 +282,17 @@ export class Bubbles {
             // determine if this message should be auto handled
             let nextBubble = this.bubbleFlow[this.bubbleFlowIndex];
             const nextNextBubble = this.bubbleFlow[this.bubbleFlowIndex + 1];
+            let delay: number = 0;
             if (nextBubble && nextBubble.type === BubbleType.delay) {
                 this.bubbleFlowIndex++;
-                await sleep((nextBubble as IDelayBubble).delay);
+                delay = (nextBubble as IDelayBubble).delay;
                 nextBubble = nextNextBubble;
             }
             if (nextBubble && (nextBubble.source === BubbleSource.supplied)) {
-                this.handleBubbleMessage(nextBubble, context);
-                return true;
+                this.handleBubbleMessage(nextBubble, context, delay);
+                return nextBubble.type === BubbleType.reply;
             } else {
-                return this.handleEndIfEndOfFlow(message);
+                return this.handleEndIfEndOfFlow(message, delay);
             }
         } catch (e) {
             context.DoNotContinueDispatchingCurrentMessageToHandlers();
@@ -305,13 +306,14 @@ export class Bubbles {
         return subscriptions && subscriptions.filter(s => s.messageFilter === message.type).length > 0;
     }
 
-    private handleEndIfEndOfFlow(message: IMessage<any>): boolean {
+    private handleEndIfEndOfFlow(message: IMessage<any>, delay: number = 0): boolean {
         if (this.bubbleFlowIndex >= this.bubbleFlow.length) {
             const hasHandler = this.hasRegisteredHandler(message);
             // delay the resolution of the promise so that the handler has a chance to execute if available
-            // setTimeout(() => this.executionPromise.resolve(), 10);
-            this.executionPromise.isComplete = true;
-            this.executionPromise.resolve();
+            setTimeout(() => {
+                this.executionPromise.isComplete = true;
+                this.executionPromise.resolve();
+            }, delay);
             return !hasHandler;
         } else {
             return false;
