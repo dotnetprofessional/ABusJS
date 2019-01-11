@@ -43,13 +43,14 @@ feature(`Linear message flows
 
         scenario(`first message is sent`, () => {
             let bubbles: Bubbles;
-            let bus: IBus;
             let bubblesResult: IBubbleFlowResult[];
+            let handlerWasCalled: boolean = false;
 
             given(`a registered handler for 'request'`, () => {
-                bus = new Bus();
-                bus.start();
-                bubbles = new Bubbles(bus);
+                bubbles = new Bubbles();
+                bubbles.bus.subscribe(stepContext.values[0], () => {
+                    handlerWasCalled = true;
+                });
             });
 
             when(`sending the message 'request'
@@ -71,6 +72,10 @@ feature(`Linear message flows
             and(`the flow result has the correct messages`, () => {
                 const expectedMessageTypes = ["request"];
                 validateMessageTypes(expectedMessageTypes, bubblesResult);
+            });
+
+            and(`the handler has invoked`, () => {
+                handlerWasCalled.should.be.true;
             });
         });
 
@@ -95,8 +100,8 @@ feature(`Linear message flows
                 (!request)(response)
 
                 request: {"type":"request"}
-                response: {"type": "response"} 
-                """        
+                response: {"type": "response"}
+                """
             `, async () => {
                     await bubbles.executeAsync(stepContext.docString);
                     bubblesResult = bubbles.result();
@@ -433,7 +438,7 @@ feature(`Linear message flows
             });
 
             and(`the response message was delayed by '40' ms`, () => {
-                executionTime.should.be.greaterThan(stepContext.values[0]);
+                executionTime.should.be.greaterThan(stepContext.values[0] - 1);
             });
 
         });
@@ -481,7 +486,7 @@ feature(`Linear message flows
             });
 
             and(`the response message was delayed by '60' ms`, () => {
-                executionTime.should.be.greaterThan(stepContext.values[0]);
+                executionTime.should.be.greaterThan(stepContext.values[0] - 1);
             });
 
         });

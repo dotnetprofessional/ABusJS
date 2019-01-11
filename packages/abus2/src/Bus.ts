@@ -155,7 +155,7 @@ export class Bus implements IBus {
             classInstance = classHandler;
         }
         definedHandlers.forEach(definition => {
-            const subscriptionId = this.subscribe(definition.type, classInstance[definition.handler].bind(classInstance), classInstance.constructor.name);
+            const subscriptionId = this.subscribe(definition.type, classInstance[definition.handler].bind(classInstance), { identifier: classInstance.constructor.name });
             // classInstance.__messageHandlersSubscriptions.push(subscriptionId);
             classInstance.__subscriptions__ = classInstance.__subscriptions__ || [];
             classInstance.__subscriptions__.push(subscriptionId);

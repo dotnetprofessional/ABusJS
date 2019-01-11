@@ -3,7 +3,7 @@ import { CancellationPolicy } from "../../src/ISubscriptionOptions";
 import { sleep } from "../Utils";
 import { IMessageHandlerContext } from "../../src";
 
-feature(`Automatic handler cancellation
+feature.only(`Automatic handler cancellation
     There are times when a several messages are sent in quick succession and it would be
     a waste of resources to process them all completion.
 
@@ -27,7 +27,7 @@ feature(`Automatic handler cancellation
 
         `, () => {
 
-        scenario.only(`Specifying the cancellation policy cancelExisting`, () => {
+        scenario(`Specifying the cancellation policy cancelExisting`, () => {
             let bubbles: Bubbles;
             given(`a handler set configured to handle `, () => {
                 bubbles = new Bubbles();
@@ -39,9 +39,10 @@ feature(`Automatic handler cancellation
                 }, { cancellationPolicy: CancellationPolicy.cancelExisting });
             });
             //(!request2)--(reply)(!request3)--(reply)(!request4)--(reply)(!request5)(reply)-----
+            //(!request1)--(!reply)--(!request2)--(reply)
             when(`sending the same message in quick succession
             """
-            (!request1)--(!reply)--(!request2)--(reply)
+            (!request2)(!request3)(!request4)(!request5)(reply)-----
 
             request1: {"type":"FAST-AND-FURIOUS",  "id":1}
             request2: {"type":"FAST-AND-FURIOUS", "id":2}
@@ -54,6 +55,7 @@ feature(`Automatic handler cancellation
                     debugger;
                     await bubbles.executeAsync(stepContext.docString);
                     const result = bubbles.result();
+                    console.log(JSON.stringify(result, null, 5));
                     debugger;
                 });
 
