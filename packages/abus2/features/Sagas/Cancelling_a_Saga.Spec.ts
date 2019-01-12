@@ -3,7 +3,7 @@ import { InMemoryKeyValueStore } from "../../src/sagas/saga";
 import { Bus } from "../../src";
 import { SagaDemo } from "./samples/SagaDemo";
 
-feature(`Cancelling a Saga
+feature.only(`Cancelling a Saga
 
     Saga's can be cancelled by calling the 'complete' method. This will prevent further processing of the
     Saga instance. If a message arrives for the Saga instance that is not one that creates a new instance then
@@ -18,16 +18,12 @@ feature(`Cancelling a Saga
         background(``, () => {
             given(`initialize bus`, () => {
                 InMemoryKeyValueStore.forceClear();
-                bus = new Bus();
-                // configure bus
-                bus.start();
-                // bus.usingRegisteredTransportToMessageType("*")
+
+                bubbles = new Bubbles();
+                bubbles.bus.registerHandlers(SagaDemo);
+                // bubbles.bus.usingRegisteredTransportToMessageType("*")
                 //     .inboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("inbound:")).andAlso()
                 //     .outboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("outbound:"));
-
-                bus.registerHandlers(SagaDemo);
-
-                bubbles = new Bubbles(bus);
             });
         });
 
@@ -37,7 +33,7 @@ feature(`Cancelling a Saga
 
             when(`sending a message to the Saga to cancel the instance
             """
-            (!start)(!cancel)(!process-order)(error)
+            (!start)---(!cancel)--(!process-order)(error)
         
             start: {"type": "START_SAGA", "payload":{"id":"test1"}}
             cancel: {"type": "CANCEL_ORDER", "payload":{"id":"test1"}}
@@ -57,7 +53,7 @@ feature(`Cancelling a Saga
             });
         });
 
-        scenario(`Cancelling a Saga that has not been started`, () => {
+        scenario.skip(`Cancelling a Saga that has not been started`, () => {
             given(`a Saga not been started`, () => {
             });
 

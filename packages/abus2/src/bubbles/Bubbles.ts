@@ -9,11 +9,10 @@ import { Intents } from "../Intents";
 import { MessageTracingTask } from "../tasks/abus-tracing/MessageTracingTask";
 import { IMessageTracing } from "../tasks/abus-tracing/MessagePerformanceTask";
 import { DebugLoggingTask } from "../tasks/DebugLoggingTask";
-import { IBusMetaData } from "../IBusMetaData";
-import { sleep } from "../../features/Utils";
 import { IMessageSubscription } from "../IMessageSubscription";
+import { SendOptions } from "../SendOptions";
 
-export interface ColorTheme {
+export interface IColorTheme {
     statusPass: Chalk;
     statusFail: Chalk;
 }
@@ -32,10 +31,11 @@ export class BubblesTask implements IMessageTask {
 export class Bubbles {
     private messages: IBubbleMessage[];
     private bubbleFlowResult: IBubbleFlowResult[] = [];
+    private actualMessageFlow: IMessage<any>[] = [];
     private bubbleFlow: IBubble[];
     private bubbleFlowIndex: number = 0;
     private executionPromise: { isComplete: boolean, resolve: any, reject: any };
-    protected colorTheme: ColorTheme = { statusFail: chalk.redBright, statusPass: chalk.greenBright };
+    protected colorTheme: IColorTheme = { statusFail: chalk.redBright, statusPass: chalk.greenBright };
 
     constructor(public bus?: IBus) {
         if (!bus) {
@@ -49,9 +49,9 @@ export class Bubbles {
             .outboundPipeline
             .useLocalMessagesReceivedTasks(new MessageTracingTask()).and
             .useTransportMessageReceivedTasks(new BubblesTask(this)).and
-        // .andAlso()
-        // .inboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("inbound:")).andAlso()
-        // .outboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("outbound:"));
+            .andAlso()
+            .inboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("inbound:")).andAlso()
+            .outboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("outbound:"));
 
     }
 
@@ -117,12 +117,24 @@ export class Bubbles {
     }
 
     public validate(): void {
-        for (let i = 0; i < this.bubbleFlowResult.length; i++) {
-            const bubbleResult = this.bubbleFlowResult[i];
-            if (!bubbleResult.result.isValid) {
-                let errorMessage = `bubble: ${bubbleResult.bubble.name}\n${bubbleResult.result.diff}`;
-                if (bubbleResult.actual.type === MessageException.type) {
-                    errorMessage += `\n${MessageException.type}:${bubbleResult.actual.payload.error}`;
+        for (let i = 0; i < this.bubbleFlow.length; i++) {
+            const actualMessage = this.actualMessageFlow[i];
+            let expectedBubble = this.bubbleFlow[i];
+            if (expectedBubble.type === BubbleType.delay) {
+                // skip delay bubbles as they can't be validated
+                expectedBubble = this.bubbleFlow[++i];
+            }
+            if (!expectedBubble) {
+                return;
+            }
+            const expectedMessage = this.getBubbleMessage(expectedBubble.name).message;
+            const bubbleResult = this.validateResult(expectedMessage, actualMessage, expectedBubble);
+            this.bubbleFlowResult.push({ bubble: expectedBubble, actual: actualMessage, expected: expectedMessage.message, result: bubbleResult });
+
+            if (!bubbleResult.isValid) {
+                let errorMessage: string = `bubble: ${expectedBubble.name}, message index: ${i}\n${bubbleResult.diff}`;
+                if (actualMessage.type === MessageException.type) {
+                    errorMessage += `\n${MessageException.type}:${actualMessage.payload.error}`;
                 }
                 throw new Error(errorMessage);
             }
@@ -262,17 +274,12 @@ export class Bubbles {
 
     public async messageHandlerAsync(message: IMessage<any>, context: IMessageHandlerContext): Promise<boolean> {
         try {
+            this.actualMessageFlow.push(message);
+
             if (this.executionPromise.isComplete) {
                 return true;
             }
-            const expectedBubble = this.bubbleFlow[this.bubbleFlowIndex];
-
             this.bubbleFlowIndex++;
-
-            const expected = this.getMessage(expectedBubble.name).message;
-            const result = this.validateResult(expected, message, expectedBubble);
-            this.bubbleFlowResult.push({ bubble: expectedBubble, actual: message, expected, result });
-
 
             // Are we at the end yet???
             if (this.handleEndIfEndOfFlow(message)) {
@@ -289,6 +296,7 @@ export class Bubbles {
                 nextBubble = nextNextBubble;
             }
             if (nextBubble && (nextBubble.source === BubbleSource.supplied)) {
+
                 this.handleBubbleMessage(nextBubble, context, delay);
                 return nextBubble.type === BubbleType.reply;
             } else {
@@ -344,30 +352,35 @@ export class Bubbles {
     }
 
     private handleBubbleMessage(bubble: IBubble, context?: IMessageHandlerContext, delay?: number) {
-        let msg = this.getMessage(bubble.name).message;
-
-        // if (bubble.type !== BubbleType.reply) {
-        //     msg.metaData = msg.metaData || {};
-        //     (msg.metaData as IBusMetaData).receivedBy = "Bubbles";
-        // }
+        let msg = this.getBubbleMessage(bubble.name).message;
 
         if (msg.error) {
             // this is an error so we need to convert it to a bus exception
             const error = new Error(msg.error);
             msg = new MessageException(error.message, error);
         }
+        let options: SendOptions;
+        if (delay) {
+            options = { timeToDelay: new TimeSpan(delay) };
+        }
+
         switch (bubble.type) {
             case BubbleType.publish:
-                this.bus.publishAsync(msg, { timeToDelay: new TimeSpan(delay) });
+                this.bus.publishAsync(msg, options);
                 break;
             case BubbleType.send:
-                this.bus.sendAsync(msg, { timeToDelay: new TimeSpan(delay) });
+                this.bus.sendAsync(msg, options);
                 break;
             case BubbleType.sendReply:
-                this.bus.sendWithReply(msg, { timeToDelay: new TimeSpan(delay) });
+                this.bus.sendWithReply(msg, options);
                 break;
             case BubbleType.reply:
-                context.replyAsync(msg);
+                // replies don't inheritably support delays but for testing this may be useful to simulate delays
+                if (delay) {
+                    setTimeout(() => context.replyAsync(msg), delay);
+                } else {
+                    context.replyAsync(msg);
+                }
                 break;
             default:
                 throw new Error("Unsupported bubble type: " + bubble.type);
@@ -390,7 +403,7 @@ export class Bubbles {
                 return;
             }
 
-            const msg = this.getMessage(b.name);
+            const msg = this.getBubbleMessage(b.name);
             if (!msg) {
                 throw new Error("Unable to locate a bubble definition for: " + b.name);
             }
@@ -421,7 +434,7 @@ export class Bubbles {
             } catch (e) {
                 throw new Error(`Unable to parse:\n${definition}\n\n${e}`);
             }
-            const existingMessage = this.getMessage(name);
+            const existingMessage = this.getBubbleMessage(name);
             if (existingMessage) {
                 // merge definition with existing one
                 existingMessage.message = Object.assign(existingMessage.message, message);
@@ -432,7 +445,7 @@ export class Bubbles {
         }
     }
 
-    private getMessage(name: string): IBubbleMessage {
+    private getBubbleMessage(name: string): IBubbleMessage {
         const message = this.messages.filter(m => m.name === name)[0];
         return message
     }

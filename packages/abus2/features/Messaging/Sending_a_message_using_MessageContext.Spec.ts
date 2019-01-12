@@ -1,6 +1,7 @@
 import { Bus } from "../../src/Bus";
 import { IMessageHandlerContext } from "../../src/IMessageHandlerContext";
 import * as chai from "chai";
+import { waitUntilAsync } from "../Utils";
 chai.should();
 
 feature(`Sending a message using MessageContext`, () => {
@@ -42,6 +43,8 @@ feature(`Sending a message using MessageContext`, () => {
             });
 
         then(`the message sent from the first handler is received by the second`, async () => {
+            // give the system time to process the messages
+            await waitUntilAsync(() => secondMessageReceived, 200);
             secondMessageReceived.should.be.true;
         });
     });
@@ -71,6 +74,8 @@ feature(`Sending a message using MessageContext`, () => {
             });
 
         then(`the message sent from the first handler is received by the second`, async () => {
+            // give the system time to process the messages
+            await waitUntilAsync(() => secondMessageReceived, 200);
             secondMessageReceived.should.be.true;
         });
     });

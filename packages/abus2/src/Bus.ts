@@ -66,7 +66,8 @@ export class Bus implements IBus {
         // hook up the transports message receiver
         transport.onMessage((message: IMessage<any>) => {
             // process raw messages from the transport
-            this.processInboundHandlers(message);
+            // Ensure this doesn't block code ie allow other code to run before processing. Make it feel like a thread.
+            setTimeout(() => this.processInboundHandlers(message), 0);
         });
         return registeredTransport;
     }
@@ -264,7 +265,8 @@ export class Bus implements IBus {
         const tasks = transport.pipeline.outboundStages;
 
         const pipelineTasks = [...tasks.logicalMessageReceived, ...tasks.transportDispatch, handlerTask];
-        this.executePipelineTasks(pipelineTasks, message, context);
+        // Ensure this doesn't block code ie allow other code to run before processing. Make it feel like a thread.
+        setTimeout(() => this.executePipelineTasks(pipelineTasks, message, context), 0);
     }
 
     private async processInboundHandlers(message: IMessage<any>): Promise<void> {

@@ -1,8 +1,9 @@
 import { Bus } from "../../src/Bus";
 import { MessageException } from "../../src/tasks/MessageException";
+import { waitUntilAsync } from "../Utils";
 
 feature(`Exceptions are published`, () => {
-    let bus: Bus
+    let bus: Bus;
     const type = "UNIT_TEST";
 
     background(``, () => {
@@ -23,7 +24,7 @@ feature(`Exceptions are published`, () => {
                 throw new Error("Blowed Up!");
             });
 
-            bus.subscribe("Bus.Error", async (message: MessageException) => {
+            bus.subscribe(MessageException.type, async (message: MessageException) => {
                 exceptionMessage = message;
             });
         });
@@ -32,8 +33,10 @@ feature(`Exceptions are published`, () => {
             await bus.sendAsync({ type: `${stepContext.values[0]}` });
         });
 
-        then(`an exception with the message 'Blowed Up!' is published`, () => {
-            exceptionMessage.description.should.be.equal(stepContext.values[0])
+        then(`an exception with the message 'Blowed Up!' is published`, async () => {
+            // give the system time to process the messages
+            await waitUntilAsync(() => exceptionMessage, 200);
+            exceptionMessage.description.should.be.equal(stepContext.values[0]);
         });
     });
 });

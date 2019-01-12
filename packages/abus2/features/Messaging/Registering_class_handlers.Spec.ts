@@ -1,12 +1,13 @@
 import { Bus } from "../../src/Bus";
 import * as classHandlers from "../MessageTypes";
+import { sleep } from "../Utils";
 
 feature(`Registering class handlers
     Classes can define handlers via decorators which can then be auto subscribed to the bus.
     This can be done individually or as a group via an export of an index file.
 
     `, () => {
-        let bus: Bus
+        let bus: Bus;
 
         background(``, () => {
             given(`abus is configured with the ExpressMemoryTransport`, () => {
@@ -73,7 +74,9 @@ feature(`Registering class handlers
             and(`sending the message 'PlusOne'`, () => {
                 bus.sendAsync(new classHandlers.PlusOne(2))
             });
-            then(`the count should be '11'`, () => {
+            then(`the count should be '11'`, async () => {
+                // give the system time to process the messages
+                await sleep(50);
                 instance.count.should.be.eql(stepContext.values[0]);
             });
         });

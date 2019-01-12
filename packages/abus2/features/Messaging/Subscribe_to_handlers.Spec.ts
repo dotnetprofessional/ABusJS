@@ -1,8 +1,9 @@
 import { Bus } from "../../src/Bus";
+import { waitUntilAsync } from "../Utils";
 require("chai").should();
 
 feature(`Subscribing to handlers`, () => {
-    let bus: Bus
+    let bus: Bus;
     const type = "UNIT_TEST";
 
     background(``, () => {
@@ -31,16 +32,18 @@ feature(`Subscribing to handlers`, () => {
 
         when(`subscribing for type '${type}'`, async () => {
             bus.subscribe(stepContext.values[0], () => {
+                console.log("XX");
                 messageReceived = true;
             });
         });
 
         and(`sending a message of type '${type}'`, () => {
             bus.sendAsync({ type: stepContext.values[0] });
-
         });
 
-        then(`the messag is received`, () => {
+        then(`the message is received`, async () => {
+            // give the system time to process the messages
+            await waitUntilAsync(() => messageReceived, 200);
             messageReceived.should.be.true;
         });
     });

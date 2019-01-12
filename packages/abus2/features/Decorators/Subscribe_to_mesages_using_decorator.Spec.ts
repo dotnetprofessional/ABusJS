@@ -1,10 +1,11 @@
 import { Bus } from "../../src/Bus";
 import { MyHandlerByTypeName, MyHandlerByTypeDefinition, PlusTwo, PlusOne, handlerResponse } from "../MessageTypes";
 import { IBus } from "../../src";
+import { waitUntilAsync } from "../Utils";
 require("chai").should();
 
 feature(`Subscribe to messages using decorators`, () => {
-    let bus: IBus
+    let bus: IBus;
 
     background(``, () => {
         given(`abus is configured with the ExpressMemoryTransport`, () => {
@@ -29,7 +30,9 @@ feature(`Subscribe to messages using decorators`, () => {
             await bus.sendAsync({ type: `${stepContext.values[0]}`, payload: stepContext.values[1] });
         });
 
-        then(`the registered handlers receives the messages`, () => {
+        then(`the registered handlers receives the messages`, async () => {
+            // give the system time to process the messages
+            await waitUntilAsync(() => handlerResponse.value > 2, 200);
             handlerResponse.value.should.be.eql(3);
         });
     });
@@ -47,7 +50,9 @@ feature(`Subscribe to messages using decorators`, () => {
             await bus.sendAsync(new PlusTwo(stepContext.values[1]));
         });
 
-        then(`the registered handlers receives the messages`, () => {
+        then(`the registered handlers receives the messages`, async () => {
+            // give the system time to process the messages
+            await waitUntilAsync(() => handlerResponse.value > 10, 200);
             handlerResponse.value.should.be.eql(11);
         });
     });

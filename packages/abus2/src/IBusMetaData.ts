@@ -4,6 +4,6 @@ export interface IBusMetaData {
     intent?: Intents;
     messageId?: string;
     replyTo?: string;
-    timeToDelay?: TimeSpan;
+    timeToDelay?: TimeSpan | number;
     receivedBy?: string;
 }

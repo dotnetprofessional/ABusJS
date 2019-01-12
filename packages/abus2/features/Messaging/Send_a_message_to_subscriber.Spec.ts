@@ -1,6 +1,7 @@
 import { Bus } from "../../src/Bus";
 import { IMessageHandlerContext } from "../../src/IMessageHandlerContext";
 import { IMessage } from "../../src/IMessage";
+import { waitUntilAsync } from "../Utils";
 require("chai").should();
 
 feature(`Send a message to a subscriber`, () => {
@@ -28,7 +29,10 @@ feature(`Send a message to a subscriber`, () => {
             await bus.sendAsync({ type: `${stepContext.values[0]}` });
         });
 
-        then(`the registered handler receives the message`, () => {
+        then(`the registered handler receives the message`, async () => {
+            // give the system time to process the messages
+            await waitUntilAsync(() => messageReceived, 200);
+
             messageReceived.type.should.be.equal(type);
         });
     });
@@ -40,7 +44,10 @@ feature(`Send a message to a subscriber`, () => {
             await bus.sendAsync({ type: `${stepContext.values[0]}`, payload: stepContext.values[1] });
         });
 
-        then(`the registered handler receives the message`, () => {
+        then(`the registered handler receives the message`, async () => {
+            // give the system time to process the messages
+            await waitUntilAsync(() => messageReceived, 200);
+
             messageReceived.type.should.be.equal(type);
             messageReceived.payload.should.be.equal(payload);
         });

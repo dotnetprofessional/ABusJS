@@ -15,7 +15,7 @@ export class SagaDemo extends Saga<any> {
 
     @handler("START_SAGA")
     public startSaga(message: any, context: IMessageHandlerContext) {
-        // console.log("HANDLER: START_SAGA");
+        console.log("HANDLER: START_SAGA");
         context.publishAsync({ type: "SAGA_STARTED" });
     }
 
@@ -29,7 +29,7 @@ export class SagaDemo extends Saga<any> {
     }
 
     public sagaNotFound(message: IMessage<any>, context: IMessageHandlerContext) {
-        // console.log("saga not found for type: " + context.activeMessage.type);
+        console.log("saga not found for type: " + context.activeMessage.type);
         super.sagaNotFound(message, context);
     }
 }

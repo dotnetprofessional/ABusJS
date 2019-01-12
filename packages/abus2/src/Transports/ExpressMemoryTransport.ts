@@ -22,6 +22,10 @@ export class ExpressMemoryTransport implements IMessageTransport {
     public async sendAsync(message: IMessage<any>, timeToDelay?: TimeSpan): Promise<void> {
         // As this is all local just send it directly to the handler
         if (timeToDelay) {
+            // add the delay meta-data so its clear this message had been delayed
+            if (message.metaData) {
+                message.metaData.timeToDelay = timeToDelay.totalMilliseconds;
+            }
             setTimeout(() => this._onMessageHandler(message), timeToDelay.totalMilliseconds);
         } else {
             this._onMessageHandler(message);

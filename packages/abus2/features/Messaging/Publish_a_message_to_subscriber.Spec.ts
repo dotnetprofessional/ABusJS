@@ -1,4 +1,5 @@
 import { Bus } from "../../src/Bus";
+import { sleep } from "../Utils";
 require("chai").should();
 
 feature(`Publish a message to a subscriber`, () => {
@@ -32,6 +33,7 @@ feature(`Publish a message to a subscriber`, () => {
 
         then(`the each of the '2' registered handlers receives the message in its own instance`, async () => {
             // give the system time to process the messages
+            await sleep(50);
             messagesReceived.length.should.be.eql(stepContext.values[0]);
         });
     });
@@ -54,6 +56,7 @@ feature(`Publish a message to a subscriber`, () => {
 
         then(`the each of the '3' messages is received by the handler`, async () => {
             // give the system time to process the messages
+            await sleep(50);
             messageCount.should.be.eql(stepContext.values[0]);
         });
     });
@@ -75,6 +78,7 @@ feature(`Publish a message to a subscriber`, () => {
 
         then(`the each of the '1' messages is received by the handler`, async () => {
             // give the system time to process the messages
+            await sleep(50);
             messageCount.should.be.eql(stepContext.values[0]);
         });
     });
