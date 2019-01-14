@@ -35,6 +35,7 @@ export class Bubbles {
     public actualMessageFlow: IMessage<any>[] = [];
     private bubbleFlow: IBubble[];
     private bubbleFlowIndex: number = 0;
+    private tracingEnabled: boolean;
     private executionPromise: { isComplete: boolean, resolve: any, reject: any };
     protected colorTheme: IColorTheme = { statusFail: chalk.redBright, statusPass: chalk.greenBright };
 
@@ -49,9 +50,9 @@ export class Bubbles {
         this.bus.usingRegisteredTransportToMessageType("*")
             .outboundPipeline
             .useLocalMessagesReceivedTasks(new MessageTracingTask()).and
-            .useTransportMessageReceivedTasks(new BubblesTask(this)).and
-            .andAlso()
-            .inboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("inbound:")).andAlso()
+            .useTransportMessageReceivedTasks(new BubblesTask(this));
+        // .andAlso()
+        // .inboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("inbound:")).andAlso()
         // .outboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("outbound:"));
 
     }
@@ -118,13 +119,12 @@ export class Bubbles {
     }
 
     public validate(): void {
-        for (let i = 0; i < this.bubbleFlow.length; i++) {
+        // remove all the delay bubbles before comparing
+        const bubbleFlow = this.bubbleFlow.filter(b => b.type !== BubbleType.delay);
+
+        for (let i = 0; i < bubbleFlow.length; i++) {
             const actualMessage = this.actualMessageFlow[i];
-            let expectedBubble = this.bubbleFlow[i];
-            if (expectedBubble.type === BubbleType.delay) {
-                // skip delay bubbles as they can't be validated
-                expectedBubble = this.bubbleFlow[++i];
-            }
+            let expectedBubble = bubbleFlow[i];
             if (!expectedBubble) {
                 return;
             }
@@ -205,6 +205,7 @@ export class Bubbles {
             const parentProcessIdentifier = this.getParentIdentifier(bubble);
 
             let event: string;
+            // at this point can add syles too
             if (actual.metaData.intent === Intents.reply) {
                 actual.metaData.receivedBy = this.getParentIdentifier(this.getParentBubble(bubble));
                 event = `${parentProcessIdentifier}-->>${actual.metaData.receivedBy || "unhandled"}:${actual.type}`;
@@ -212,9 +213,7 @@ export class Bubbles {
                 event = `${parentProcessIdentifier}->>${actual.metaData.receivedBy || "unhandled"}:${actual.type}`;
 
             }
-            // const event = `${parentProcessIdentifier} --> |${actual.type}| ${actual.metaData.receivedBy || "unhandled"}`;
 
-            // at this point can add syles too
             output += "\n" + event;
         });
 
@@ -277,7 +276,10 @@ export class Bubbles {
 
     public async messageHandlerAsync(message: IMessage<any>, context: IMessageHandlerContext): Promise<boolean> {
         try {
-            console.info(`BUBBLES: ${message.type} incoming: ${Date.now() - this.offset}`);
+            if (this.tracingEnabled) console.info(`BUBBLES: Received ${message.type}: ${Date.now() - this.offset}ms`);
+            if (message.type === "SAGA_STARTED") {
+                debugger;
+            }
             this.actualMessageFlow.push(message);
 
             if (this.executionPromise.isComplete) {
@@ -285,10 +287,6 @@ export class Bubbles {
             }
             this.bubbleFlowIndex++;
 
-            // Are we at the end yet???
-            if (this.handleEndIfEndOfFlow(message)) {
-                return true;
-            }
 
             // determine if this message should be auto handled
             let nextBubble = this.bubbleFlow[this.bubbleFlowIndex];
@@ -299,12 +297,22 @@ export class Bubbles {
                 delay = (nextBubble as IDelayBubble).delay;
                 nextBubble = nextNextBubble;
             }
+
+            // Are we at the end yet???
+            if (this.handleEndIfEndOfFlow(message, delay)) {
+                // is the next next bubble one that bubbles needs to handle too? (ie if we don't we may never get another message and timeout)
+
+                if (this.tracingEnabled) console.log(`BUBBLES: handled type: ${message.type}`);
+                return true;
+            }
+
             if (nextBubble && (nextBubble.source === BubbleSource.supplied)) {
 
                 this.handleBubbleMessage(nextBubble, context, delay);
                 return nextBubble.type === BubbleType.reply;
             } else {
-                return this.handleEndIfEndOfFlow(message, delay);
+                const willHandle = this.handleEndIfEndOfFlow(message, delay);
+                if (this.tracingEnabled && willHandle) console.log(`BUBBLES: handled type: ${message.type}`);
             }
         } catch (e) {
             context.DoNotContinueDispatchingCurrentMessageToHandlers();
@@ -312,10 +320,21 @@ export class Bubbles {
         }
     }
 
+    public enableTracing() {
+        this.tracingEnabled = true;
+    }
+
+
     private hasRegisteredHandler(message: IMessage<any>) {
         // accessing private state - but we need it!!
-        const subscriptions = (this.bus as any).messageSubscriptions as IMessageSubscription<any>[];
-        return subscriptions && subscriptions.filter(s => s.messageFilter === message.type).length > 0;
+        if (message.metaData.intent === Intents.reply) {
+            // Validate that there's a registered handler for this reply
+            const replySubscription = (this.bus as any).messageReplyHandlers[message.metaData.replyTo];
+            return !!replySubscription;
+        } else {
+            const subscriptions = (this.bus as any).messageSubscriptions as IMessageSubscription<any>[];
+            return subscriptions && subscriptions.filter(s => s.messageFilter === message.type).length > 0;
+        }
     }
 
     private handleEndIfEndOfFlow(message: IMessage<any>, delay: number = 0): boolean {
@@ -328,7 +347,7 @@ export class Bubbles {
             }, delay);
             return !hasHandler;
         } else {
-            return false;
+            return !this.hasRegisteredHandler(message);
         }
     }
 
