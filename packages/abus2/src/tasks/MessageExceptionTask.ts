@@ -11,10 +11,11 @@ export class MessageExceptionTask implements IMessageTask {
         try {
             await next();
         } catch (error) {
+            const exception = new MessageException(error.message, error);
             message.metaData = message.metaData || {};
-            message.metaData[this.errorKey] = error;
+            message.metaData[this.errorKey] = exception.description;
             message.metaData[this.errorCount] = (message.metaData[this.errorCount] || 0) + 1;
-            context.publishAsync({ type: MessageException.type, payload: new MessageException(error.message, error) });
+            context.publishAsync({ type: MessageException.type, payload: exception });
         }
     }
 }

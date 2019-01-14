@@ -33,8 +33,9 @@ feature.only(`Cancelling a Saga
 
             when(`sending a message to the Saga to cancel the instance
             """
-            (!start)---(!cancel)--(!process-order)(error)
+            (!start)(saga-started)-----(!cancel)----(!process-order)(error)---
         
+            saga-started: {"type":"SAGA_STARTED"}
             start: {"type": "START_SAGA", "payload":{"id":"test1"}}
             cancel: {"type": "CANCEL_ORDER", "payload":{"id":"test1"}}
             process-order: {"type":"PROCESS_ORDER", "payload":{"id":"test1"}}
@@ -42,6 +43,7 @@ feature.only(`Cancelling a Saga
             """
             `, async () => {
                     await bubbles.executeAsync(stepContext.docString);
+                    console.log(JSON.stringify(bubbles.actualMessageFlow, null, 5));
                 });
 
             and(`sending another message to the Saga`, () => {

@@ -11,6 +11,7 @@ import { IMessageTracing } from "../tasks/abus-tracing/MessagePerformanceTask";
 import { DebugLoggingTask } from "../tasks/DebugLoggingTask";
 import { IMessageSubscription } from "../IMessageSubscription";
 import { SendOptions } from "../SendOptions";
+import { MessageHandlerContext } from "../MessageHandlerContext";
 
 export interface IColorTheme {
     statusPass: Chalk;
@@ -31,7 +32,7 @@ export class BubblesTask implements IMessageTask {
 export class Bubbles {
     private messages: IBubbleMessage[];
     private bubbleFlowResult: IBubbleFlowResult[] = [];
-    private actualMessageFlow: IMessage<any>[] = [];
+    public actualMessageFlow: IMessage<any>[] = [];
     private bubbleFlow: IBubble[];
     private bubbleFlowIndex: number = 0;
     private executionPromise: { isComplete: boolean, resolve: any, reject: any };
@@ -51,7 +52,7 @@ export class Bubbles {
             .useTransportMessageReceivedTasks(new BubblesTask(this)).and
             .andAlso()
             .inboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("inbound:")).andAlso()
-            .outboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("outbound:"));
+        // .outboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("outbound:"));
 
     }
 
@@ -93,7 +94,7 @@ export class Bubbles {
                 actual = this.trimToExpected(expected, message.payload);
             }
         } else if (message.type === MessageException.type) {
-            // We maybe trying to validate an exceptin or there just may have been an 
+            // We maybe trying to validate an exception or there just may have been an 
             // unexpected one so need to treat those differently
             if (!expected.type) {
                 actual = this.trimToExpected(expected, { error: message.payload.description });
@@ -272,8 +273,11 @@ export class Bubbles {
         return copy(expected, actual);
     }
 
+    private offset = Date.now();
+
     public async messageHandlerAsync(message: IMessage<any>, context: IMessageHandlerContext): Promise<boolean> {
         try {
+            console.info(`BUBBLES: ${message.type} incoming: ${Date.now() - this.offset}`);
             this.actualMessageFlow.push(message);
 
             if (this.executionPromise.isComplete) {
@@ -354,6 +358,7 @@ export class Bubbles {
     private handleBubbleMessage(bubble: IBubble, context?: IMessageHandlerContext, delay?: number) {
         let msg = this.getBubbleMessage(bubble.name).message;
 
+        context = context || new MessageHandlerContext(this.bus, null, null);
         if (msg.error) {
             // this is an error so we need to convert it to a bus exception
             const error = new Error(msg.error);
@@ -366,25 +371,30 @@ export class Bubbles {
 
         switch (bubble.type) {
             case BubbleType.publish:
-                this.bus.publishAsync(msg, options);
+                this.executeWithDelay(() => context.publishAsync(msg), options);
                 break;
             case BubbleType.send:
-                this.bus.sendAsync(msg, options);
+                this.executeWithDelay(() => context.sendAsync(msg), options);
                 break;
             case BubbleType.sendReply:
-                this.bus.sendWithReply(msg, options);
+                this.executeWithDelay(() => context.sendWithReply(msg), options);
                 break;
             case BubbleType.reply:
                 // replies don't inheritably support delays but for testing this may be useful to simulate delays
-                if (delay) {
-                    setTimeout(() => context.replyAsync(msg), delay);
-                } else {
-                    context.replyAsync(msg);
-                }
+                this.executeWithDelay(() => context.replyAsync(msg), options);
                 break;
             default:
                 throw new Error("Unsupported bubble type: " + bubble.type);
         }
+    }
+
+    private executeWithDelay(f: Function, options: SendOptions) {
+        if (options && options.timeToDelay) {
+            setTimeout(() => f(), options.timeToDelay.totalMilliseconds);
+        } else {
+            f();
+        }
+
     }
     private initializeBus(): IBus {
         const bus = new Bus();

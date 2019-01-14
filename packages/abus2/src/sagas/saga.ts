@@ -78,13 +78,13 @@ export abstract class Saga<T> {
         return async (message: any, context: IMessageHandlerContext) => {
             // create a new saga instance
             let sagaKey = this.configureSagaKey(context.activeMessage);
+            // To ensure uniqueness for keys add the name of the Saga to the key
+            sagaKey = this.constructor.name + ":" + sagaKey;
             if (sagaInstance.startSagaWithType === context.activeMessage.type) {
                 if (!sagaKey) {
                     throw new Error("Saga key not defined for message: " + context.activeMessage.type);
                 }
 
-                // To ensure uniqueness for keys add the name of the Saga to the key
-                sagaKey = this.constructor.name + ":" + sagaKey;
                 if ((await this.getSagaDataAsync(sagaKey)).sagaKey) {
                     throw new Error(`Saga with key ${sagaKey} already exists. Can't start saga twice.`);
                 }
@@ -104,7 +104,7 @@ export abstract class Saga<T> {
             newSagaInstance.sagaData = data;
             const handler = originalHandler.bind(newSagaInstance);
             try {
-                handler(message, context);
+                await handler(message, context);
                 // now persist the data again
                 if (this.sagaData.sagaKey !== "complete") {
                     await newSagaInstance.saveSagaDataAsync();
@@ -126,7 +126,7 @@ export abstract class Saga<T> {
      */
     public sagaNotFound(message: IMessage<any>, context: IMessageHandlerContext) {
         const key = this.configureSagaKey(context.activeMessage);
-        throw Error(`Unable to find Saga instance for key: ${key}. This may be due to the Saga not being started or being already complete.`);
+        throw Error(`Received message type: ${context.activeMessage.type}, however unable to find Saga instance for key: ${key}. This may be due to the Saga not being started or being already complete.`);
     }
 
     /**

@@ -1,6 +1,6 @@
 import { Saga } from "../../../src/sagas/saga";
 
-import { IMessage, handler, IMessageHandlerContext } from "../../../src";
+import { IMessage, handler, IMessageHandlerContext, TimeSpan } from "../../../src";
 
 export class SagaDemo extends Saga<any> {
 
