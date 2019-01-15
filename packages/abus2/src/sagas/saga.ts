@@ -106,7 +106,7 @@ export abstract class Saga<T> {
             try {
                 await handler(message, context);
                 // now persist the data again
-                if (this.sagaData.sagaKey !== "complete") {
+                if (!this.sagaData.sagaKey) {
                     await newSagaInstance.saveSagaDataAsync();
                 }
             } catch (e) {
@@ -169,7 +169,7 @@ export abstract class Saga<T> {
     public async completeAsync() {
         await this.removeSagaDataAsync();
         // update the local sagaData to signify its been deleted
-        this.sagaData.sagaKey = "complete";
+        this.sagaData = { userData: {} };
     }
 
     public isCompleted(): boolean {

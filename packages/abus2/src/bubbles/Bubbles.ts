@@ -122,11 +122,16 @@ export class Bubbles {
         // remove all the delay bubbles before comparing
         const bubbleFlow = this.bubbleFlow.filter(b => b.type !== BubbleType.delay);
 
-        for (let i = 0; i < bubbleFlow.length; i++) {
+        for (let i = 0; i < this.actualMessageFlow.length; i++) {
             const actualMessage = this.actualMessageFlow[i];
             let expectedBubble = bubbleFlow[i];
             if (!expectedBubble) {
-                return;
+                let errorMessage: string = `bubble: extra!!, message index: ${i}\n`;
+                if (actualMessage.type === MessageException.type) {
+                    errorMessage += `\n${MessageException.type}:${actualMessage.payload.description}`;
+                }
+                errorMessage
+                throw new Error(errorMessage);
             }
             const expectedMessage = this.getBubbleMessage(expectedBubble.name).message;
             const bubbleResult = this.validateResult(expectedMessage, actualMessage, expectedBubble);
@@ -277,53 +282,113 @@ export class Bubbles {
     public async messageHandlerAsync(message: IMessage<any>, context: IMessageHandlerContext): Promise<boolean> {
         try {
             if (this.tracingEnabled) console.info(`BUBBLES: Received ${message.type}: ${Date.now() - this.offset}ms`);
-            if (message.type === "SAGA_STARTED") {
-                debugger;
-            }
+
             this.actualMessageFlow.push(message);
 
-            if (this.executionPromise.isComplete) {
-                return true;
+            if (message.type === "GetAgreementHeadersRequest") {
+                debugger;
             }
+
+            // work out the basics of this message
+            const handleMessage = this.shouldHandleRequest(message);
+
+            const processNextMessageAsync = async (nextIndex: number, message: IMessage<any>, context: IMessageHandlerContext) => {
+                let delay: number;
+                let nextMessageBubble = this.bubbleFlow[nextIndex];
+                if (nextMessageBubble && nextMessageBubble.type === BubbleType.delay) {
+                    delay = (nextMessageBubble as IDelayBubble).delay;
+                    nextIndex++;
+                    this.bubbleFlowIndex++;
+                    nextMessageBubble = this.bubbleFlow[nextIndex];
+                }
+                if (nextMessageBubble && nextMessageBubble.source === BubbleSource.supplied) {
+                    this.handleBubbleMessage(nextMessageBubble, context, delay);
+                } else {
+                    // this message will come from the system or it could be a final delay in the definition
+                    if (this.isLastMessage(nextIndex)) {
+                        this.completeFlow(delay);
+                    }
+                }
+            };
+
+            // process the next message without blocking
             this.bubbleFlowIndex++;
-
-
-            // determine if this message should be auto handled
-            let nextBubble = this.bubbleFlow[this.bubbleFlowIndex];
-            const nextNextBubble = this.bubbleFlow[this.bubbleFlowIndex + 1];
-            let delay: number = 0;
-            if (nextBubble && nextBubble.type === BubbleType.delay) {
-                this.bubbleFlowIndex++;
-                delay = (nextBubble as IDelayBubble).delay;
-                nextBubble = nextNextBubble;
-            }
-
-            // Are we at the end yet???
-            if (this.handleEndIfEndOfFlow(message, delay)) {
-                // is the next next bubble one that bubbles needs to handle too? (ie if we don't we may never get another message and timeout)
-
-                if (this.tracingEnabled) console.log(`BUBBLES: handled type: ${message.type}`);
-                return true;
-            }
-
-            if (nextBubble && (nextBubble.source === BubbleSource.supplied)) {
-
-                this.handleBubbleMessage(nextBubble, context, delay);
-                return nextBubble.type === BubbleType.reply;
-            } else {
-                const willHandle = this.handleEndIfEndOfFlow(message, delay);
-                if (this.tracingEnabled && willHandle) console.log(`BUBBLES: handled type: ${message.type}`);
-            }
+            processNextMessageAsync(this.bubbleFlowIndex, message, context);
+            // if the current message has a handler the bubbles won't handle it
+            return handleMessage;
         } catch (e) {
             context.DoNotContinueDispatchingCurrentMessageToHandlers();
             this.executionPromise.reject(e);
         }
     }
 
+
+    //     if (message.type === "SAGA_STARTED") {
+    //         debugger;
+    //     }
+
+    //     if (this.executionPromise.isComplete) {
+    //         return true;
+    //     }
+    //     this.bubbleFlowIndex++;
+
+
+    //     // determine if this message should be auto handled
+    //     let nextBubble = this.bubbleFlow[this.bubbleFlowIndex];
+    //     const nextNextBubble = this.bubbleFlow[this.bubbleFlowIndex + 1];
+    //     let delay: number = 0;
+    //     if (nextBubble && nextBubble.type === BubbleType.delay) {
+    //         this.bubbleFlowIndex++;
+    //         delay = (nextBubble as IDelayBubble).delay;
+    //         nextBubble = nextNextBubble;
+    //     }
+
+    //     // Are we at the end yet???
+    //     if (this.handleEndIfEndOfFlow(message, delay)) {
+    //         // is the next next bubble one that bubbles needs to handle too? (ie if we don't we may never get another message and timeout)
+
+    //         if (this.tracingEnabled) console.log(`BUBBLES: handled type: ${message.type}`);
+    //         return true;
+    //     }
+
+    //     if (nextBubble && (nextBubble.source === BubbleSource.supplied)) {
+
+    //         this.handleBubbleMessage(nextBubble, context, delay);
+    //         return nextBubble.type === BubbleType.reply;
+    //     } else {
+    //         const willHandle = this.handleEndIfEndOfFlow(message, delay);
+    //         if (this.tracingEnabled && willHandle) console.log(`BUBBLES: handled type: ${message.type}`);
+    //     }
+    // } catch (e) {
+    //     context.DoNotContinueDispatchingCurrentMessageToHandlers();
+    //     this.executionPromise.reject(e);
+    // }
+
+
     public enableTracing() {
         this.tracingEnabled = true;
     }
 
+    private isLastMessage(index: number): boolean {
+        return index >= this.bubbleFlow.length;
+    }
+
+    private shouldHandleRequest(message: IMessage<any>) {
+        const currentBubble = this.bubbleFlow[this.bubbleFlowIndex];
+        const nextBubble = this.bubbleFlow[this.bubbleFlowIndex + 1];
+
+        let shouldHandle: boolean;
+        if (nextBubble && nextBubble.type === BubbleType.reply && nextBubble.source === BubbleSource.supplied) {
+            shouldHandle = true;
+        }
+        shouldHandle = shouldHandle || (currentBubble.type !== BubbleType.reply && currentBubble.source === BubbleSource.supplied)
+            || !this.hasRegisteredHandler(message);
+
+        if (shouldHandle && this.tracingEnabled) {
+            console.log(`BUBBLES: handled type: ${message.type}`);
+        }
+        return shouldHandle;
+    }
 
     private hasRegisteredHandler(message: IMessage<any>) {
         // accessing private state - but we need it!!
@@ -337,19 +402,25 @@ export class Bubbles {
         }
     }
 
-    private handleEndIfEndOfFlow(message: IMessage<any>, delay: number = 0): boolean {
-        if (this.bubbleFlowIndex >= this.bubbleFlow.length) {
-            const hasHandler = this.hasRegisteredHandler(message);
-            // delay the resolution of the promise so that the handler has a chance to execute if available
-            setTimeout(() => {
-                this.executionPromise.isComplete = true;
-                this.executionPromise.resolve();
-            }, delay);
-            return !hasHandler;
-        } else {
-            return !this.hasRegisteredHandler(message);
-        }
+    private completeFlow(delay: number = 0) {
+        setTimeout(() => {
+            this.executionPromise.isComplete = true;
+            this.executionPromise.resolve();
+        }, delay);
     }
+    // private handleEndIfEndOfFlow(message: IMessage<any>, delay: number = 0): boolean {
+    //     if (this.bubbleFlowIndex >= this.bubbleFlow.length) {
+    //         const hasHandler = this.hasRegisteredHandler(message);
+    //         // delay the resolution of the promise so that the handler has a chance to execute if available
+    //         setTimeout(() => {
+    //             this.executionPromise.isComplete = true;
+    //             this.executionPromise.resolve();
+    //         }, delay);
+    //         return !hasHandler;
+    //     } else {
+    //         return !this.hasRegisteredHandler(message);
+    //     }
+    // }
 
     private processWorkflowDefinition(workflow: string) {
         const blockReader = new TextBlockReader(workflow);
@@ -364,9 +435,6 @@ export class Bubbles {
     private async executeBubbleFlowAsync(): Promise<void> {
         try {
             const firstBubble = this.bubbleFlow[0];
-            if (firstBubble.source != BubbleSource.supplied) {
-                throw new Error("The first bubble in a definition must be marked as supplied ie (!my-first-bubble)");
-            }
 
             this.handleBubbleMessage(firstBubble);
         } catch (e) {
@@ -375,13 +443,17 @@ export class Bubbles {
     }
 
     private handleBubbleMessage(bubble: IBubble, context?: IMessageHandlerContext, delay?: number) {
-        let msg = this.getBubbleMessage(bubble.name).message;
+        let bubbleMessage: any;
+        bubbleMessage = this.getBubbleMessage(bubble.name).message;
+        if (bubble.type !== BubbleType.reply) {
+            bubbleMessage = Object.assign({}, bubbleMessage);
+        }
 
         context = context || new MessageHandlerContext(this.bus, null, null);
-        if (msg.error) {
+        if (bubbleMessage.error) {
             // this is an error so we need to convert it to a bus exception
-            const error = new Error(msg.error);
-            msg = new MessageException(error.message, error);
+            const error = new Error(bubbleMessage.error);
+            bubbleMessage = new MessageException(error.message, error);
         }
         let options: SendOptions;
         if (delay) {
@@ -390,17 +462,17 @@ export class Bubbles {
 
         switch (bubble.type) {
             case BubbleType.publish:
-                this.executeWithDelay(() => context.publishAsync(msg), options);
+                this.executeWithDelay(() => context.publishAsync(bubbleMessage), options);
                 break;
             case BubbleType.send:
-                this.executeWithDelay(() => context.sendAsync(msg), options);
+                this.executeWithDelay(() => context.sendAsync(bubbleMessage), options);
                 break;
             case BubbleType.sendReply:
-                this.executeWithDelay(() => context.sendWithReply(msg), options);
+                this.executeWithDelay(() => context.sendWithReply(bubbleMessage), options);
                 break;
             case BubbleType.reply:
                 // replies don't inheritably support delays but for testing this may be useful to simulate delays
-                this.executeWithDelay(() => context.replyAsync(msg), options);
+                this.executeWithDelay(() => context.replyAsync(bubbleMessage), options);
                 break;
             default:
                 throw new Error("Unsupported bubble type: " + bubble.type);

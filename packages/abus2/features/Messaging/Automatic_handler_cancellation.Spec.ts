@@ -3,7 +3,7 @@ import { CancellationPolicy } from "../../src/ISubscriptionOptions";
 import { sleep } from "../Utils";
 import { IMessageHandlerContext } from "../../src";
 
-feature(`Automatic handler cancellation
+feature.skip(`Automatic handler cancellation
     There are times when a several messages are sent in quick succession and it would be
     a waste of resources to process them all completion.
 
@@ -25,7 +25,47 @@ feature(`Automatic handler cancellation
         ignoreIfExisting:
             when a new message is sent, and the handler is busy the new message will be ignored.
 
-        `, () => {
+        `, function () {
+        this.timeout(5000);
+
+        scenario(`Not specifying the cancellation policy will process every message`, () => {
+            let bubbles: Bubbles;
+            given(`a handler set configured to handle `, () => {
+                bubbles = new Bubbles();
+                bubbles.bus.subscribe("FAST-AND-FURIOUS", async (message: any, context: IMessageHandlerContext) => {
+                    console.log("I was executed");
+                    // simulate work that will take some time so new messages will be executed before this completes
+                    await sleep(40);
+                    context.sendAsync({ type: "NOT-SO-FAST", id: message.id });
+                }, { cancellationPolicy: CancellationPolicy.cancelExisting, identifier: "FURIOUS PROCESS" });
+            });
+            when(`sending the same message in quick succession
+            """
+            (!request1)(!request2)(!request3)(!request4)(!request5)(reply1)(reply2)(reply3)(reply4)(reply5)--------------
+
+            request1: {"type":"FAST-AND-FURIOUS",  "id":1}
+            request2: {"type":"FAST-AND-FURIOUS", "id":2}
+            request3: {"type":"FAST-AND-FURIOUS", "id":3}
+            request4: {"type":"FAST-AND-FURIOUS", "id":4}
+            request5: {"type":"FAST-AND-FURIOUS", "id":5}
+            reply1: {"type": "NOT-SO-FAST", "id":1}
+            reply2: {"type": "NOT-SO-FAST", "id":2}
+            reply3: {"type": "NOT-SO-FAST", "id":3}
+            reply4: {"type": "NOT-SO-FAST", "id":4}
+            reply5: {"type": "NOT-SO-FAST", "id":5}
+            """        
+                `, async () => {
+                    debugger;
+                    await bubbles.executeAsync(stepContext.docString);
+                    debugger;
+                });
+
+            then(`the message flow matches
+                `, () => {
+                    bubbles.validate();
+                });
+
+        });
 
         scenario(`Specifying the cancellation policy cancelExisting`, () => {
             let bubbles: Bubbles;
@@ -42,7 +82,7 @@ feature(`Automatic handler cancellation
             //(!request1)--(!reply)--(!request2)--(reply)
             when(`sending the same message in quick succession
             """
-            (!request1)(!request2)(!request3)(!request4)(reply)
+            (!request1)(!request2)(!request3)(!request4)(reply)---
 
             request1: {"type":"FAST-AND-FURIOUS",  "id":1}
             request2: {"type":"FAST-AND-FURIOUS", "id":2}

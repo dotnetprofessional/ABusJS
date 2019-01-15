@@ -7,40 +7,6 @@ feature(`Linear message flows
     Provides the ability to validate simple linear message flows
     `, () => {
 
-        scenario(`first message must be supplied`, () => {
-            let bubbles: Bubbles;
-            let bus: IBus;
-            let errorResult: Error;
-
-            given(`a registered handler for 'request'`, () => {
-                bus = new Bus();
-                bus.start();
-                bubbles = new Bubbles(bus);
-            });
-
-            when(`sending the message 'request'
-                """
-                (request)
-
-                request: {"type":"request"}
-                """        
-            `, async () => {
-                    try {
-                        await bubbles.executeAsync(stepContext.docString);
-                    } catch (e) {
-                        errorResult = e;
-                    }
-                });
-
-            then(`the following error is thrown
-                """
-                The first bubble in a definition must be marked as supplied ie (!my-first-bubble)
-                """
-            `, () => {
-                    errorResult.message.should.eq(stepContext.docString);
-                });
-        });
-
         scenario(`first message is sent`, () => {
             let bubbles: Bubbles;
             let bubblesResult: IBubbleFlowResult[];
@@ -55,7 +21,7 @@ feature(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (!request)
+                (request)
 
                 request: {"type":"request"}
                 """        
@@ -97,7 +63,7 @@ feature(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (!request)(response)
+                (request)(response)
 
                 request: {"type":"request"}
                 response: {"type": "response"}
@@ -121,17 +87,13 @@ feature(`Linear message flows
 
         scenario(`message handler overridden by supplied message`, () => {
             let bubbles: Bubbles;
-            let bus: IBus;
             let bubblesResult: IBubbleFlowResult[];
 
             given(`a registered handler for 'request' sends the message 'response'`, () => {
-                bus = new Bus();
-                bus.start();
-                bus.subscribe(stepContext.values[0], (m, c: IMessageHandlerContext) => {
+                bubbles = new Bubbles();
+                bubbles.bus.subscribe(stepContext.values[0], (m, c: IMessageHandlerContext) => {
                     throw new Error("This should not be hit as bubbles overrides the handler!");
                 });
-
-                bubbles = new Bubbles(bus);
             });
 
             when(`sending the message 'request'
@@ -182,12 +144,12 @@ feature(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (!request)(api-call)(:api-call-reply)
+                (request)(api-call)(:api-call-reply)
 
                 request: {"type":"request"}
                 api-call: {"type": "api-call"}
                 api-call-reply: {"orderId":"123456"}
-                """        
+                """
             `, async () => {
                     await bubbles.executeAsync(stepContext.docString);
                     bubblesResult = bubbles.result();
@@ -221,7 +183,7 @@ feature(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (!>request)(:response))
+                (>request)(:response))
 
                 request: {"type":"request"}
                 response: "response"
@@ -242,28 +204,25 @@ feature(`Linear message flows
             });
         });
 
-        scenario(`message handler overridden by supplied reply message`, () => {
+        scenario(`message handler overridden by supplied request/reply message`, () => {
             let bubbles: Bubbles;
-            let bus: IBus;
             let bubblesResult: IBubbleFlowResult[];
 
             given(`a registered handler for 'request' returns a reply`, () => {
-                bus = new Bus();
-                bus.start();
-                bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
+                bubbles = new Bubbles();
+                bubbles.bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
                     throw new Error("This should not be hit as bubbles overrides the handler!");
                 });
 
-                bubbles = new Bubbles(bus);
             });
 
             when(`sending the message 'request'
                 """
-                (!>request)(!:response))
+                (!>request)(!:response)
 
                 request: {"type":"request"}
                 response: "response"
-                """        
+                """
                 `, async () => {
                     await bubbles.executeAsync(stepContext.docString);
                     bubblesResult = bubbles.result();
@@ -276,6 +235,48 @@ feature(`Linear message flows
 
             and(`the flow result has the correct message types`, () => {
                 const expectedMessageTypes = ["request", "request.reply"];
+                validateMessageTypes(expectedMessageTypes, bubblesResult);
+            });
+        });
+
+        scenario(`message handler sends a requrest/response which is overridden by supplied request/response message`, () => {
+            let bubbles: Bubbles;
+            let bubblesResult: IBubbleFlowResult[];
+
+            given(`a registered handler for 'api-request' sends a request/response`, () => {
+                bubbles = new Bubbles();
+
+                bubbles.bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
+                    await context.sendWithReply({ type: "request" }).responseAsync();
+                });
+
+                bubbles.bus.subscribe("request", async (message: any, context: IMessageHandlerContext) => {
+                    throw new Error("This should not be hit as bubbles overrides the handler!");
+                });
+
+            });
+
+            when(`sending the message 'api-request'
+                """
+                (api-request)(>request)(!:response)
+
+                api-request: {"type":"api-request"}
+                request: {"type":"request"}
+                response: "response"
+                """
+                `, async () => {
+                    await bubbles.executeAsync(stepContext.docString);
+                    bubblesResult = bubbles.result();
+                    debugger;
+                });
+
+            then(`the message flow matches
+                `, () => {
+                    bubbles.validate();
+                });
+
+            and(`the flow result has the correct message types`, () => {
+                const expectedMessageTypes = ["api-request", "request", "request.reply"];
                 validateMessageTypes(expectedMessageTypes, bubblesResult);
             });
         });
@@ -297,7 +298,7 @@ feature(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (!request)(*response))
+                (request)(*response))
 
                 request: {"type":"request"}
                 response: {"type": "response"}
@@ -335,7 +336,7 @@ feature(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (!request)(!*response))
+                (!request)(!*response)
 
                 request: {"type":"request"}
                 response: {"type": "response"}
@@ -373,7 +374,7 @@ feature(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (!request)(response)
+                (request)(response)
 
                 request: {"type":"request"}
                 response: {"error":"I'm blowing up on purpose!"}
@@ -412,18 +413,17 @@ feature(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (!request)(response)------
+                (request)(response)------
 
                 request: {"type":"request"}
                 response: {"type": "response"}
                 """        
                 `, async () => {
-                    debugger;
                     const startTime = Date.now();
+
                     await bubbles.executeAsync(stepContext.docString);
                     executionTime = Date.now() - startTime;
                     bubblesResult = bubbles.result();
-                    debugger;
                 });
 
             then(`the message flow matches
@@ -433,6 +433,104 @@ feature(`Linear message flows
 
             and(`the flow result has the correct message types`, () => {
                 const expectedMessageTypes = ["request", "response"];
+                validateMessageTypes(expectedMessageTypes, bubblesResult);
+            });
+
+            and(`the response message was delayed by '60' ms`, () => {
+                executionTime.should.be.greaterThan(stepContext.values[0] - 1);
+            });
+
+        });
+
+        scenario(`Bubble flow can supply a delayed message after handler sends message`, () => {
+            let bubbles: Bubbles;
+            let bubblesResult: IBubbleFlowResult[];
+            let executionTime: number;
+
+            given(`a registered handler for 'SUPPLIED-MESSAGE' returns a reply`, () => {
+                bubbles = new Bubbles();
+                bubbles.bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
+                    context.sendAsync({ type: "HANDLER-SENT-MESSAGE" });
+                });
+            });
+
+            when(`sending the message 'request'
+                """
+                (supplied-message)(handler-sent-message)---(!supplied-message-delayed)
+
+                supplied-message: {"type":"SUPPLIED-MESSAGE"}
+                handler-sent-message: {"type": "HANDLER-SENT-MESSAGE"}
+                supplied-message-delayed: {"type":"SUPPLIED-MESSAGE-DELAYED"}
+                """
+                `, async () => {
+                    const startTime = Date.now();
+                    bubbles.enableTracing();
+                    await bubbles.executeAsync(stepContext.docString);
+                    executionTime = Date.now() - startTime;
+                    bubblesResult = bubbles.result();
+                });
+
+            then(`the message flow matches
+                `, () => {
+                    bubbles.validate();
+                });
+
+            and(`the flow result has the correct message types`, () => {
+                const expectedMessageTypes = ["SUPPLIED-MESSAGE", "HANDLER-SENT-MESSAGE", "SUPPLIED-MESSAGE-DELAYED"];
+                validateMessageTypes(expectedMessageTypes, bubblesResult);
+            });
+
+            and(`the response message was delayed by '60' ms`, () => {
+                executionTime.should.be.greaterThan(stepContext.values[0] - 1);
+            });
+
+        });
+
+        scenario(`Bubble flow can supply a message after supplying the previous message`, () => {
+            let bubbles: Bubbles;
+            let bubblesResult: IBubbleFlowResult[];
+            let executionTime: number;
+            let receivedCount: number = 0;
+
+            given(`a registered handler for 'START' returns a reply`, () => {
+                bubbles = new Bubbles();
+                bubbles.bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
+                    context.sendAsync({ type: "HANDLER-SENT-MESSAGE" });
+                });
+
+                bubbles.bus.subscribe("SUPPLIED-MESSAGE-1", async (message: any, context: IMessageHandlerContext) => {
+                    receivedCount++;
+                });
+
+                bubbles.bus.subscribe("SUPPLIED-MESSAGE-2", async (message: any, context: IMessageHandlerContext) => {
+                    receivedCount++;
+                });
+            });
+
+            when(`sending the message 'request'
+                """
+                (start)(start-result)(!supplied-message-1)---(!supplied-message-2)
+
+                start: {"type":"START"}
+                start-result: {"type":"HANDLER-SENT-MESSAGE"}
+                supplied-message-1: {"type":"SUPPLIED-MESSAGE-1"}
+                supplied-message-2: {"type":"SUPPLIED-MESSAGE-2"}
+                """
+                `, async () => {
+                    const startTime = Date.now();
+                    await bubbles.executeAsync(stepContext.docString);
+                    executionTime = Date.now() - startTime;
+                    bubblesResult = bubbles.result();
+                });
+
+            then(`the message flow matches
+                `, () => {
+                    bubbles.enableTracing();
+                    bubbles.validate();
+                });
+
+            and(`the flow result has the correct message types`, () => {
+                const expectedMessageTypes = ["START", "HANDLER-SENT-MESSAGE", "SUPPLIED-MESSAGE-1", "SUPPLIED-MESSAGE-2"];
                 validateMessageTypes(expectedMessageTypes, bubblesResult);
             });
 
@@ -457,3 +555,5 @@ feature(`Linear message flows
             }
         }
     });
+
+    // (request-headers)(*status-executing)(>api-request)(!:api-response)(*status-error)

@@ -68,7 +68,7 @@ feature(`Agreements Service`, () => {
 
             when(`requesting the agreements for TPID: '12345'
             """
-            (!>request)(:response)
+            (>request)(:response)
 
             request: {"type": "GetAgreementHeadersRequest", "payload": {"tpid": "12345"} }
             response:  {"tpid":"12345","agreementHeaders":[{"id":"1","name":"Agreement 1","tpid":"12345"},{"id":"2","name":"Agreement 2","tpid":"12345"}]}
@@ -96,7 +96,7 @@ feature(`Agreements Service`, () => {
             * This example shows that the more complex response can be supplied via code
             '
             """
-            (!>request)(:response)
+            (>request)(:response)
 
             request: {"type": "GetAgreementHeadersRequest", "payload": {"tpid": "12345"} }
             """
@@ -122,7 +122,7 @@ feature(`Agreements Service`, () => {
 
             when(`requesting the agreements for TPID: 'XXXX'
             """
-            (!>request)(error)
+            (>request)(error)
 
             request: {"type": "GetAgreementHeadersRequest", "payload": {"tpid": "XXXX"} }
             error:  {"error":"Unable to locate tpid: XXXX"}

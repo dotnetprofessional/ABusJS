@@ -34,7 +34,7 @@ feature(`Validate bubbles works with more complex workflows`, () => {
 
             when(`sending the message 'request'
                 """
-                (!>authorize-user)(authorize-api)(:authorize-api-reply)(:authorize-user-reply)
+                (>authorize-user)(authorize-api)(:authorize-api-reply)(:authorize-user-reply)
 
                 authorize-user: {"type":"authorize-user", "payload":{"user":"<user>"}}
                 authorize-api: {"type": "authorize", "payload":{"authorizedUser":"<user>"}}
@@ -83,7 +83,7 @@ feature(`Validate bubbles works with more complex workflows`, () => {
 
             when(`sending the message 'request'
                 """
-                (!>authorize-user)(authorize-api)(:authorize-api-reply)(:authorize-user-reply)
+                (>authorize-user)(authorize-api)(:authorize-api-reply)(:authorize-user-reply)
 
                 authorize-user: {"type":"authorize-user", "payload":{"user":"<user>"}}
                 authorize-api: {"type": "authorize", "payload":{"authorizedUser":"<user>"}}
