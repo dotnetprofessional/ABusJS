@@ -374,15 +374,14 @@ export class Bubbles {
     }
 
     private shouldHandleRequest(message: IMessage<any>) {
-        const currentBubble = this.bubbleFlow[this.bubbleFlowIndex];
         const nextBubble = this.bubbleFlow[this.bubbleFlowIndex + 1];
 
         let shouldHandle: boolean;
         if (nextBubble && nextBubble.type === BubbleType.reply && nextBubble.source === BubbleSource.supplied) {
             shouldHandle = true;
         }
-        shouldHandle = shouldHandle || (currentBubble.type !== BubbleType.reply && currentBubble.source === BubbleSource.supplied)
-            || !this.hasRegisteredHandler(message);
+        //(currentBubble.type !== BubbleType.reply && currentBubble.source === BubbleSource.supplied)
+        shouldHandle = shouldHandle || !this.hasRegisteredHandler(message);
 
         if (shouldHandle && this.tracingEnabled) {
             console.log(`BUBBLES: handled type: ${message.type}`);

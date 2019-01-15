@@ -55,7 +55,7 @@ feature(`Cancelling a Saga
             });
         });
 
-        scenario.skip(`Cancelling a Saga that has not been started`, () => {
+        scenario(`Cancelling a Saga that has not been started`, () => {
             given(`a Saga not been started`, () => {
             });
 

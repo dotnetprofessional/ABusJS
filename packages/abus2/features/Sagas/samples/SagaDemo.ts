@@ -21,10 +21,12 @@ export class SagaDemo extends Saga<any> {
 
     @handler("PROCESS_ORDER")
     public processOrder(message: any, context: IMessageHandlerContext) {
+        debugger;
     }
 
     @handler("CANCEL_ORDER")
     public cancelOrder(message: any, context: IMessageHandlerContext) {
+        debugger;
         this.completeAsync();
     }
 

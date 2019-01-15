@@ -41,7 +41,8 @@ for a given test. This can then be included as part of the test output, in the s
 
   (!CreateOrderMessage)-[RequestAuthorization]-[Authorization-Manager1|Authorization-Manager2]
                         
-                        
+
+
 
   RequestAuthorization:= (AuthorizationRequestMessage-Manager1)
                         =(AuthorizationRequestMessage-Manager2)
@@ -90,3 +91,20 @@ for a given test. This can then be included as part of the test output, in the s
   bus.start();
   bubbles.validate(messages, workflow, bus?);
 
+
+# Patterns
+
+## request response
+To override a request with a supplied response. This will prevent the message from being received by the 
+original handler.
+
+### 
+(!request:response)     - immediate response
+(!request:---response)  - delayed response
+---(!request:response)  - wait 3 time periods before sending request response. Has same affect as previous, but previous is more logical
+
+## supply a message
+This will send the message to the bus and allow the message to be handled by any subscribers
+
+(previous-message)(!request)      - send message to the bus after the previous-message is received
+---(!request)                     - wait 3 time periods before sending the request
