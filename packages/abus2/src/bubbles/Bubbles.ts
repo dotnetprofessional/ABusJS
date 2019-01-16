@@ -7,7 +7,7 @@ import { MessageException } from "../tasks/MessageException";
 import { TimeSpan } from "../Timespan";
 import { Intents } from "../Intents";
 import { MessageTracingTask } from "../tasks/abus-tracing/MessageTracingTask";
-import { IMessageTracing } from "../tasks/abus-tracing/MessagePerformanceTask";
+import { IMessageTracing } from "../tasks/abus-tracing/IMessageTracing";
 import { DebugLoggingTask } from "../tasks/DebugLoggingTask";
 import { IMessageSubscription } from "../IMessageSubscription";
 import { SendOptions } from "../SendOptions";

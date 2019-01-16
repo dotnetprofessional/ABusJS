@@ -1,18 +1,18 @@
-import * as React from 'react'
-import { createStore, applyMiddleware } from 'redux'
-import { Provider } from 'react-redux'
-import { createLogger } from 'redux-logger'
-import thunk from 'redux-thunk'
-import reducer from './reducers'
-import { getAllProducts } from './actions'
-import { Bus, IBus, IMessageTask, IMessage, IMessageHandlerContext, IBusMetaData, newGuid, Intents } from "abus2";
-import App from './containers/App'
-import { composeWithDevTools } from 'redux-devtools-extension';
+import * as React from "react";
+import { createStore, applyMiddleware } from "redux";
+import { Provider } from "react-redux";
+import { createLogger } from "redux-logger";
+import thunk from "redux-thunk";
+import reducer from "./reducers";
+import { getAllProducts } from "./actions";
+import { Bus } from "abus2";
+import App from "./containers/App";
+import { composeWithDevTools } from "redux-devtools-extension";
 import { DevTools, DevToolsTask } from "../devtools";
 import reduxAbusMiddleware from "redux-abus";
 import reduxAbusThunkMiddleware from "redux-abus-thunk";
-import { MessageTracingTask } from '../abus-tracing/MessageTracingTask';
-import { MessagePerformanceTask } from '../abus-tracing/MessagePerformanceTask';
+import { MessageTracingTask } from "../abus-tracing/MessageTracingTask";
+import { MessagePerformanceTask } from "../abus-tracing/MessagePerformanceTask";
 
 const bus = new Bus();
 const busDevTools = new Bus();
@@ -31,15 +31,15 @@ const middleWareTest = store => next => action => {
   action.before = "x";
   next(action);
   action.after = "X";
-}
+};
 const middleware = [reduxAbusThunkMiddleware(bus), reduxAbusMiddleware(bus)];
 // const middleware = [thunk, middleWareTest];
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   middleware.push(createLogger());
 }
 
 const composeEnhancers = composeWithDevTools({
-  name: 'ABUS SAMPLES: Shopping Cart', actionsBlacklist: []
+  name: "ABUS SAMPLES: Shopping Cart", actionsBlacklist: []
 });
 
 const store = createStore(

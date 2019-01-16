@@ -1,0 +1,14 @@
+{
+    "files": [],
+    "references": [
+        {
+            "path": "abus2"
+        },
+        {
+            "path": "redux-abus"
+        },
+        {
+            "path": "redux-abus-thunk"
+        }
+    ]
+}

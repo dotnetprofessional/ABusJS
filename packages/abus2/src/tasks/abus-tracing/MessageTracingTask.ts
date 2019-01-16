@@ -1,4 +1,4 @@
-import { IMessageTracing } from './MessagePerformanceTask';
+import { IMessageTracing } from "./IMessageTracing";
 import { IMessageHandlerContext, IMessageTask, IMessage, newGuid } from "../..";
 
 export class MessageTracingTask implements IMessageTask {

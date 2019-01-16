@@ -9,8 +9,8 @@ export interface IPersistSagaData {
     removeAsync(key: string): Promise<void>;
 }
 interface ISagaData {
-    eTag?: string,
-    sagaKey?: string,
+    eTag?: string;
+    sagaKey?: string;
     userData: any;
 }
 
@@ -19,18 +19,18 @@ export class InMemoryKeyValueStore implements IPersistSagaData {
 
     /**
      * Clears all saga data stored. This is primarily useful when writing
-     * unit tests 
+     * unit tests
      *
      * @static
      * @memberof InMemoryKeyValueStore
      */
-    public static forceClear() {
+    public static forceClear(): void {
         InMemoryKeyValueStore.storage = {};
     }
 
     public async saveAsync(key: string, data: Object): Promise<void> {
-        // Check the etag to ensure it hasn't changed before saving
-        const eTag = data["eTag"];
+        // check the etag to ensure it hasn't changed before saving
+        const eTag: string = data["eTag"];
         const persistedETag = InMemoryKeyValueStore.storage[key] ? InMemoryKeyValueStore.storage[key].eTag : eTag;
 
         if (eTag && persistedETag !== eTag) {

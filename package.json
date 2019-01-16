@@ -1,5 +1,8 @@
 {
   "name": "abus-root",
+  "scripts": {
+    "watch": "tsc -b --watch packages"
+  },
   "workspaces": {
     "packages": [
       "packages/*"

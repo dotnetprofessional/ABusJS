@@ -1,12 +1,7 @@
 {
-    "extends": "./tsconfig.base.json",
-    "compilerOptions": {
-        "target": "es2018",
-        "outDir": "compile",
-        "declaration": true
-    },
+    "extends": "../tsconfig.settings.json",
+    "compilerOptions": {},
     "include": [
-        "src/**/*.ts",
-        "Features/**/*.ts"
+        "src/**/*.ts"
     ]
 }

@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "description": "A replacement for redux-thunk when using the ABus messaging library",
   "author": "Garry McGlennon",
+  "types": "dist/src/index.d.ts",
+  "main": "dist/src/index.js",
   "ts:main": "src/index.ts",
-  "types": "index.ts",
-  "main": "dist/index.js",
   "scripts": {
-    "watch": "tsc --watch -p .",
-    "release": "tsc -p ."
+    "prepublishOnly": "npm run release",
+    "watch": "tsc -b --watch -p .",
+    "release": "tsc -b -p ."
   },
   "repository": {
     "type": "git",

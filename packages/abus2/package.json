@@ -6,8 +6,9 @@
   "repository": {
     "url": ""
   },
-  "main": "compile/src/index.js",
-  "typings": "compile/src/index.d.ts",
+  "main": "dist/src/index.js",
+  "typings": "dist/src/index.d.ts",
+  "ts:main": "src/index.ts",
   "keywords": [
     "abus",
     "service bus",
@@ -17,12 +18,12 @@
     "node": "*"
   },
   "scripts": {
-    "test": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=+summary+list\" --recursive compile/Features/",
-    "test-spec": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=spec+summary+list\" --recursive compile/Features/",
-    "release-web": "npm run compile-web && npm run compile-web-minify",
+    "test": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=+summary+list\" --recursive dist/Features/",
+    "test-spec": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=spec+summary+list\" --recursive dist/Features/",
+    "release-web": "npm run dist && npm run compile-web-minify",
     "compile-web": "rimraf out && tsc -p tsconfig.web.json",
     "compile-web-minify": "uglifyjs out/abus.js --output out/abus.min.js --compress dead_code,drop_debugger,conditionals,booleans,loops,properties,drop_console --mangle --wrap abus",
-    "release": "rimraf release && tsc -d -t ES6 -p tsconfig.npm.json",
+    "release": "rimraf dist && tsc -b",
     "prepublish": "npm run release",
     "watch": "tsc --watch -p ."
   },

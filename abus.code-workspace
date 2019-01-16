@@ -14,12 +14,19 @@
 		},
 		{
 			"path": "packages\\redux-abus-thunk"
+		},
+		{
+			"path": "packages\\abus-bubbles"
+		},
+		{
+			"path": "."
 		}
 	],
 	"settings": {
 		"typescript.tsdk": "./node_modules/typescript/lib",
 		"cSpell.words": [
 			"Abus",
+			"Guid",
 			"Hashtable",
 			"Timespan",
 			"livedoc",

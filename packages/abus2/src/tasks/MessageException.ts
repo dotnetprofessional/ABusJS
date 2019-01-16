@@ -1,3 +1,4 @@
+import { IBusError } from "./IBusError";
 
 export class MessageException {
     constructor(public description: string, error: Error) {
@@ -9,8 +10,3 @@ export class MessageException {
     public static type = "Bus.Error";
 }
 
-export interface IBusError {
-    name: string,
-    message: string,
-    stack: string
-}

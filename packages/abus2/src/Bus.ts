@@ -172,7 +172,7 @@ export class Bus implements IBus {
                 // class instance
                 (handler as any).__subscriptions__.forEach(s => {
                     this.unsubscribe(s);
-                })
+                });
             }
         }
     }
@@ -187,6 +187,8 @@ export class Bus implements IBus {
         let replyHandler = new ReplyHandler();
         const msg = message as IMessage<T>;
         msg.metaData = msg.metaData || {};
+        // replies require an Id to have been set which isn't required otherwise. Middleware may also add this so
+        // use an existing one if available.
         msg.metaData.messageId = msg.metaData.messageId || newGuid();
 
         const replyHandlerPromise = new Promise((resolve, reject) => {

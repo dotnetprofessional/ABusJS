@@ -13,3 +13,5 @@ export { SendOptions } from "./SendOptions";
 export { IMessageTask } from "./tasks/IMessageTask";
 export { newGuid } from "./Guid";
 export { handler } from "./decorators";
+export { MessageTracingTask } from "./tasks/abus-tracing/MessageTracingTask";
+export { MessagePerformanceTask } from "./tasks/abus-tracing/MessagePerformanceTask";
