@@ -1,5 +1,5 @@
 import { BubbleType, BubbleSource } from "./Bubbles";
-import { IMessage } from "../IMessage";
+import { IMessage } from "abus2";
 
 export interface IBubble {
     type: BubbleType;

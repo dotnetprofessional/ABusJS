@@ -1,6 +1,6 @@
-import { Bubbles } from "../../src/bubbles/Bubbles";
-import { IBus, Bus, IMessageHandlerContext } from "../../src";
-import { IBubbleFlowResult } from "../../src/bubbles/Bubble";
+import { Bubbles } from "../src/Bubbles";
+import { IBubbleFlowResult } from '../src/Bubble';
+
 require("chai").should();
 
 feature.only(`Linear message flows

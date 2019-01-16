@@ -1,7 +1,7 @@
-import { Bubbles } from "../../src/bubbles/Bubbles";
 import { CancellationPolicy } from "../../src/ISubscriptionOptions";
 import { sleep } from "../Utils";
 import { IMessageHandlerContext } from "../../src";
+import { Bubbles } from "abus-bubbles";
 
 feature.skip(`Automatic handler cancellation
     There are times when a several messages are sent in quick succession and it would be

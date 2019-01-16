@@ -1,7 +1,8 @@
 import { Bus } from "../../src";
 import { InMemoryKeyValueStore } from "../../src/sagas/saga";
-import { Bubbles } from "../../src/bubbles/Bubbles";
 import { SagaDemo } from "./samples/SagaDemo";
+import { Bubbles } from "abus-bubbles";
+
 // import { DebugLoggingTask } from "../../src/tasks/DebugLoggingTask";
 
 feature(`Starting a Saga

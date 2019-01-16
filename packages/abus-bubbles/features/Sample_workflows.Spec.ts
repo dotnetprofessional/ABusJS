@@ -1,5 +1,5 @@
 import { Bubbles } from "../../src/bubbles/Bubbles";
-import { IBus, Bus, IMessageHandlerContext } from "../../src";
+import { IBus, Bus, IMessageHandlerContext } from "../../abus2/src";
 import "chai";
 
 feature(`Validate bubbles works with more complex workflows`, () => {

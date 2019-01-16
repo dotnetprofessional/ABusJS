@@ -1,7 +1,7 @@
-import { Bubbles } from "../../src/bubbles/Bubbles";
 import { InMemoryKeyValueStore } from "../../src/sagas/saga";
 import { Bus } from "../../src";
 import { SagaDemo } from "./samples/SagaDemo";
+import { Bubbles } from "abus-bubbles";
 
 feature(`Cancelling a Saga
 

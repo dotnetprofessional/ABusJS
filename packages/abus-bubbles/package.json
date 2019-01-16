@@ -1,7 +1,7 @@
 {
-  "name": "redux-abus",
-  "version": "0.1.0",
-  "description": "Integrates ABUS with react-redux",
+  "name": "abus-bubbles",
+  "version": "0.1.0-alpha-1",
+  "description": "Provides a clean way to test Abus message based systems",
   "author": "Garry McGlennon",
   "ts:main": "src/index.ts",
   "types": "dist/src/index.d.ts",
@@ -9,7 +9,7 @@
   "scripts": {
     "prepublishOnly": "tsc -b .",
     "watch": "tsc -b --watch -p .",
-    "release": "rimraf dist && tsc -b -p tsconfig.json"
+    "release": "rimraf dist && tsc -b"
   },
   "repository": {
     "type": "git",
@@ -17,8 +17,9 @@
   },
   "keywords": [
     "abus",
-    "react",
-    "redux",
+    "bubbles",
+    "BDD",
+    "testing",
     "messaging",
     "TypeScript"
   ],
@@ -26,11 +27,25 @@
   "bugs": {
     "url": "https://github.com/dotnetprofessional/ABusJS/issues"
   },
-  "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/redux-abus#readme",
+  "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-bubbles#readme",
+  "dependencies": {
+    "abus2": "0.6.0-alpha-1",
+    "diff": "^3.5.0",
+    "chalk": "^2.4.2"
+  },
   "peerDependencies": {
     "abus2": "0.6.0-alpha-1"
   },
   "devDependencies": {
-    "typescript": "*"
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.12.10",
+    "typescript": "*",
+    "livedoc-mocha": "^0.4.0-beta-4",
+    "mocha": "^5.2.0",
+    "chai": "^4.2.0",
+    "rimraf": "^2.6.2",
+    "tslint": "^5.11.0",
+    "typescript": "^3.2.2"
   }
 }
