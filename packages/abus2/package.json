@@ -20,9 +20,9 @@
   "scripts": {
     "test": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=+summary+list\" --recursive dist/Features/",
     "test-spec": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=spec+summary+list\" --recursive dist/Features/",
-    "release-web": "npm run dist && npm run compile-web-minify",
-    "compile-web": "rimraf out && tsc -p tsconfig.web.json",
-    "compile-web-minify": "uglifyjs out/abus.js --output out/abus.min.js --compress dead_code,drop_debugger,conditionals,booleans,loops,properties,drop_console --mangle --wrap abus",
+    "release-web": "npm run compile-web && npm run compile-web-minify",
+    "compile-web": "rimraf dist && tsc -p tsconfig.web.json",
+    "compile-web-minify": "uglifyjs dist/abus.js --output dist/abus.min.js --compress dead_code,drop_debugger,conditionals,booleans,loops,properties,drop_console --mangle --wrap abus",
     "release": "rimraf dist && tsc -b",
     "prepublish": "npm run release",
     "watch": "tsc --watch -p ."
@@ -41,6 +41,7 @@
     "chai": "^4.2.0",
     "rimraf": "^2.6.2",
     "tslint": "^5.11.0",
-    "typescript": "^3.2.2"
+    "typescript": "^3.2.2",
+    "uglify-js": "^3.4.9"
   }
 }

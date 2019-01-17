@@ -32,7 +32,6 @@ feature(`Subscribing to handlers`, () => {
 
         when(`subscribing for type '${type}'`, async () => {
             bus.subscribe(stepContext.values[0], () => {
-                console.log("XX");
                 messageReceived = true;
             });
         });

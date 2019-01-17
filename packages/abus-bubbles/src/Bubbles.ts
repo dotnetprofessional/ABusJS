@@ -1,33 +1,16 @@
-import { IBus, Bus, IMessageTask, IMessageHandlerContext } from "../../abus2/src";
-import { IMessage } from "../../abus2/src/IMessage";
-import { IBubble, IDelayBubble, IBubbleFlowResult, IBubbleResult } from "./Bubble";
-import chalk, { Chalk } from "chalk";
-import * as diff from "diff";
-import { MessageException } from "../../abus2/src/tasks/MessageException";
-import { TimeSpan } from "../../abus2/src/Timespan";
-import { Intents } from "../../abus2/src/Intents";
-import { MessageTracingTask } from "../../abus2/src/tasks/abus-tracing/MessageTracingTask";
-import { IMessageTracing } from "../../abus2/src/tasks/abus-tracing/IMessageTracing";
-import { DebugLoggingTask } from "../../abus2/src/tasks/DebugLoggingTask";
-import { IMessageSubscription } from "../../abus2/src/IMessageSubscription";
-import { SendOptions } from "../../abus2/src/SendOptions";
-import { MessageHandlerContext } from "../../abus2/src/MessageHandlerContext";
-
-export interface IColorTheme {
-    statusPass: Chalk;
-    statusFail: Chalk;
-}
-
-export class BubblesTask implements IMessageTask {
-    constructor(private bubbles: Bubbles) {
-
-    }
-    public async invokeAsync(message: IMessage<any>, context: IMessageHandlerContext, next: any): Promise<void> {
-        if (!await this.bubbles.messageHandlerAsync(message, context)) {
-            await next();
-        }
-    }
-}
+import { IBubbleMessage } from './IBubbleMessage';
+import { IBubbleFlowResult } from './IBubbleFlowResult';
+import { IMessage, IBus, MessageTracingTask, Intents, IMessageHandlerContext, MessageHandlerContext, SendOptions, TimeSpan, Bus, MessageException, IMessageTracing, IMessageSubscription } from 'abus2';
+import { IBubble } from './IBubble';
+import { IColorTheme } from './IColorTheme';
+import chalk from 'chalk';
+import { BubblesTask } from './BubblesTask';
+import { IBubbleResult } from './IBubbleResult';
+import { BubbleType } from './BubbleType';
+import { IDelayBubble } from './IDelayBubble';
+import { BubbleSource } from './BubbleSource';
+import { TextBlockReader } from './TextBlockReader';
+import diff from "diff";
 
 export class Bubbles {
     private messages: IBubbleMessage[];
@@ -666,67 +649,3 @@ export class Bubbles {
     }
 }
 
-/*
-  bubble|timeperiod|group
-*/
-export enum BubbleSource {
-    supplied = "supplied",
-    generated = "generated"
-}
-
-export enum BubbleType {
-    publish = "publish",
-    send = "sent",
-    reply = "reply",
-    sendReply = "sendReply",
-    delay = "delay"
-}
-
-export class TextBlockReader {
-    private arrayOfLines: string[];
-    private currentIndex: number = -1;
-
-    constructor(text: string) {
-        // Split text into lines for processing
-        this.arrayOfLines = text.split(/\r?\n/);
-    }
-
-    public get count() {
-        return this.arrayOfLines.length;
-    }
-
-    public get line(): string {
-        if (this.currentIndex < this.count) {
-            const line = this.arrayOfLines[this.currentIndex];
-            return (line || "").trim();
-        } else {
-            return null;
-        }
-    }
-
-    public next(): boolean {
-        this.currentIndex++;
-        return this.currentIndex >= 0 && this.currentIndex < this.count;
-    }
-
-
-    public get nextBlock(): string {
-        const lines = [];
-        let isNext = this.next();
-        while (isNext && (this.line && this.line.length > 0)) {
-            lines.push(this.line);
-            isNext = this.next();
-        }
-
-        return lines.join("\n");
-    }
-
-    public reset(): void {
-        this.currentIndex = -1;
-    }
-}
-
-export interface IBubbleMessage {
-    name: string,
-    message: any
-}

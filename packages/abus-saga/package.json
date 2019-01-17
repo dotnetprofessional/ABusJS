@@ -7,8 +7,10 @@
   "types": "dist/src/index.d.ts",
   "main": "dist/src/index.js",
   "scripts": {
+    "test": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=+summary+list\" --recursive dist/Features/",
+    "test-spec": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=spec+summary+list\" --recursive dist/Features/",
     "prepublishOnly": "tsc -b .",
-    "watch": "tsc -b --watch -p .",
+    "watch": "tsc -b --watch",
     "release": "rimraf dist && tsc -b"
   },
   "repository": {
@@ -29,7 +31,8 @@
   },
   "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-saga#readme",
   "dependencies": {
-    "abus2": "0.6.0-alpha-1"
+    "abus2": "0.6.0-alpha-1",
+    "abus-bubbles": "0.1.0-alpha-1"
   },
   "peerDependencies": {
     "abus2": "0.6.0-alpha-1"

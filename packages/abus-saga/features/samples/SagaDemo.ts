@@ -1,6 +1,5 @@
-import { Saga } from "../../../src/sagas/saga";
-
-import { IMessage, handler, IMessageHandlerContext, TimeSpan } from "../../../src";
+import { Saga } from '../../src/saga';
+import { IMessage, handler, IMessageHandlerContext } from 'abus2';
 
 export class SagaDemo extends Saga<any> {
 

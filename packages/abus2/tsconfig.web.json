@@ -4,11 +4,14 @@
         "target": "es5",
         "lib": [
             "es5",
-            "es2015.promise"
+            "es2015.promise",
+            "es2015.core"
         ],
         "module": "System",
         "outFile": "dist/abus.js",
-        "importHelpers": false,
-        "declaration": false
-    }
+        "importHelpers": false
+    },
+    "include": [
+        "src/**/*.ts"
+    ]
 }

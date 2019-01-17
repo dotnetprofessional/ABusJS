@@ -1,4 +1,4 @@
-import { Bubbles } from "../../../../src/bubbles/Bubbles";
+import { Bubbles } from "../../../src";
 import { AgreementsProcess } from "../AgreementsProcess";
 import { AgreementService } from "../services/AgreementService";
 
@@ -50,7 +50,6 @@ feature(`Agreements Process`, () => {
             status-error: {"type":"AgreementProcessStatusEvent", "payload": {"operation": "GetAgreementHeadersCommand", "status": "ERROR"}}
             """
             `, async () => {
-                bubbles.enableTracing();
                 await bubbles.executeAsync(stepContext.docString);
                 debugger;
             });

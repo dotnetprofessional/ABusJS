@@ -1,9 +1,11 @@
+import "livedoc-mocha";
 import { Bubbles } from "../src/Bubbles";
-import { IBubbleFlowResult } from '../src/Bubble';
+import { IBubbleFlowResult } from "../src/IBubbleFlowResult";
+import { IBus, Bus, IMessageHandlerContext } from 'abus2';
 
 require("chai").should();
 
-feature.only(`Linear message flows
+feature(`Linear message flows
     Provides the ability to validate simple linear message flows
     `, () => {
 
@@ -319,7 +321,7 @@ feature.only(`Linear message flows
             });
         });
 
-        scenario.only(`message handler overridden by supplied message that is published`, () => {
+        scenario(`message handler overridden by supplied message that is published`, () => {
             let bubbles: Bubbles;
             let bus: IBus;
             let bubblesResult: IBubbleFlowResult[];
@@ -342,7 +344,6 @@ feature.only(`Linear message flows
                 response: {"type": "response"}
                 """        
                 `, async () => {
-                    bubbles.enableTracing();
                     await bubbles.executeAsync(stepContext.docString);
                     bubblesResult = bubbles.result();
                 });
@@ -354,7 +355,6 @@ feature.only(`Linear message flows
                     } catch (e) {
                         console.log(e.message);
                     }
-                    console.log(JSON.stringify(bubbles.actualMessageFlow, null, 5));
                 });
 
             and(`the flow result has the correct message types`, () => {
@@ -470,7 +470,6 @@ feature.only(`Linear message flows
                 """
                 `, async () => {
                     const startTime = Date.now();
-                    bubbles.enableTracing();
                     await bubbles.executeAsync(stepContext.docString);
                     executionTime = Date.now() - startTime;
                     bubblesResult = bubbles.result();
@@ -531,7 +530,6 @@ feature.only(`Linear message flows
 
             then(`the message flow matches
                 `, () => {
-                    bubbles.enableTracing();
                     bubbles.validate();
                 });
 

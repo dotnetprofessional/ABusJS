@@ -5,6 +5,12 @@
             "path": "abus2"
         },
         {
+            "path": "abus-bubbles"
+        },
+        {
+            "path": "abus-saga"
+        },
+        {
             "path": "redux-abus"
         },
         {

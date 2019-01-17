@@ -1,5 +1,5 @@
-import { Bus } from "../../src";
-import { InMemoryKeyValueStore } from "../../src/sagas/saga";
+import { Bus } from "abus2";
+import { InMemoryKeyValueStore } from "../src/InMemoryKeyValueStore";
 import { SagaDemo } from "./samples/SagaDemo";
 import { Bubbles } from "abus-bubbles";
 
@@ -65,7 +65,6 @@ feature(`Starting a Saga
                 error: {"error":"Saga with key SagaDemo:test1 already exists. Can't start saga twice."}
                 """
                 `, async () => {
-                    bubbles.enableTracing();
                     await bubbles.executeAsync(stepContext.docString);
                 });
 

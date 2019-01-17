@@ -1,54 +1,7 @@
-import { IMessageHandlerContext } from "../IMessageHandlerContext";
-import { IMessage } from "..";
-import { IMessageHandler } from "../IMessageHandler";
-import { newGuid } from "../Guid";
-
-export interface IPersistSagaData {
-    saveAsync(key: string, data: Object): Promise<void>;
-    getAsync(key: string): Promise<Object>;
-    removeAsync(key: string): Promise<void>;
-}
-interface ISagaData {
-    eTag?: string;
-    sagaKey?: string;
-    userData: any;
-}
-
-export class InMemoryKeyValueStore implements IPersistSagaData {
-    static storage = {};
-
-    /**
-     * Clears all saga data stored. This is primarily useful when writing
-     * unit tests
-     *
-     * @static
-     * @memberof InMemoryKeyValueStore
-     */
-    public static forceClear(): void {
-        InMemoryKeyValueStore.storage = {};
-    }
-
-    public async saveAsync(key: string, data: Object): Promise<void> {
-        // check the etag to ensure it hasn't changed before saving
-        const eTag: string = data["eTag"];
-        const persistedETag = InMemoryKeyValueStore.storage[key] ? InMemoryKeyValueStore.storage[key].eTag : eTag;
-
-        if (eTag && persistedETag !== eTag) {
-            throw new Error("Concurrency error saving data.");
-        }
-
-        data["eTag"] = newGuid();
-        InMemoryKeyValueStore.storage[key] = data;
-    }
-
-    public async getAsync(key: string): Promise<Object> {
-        return Object.assign({}, InMemoryKeyValueStore.storage[key]);
-    }
-
-    public async removeAsync(key: string): Promise<void> {
-        delete InMemoryKeyValueStore.storage[key];
-    }
-}
+import { IPersistSagaData } from './IPersistSagaData';
+import { InMemoryKeyValueStore } from './InMemoryKeyValueStore';
+import { ISagaData } from './ISagaData';
+import { IMessageHandler, IMessageHandlerContext, IMessage } from 'abus2';
 
 export abstract class Saga<T> {
     private startSagaWithType: string;

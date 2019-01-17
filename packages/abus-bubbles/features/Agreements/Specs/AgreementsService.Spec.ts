@@ -1,9 +1,8 @@
+import { IBus, Bus, MessageException } from "abus2";
 import { GetAgreementHeadersResponse } from "../services/GetAgreementHeadersResponse";
-import { IBus, Bus } from "../../../../src";
 import { AgreementService } from "../services/AgreementService";
 import { GetAgreementHeadersRequest } from "../services/GetAgreementHeadersRequest";
-import { MessageException } from "../../../../src/tasks/MessageException";
-import { Bubbles } from "../../../../src/bubbles/Bubbles";
+import { Bubbles } from "../../../src";
 
 feature(`Agreements Service`, () => {
     let bus: IBus;

@@ -5,11 +5,14 @@
   },
   "include": [
     "src/**/*.ts",
-    "Features/**/*.ts"
+    "features/**/*.ts"
   ],
   "references": [
     {
       "path": "../abus2"
+    },
+    {
+      "path": "../abus-bubbles"
     }
   ]
 }

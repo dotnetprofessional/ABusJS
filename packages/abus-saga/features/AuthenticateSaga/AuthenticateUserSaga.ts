@@ -1,10 +1,10 @@
-import { Saga } from "../../../src/sagas/saga";
-import { IMessage, IMessageHandlerContext, handler } from "../../../src";
-import { AuthenticateUserRequest } from "./Services/AuthenticateUserRequest";
-import { AuthenticateUserResponse } from "./Services/AuthenticateUserResponse";
-import { AuthenticationStatus } from "./Services/AuthenticationStatus";
-import { TwoFactorAuthenticateUserRequest } from "./Services/TwoFactorAuthenticateUserRequest";
-import { TwoFactorAuthenticateUserResponse } from "./Services/TwoFactorAuthenticateUserResponse";
+import { Saga } from '../../src/saga';
+import { IMessage, handler, IMessageHandlerContext } from 'abus2';
+import { AuthenticateUserRequest } from './Services/AuthenticateUserRequest';
+import { AuthenticateUserResponse } from './Services/AuthenticateUserResponse';
+import { AuthenticationStatus } from './Services/AuthenticationStatus';
+import { TwoFactorAuthenticateUserRequest } from './Services/TwoFactorAuthenticateUserRequest';
+import { TwoFactorAuthenticateUserResponse } from './Services/TwoFactorAuthenticateUserResponse';
 
 export class LoginRequest {
     user: string;

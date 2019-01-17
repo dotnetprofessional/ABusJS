@@ -26,13 +26,11 @@ export class PlusTwo {
 export class MyHandlerByTypeDefinition {
     @handler(PlusOne)
     plusOne(message: PlusOne) {
-        console.log("adding:" + message.value);
         handlerResponse.value += message.value;
     }
 
     @handler(PlusTwo)
     plusTwo(message: PlusTwo) {
-        console.log("adding:" + message.value);
         handlerResponse.value += message.value;
     }
 }

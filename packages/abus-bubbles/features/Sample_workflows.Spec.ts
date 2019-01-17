@@ -1,6 +1,6 @@
-import { Bubbles } from "../../src/bubbles/Bubbles";
-import { IBus, Bus, IMessageHandlerContext } from "../../abus2/src";
 import "chai";
+import { Bubbles } from '../src';
+import { IBus, Bus, IMessageHandlerContext } from 'abus2';
 
 feature(`Validate bubbles works with more complex workflows`, () => {
     scenarioOutline(`Authorize user form an API

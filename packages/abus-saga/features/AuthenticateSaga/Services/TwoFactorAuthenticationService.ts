@@ -1,7 +1,7 @@
-import { IMessageHandlerContext, handler } from "../../../../src";
 import { AuthenticationStatus } from "./AuthenticationStatus";
 import { TwoFactorAuthenticateUserRequest } from "./TwoFactorAuthenticateUserRequest";
 import { TwoFactorAuthenticateUserResponse } from "./TwoFactorAuthenticateUserResponse";
+import { handler, IMessageHandlerContext } from 'abus2';
 
 
 export class TwoFactorAuthenticationService {

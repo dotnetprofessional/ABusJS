@@ -1,7 +1,7 @@
-import { IMessageHandlerContext, handler } from "../../../../src";
-import { GetAgreementHeadersRequest } from "./GetAgreementHeadersRequest";
-import { AgreementHeader } from "../model/AgreementHeader";
-import { GetAgreementHeadersResponse } from "./GetAgreementHeadersResponse";
+import { handler, IMessageHandlerContext } from 'abus2';
+import { GetAgreementHeadersRequest } from './GetAgreementHeadersRequest';
+import { AgreementHeader } from '../model/AgreementHeader';
+import { GetAgreementHeadersResponse } from './GetAgreementHeadersResponse';
 
 export class AgreementService {
     private testData = {

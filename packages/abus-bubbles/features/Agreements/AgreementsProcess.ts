@@ -1,9 +1,7 @@
-import { IMessageHandlerContext, handler } from "../../../src";
-import { GetAgreementHeadersResponse } from "./services/GetAgreementHeadersResponse";
-import { GetAgreementHeadersRequest } from "./services/GetAgreementHeadersRequest";
-import { AgreementProcessStatusEvent } from "./messages/AgreementProcessStatusEvent";
-import { GetAgreementHeadersCommand, ParentCompanyHeadersEvent } from "./messages";
-
+import { handler, IMessageHandlerContext } from 'abus2';
+import { GetAgreementHeadersCommand, AgreementProcessStatusEvent, ParentCompanyHeadersEvent } from './messages';
+import { GetAgreementHeadersRequest } from './services/GetAgreementHeadersRequest';
+import { GetAgreementHeadersResponse } from './services/GetAgreementHeadersResponse';
 
 export class AgreementProcessData {
     activeTpid: string;

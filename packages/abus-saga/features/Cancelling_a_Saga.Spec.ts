@@ -1,7 +1,8 @@
-import { InMemoryKeyValueStore } from "../../src/sagas/saga";
-import { Bus } from "../../src";
-import { SagaDemo } from "./samples/SagaDemo";
+import { Bus } from "abus2";
 import { Bubbles } from "abus-bubbles";
+import { InMemoryKeyValueStore } from "../src/InMemoryKeyValueStore";
+import { SagaDemo } from "./samples/SagaDemo";
+import "livedoc-mocha";
 
 feature(`Cancelling a Saga
 
@@ -42,7 +43,6 @@ feature(`Cancelling a Saga
             error: {"error":"Received message type: PROCESS_ORDER, however unable to find Saga instance for key: test1. This may be due to the Saga not being started or being already complete."}
             """
             `, async () => {
-                    bubbles.enableTracing();
                     await bubbles.executeAsync(stepContext.docString);
                 });
 
