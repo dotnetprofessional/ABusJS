@@ -1,22 +1,25 @@
 {
 	"folders": [
 		{
-			"path": "packages\\abus2"
-		},
-		{
 			"path": "packages\\abus-react-sample"
 		},
 		{
 			"path": "packages\\abus"
 		},
 		{
+			"path": "packages\\abus2"
+		},
+		{
+			"path": "packages\\abus-saga"
+		},
+		{
+			"path": "packages\\abus-bubbles"
+		},
+		{
 			"path": "packages\\redux-abus"
 		},
 		{
 			"path": "packages\\redux-abus-thunk"
-		},
-		{
-			"path": "packages\\abus-bubbles"
 		},
 		{
 			"path": "."

@@ -1,7 +1,7 @@
 {
-  "name": "abus-bubbles",
+  "name": "abus-saga",
   "version": "0.1.0-alpha-1",
-  "description": "Provides a clean way to test Abus message based systems",
+  "description": "A message-driven state machine that persist shared state. Sagas represent a business process where multiple related messages can trigger state changes.",
   "author": "Garry McGlennon",
   "ts:main": "src/index.ts",
   "types": "dist/src/index.d.ts",
@@ -27,11 +27,9 @@
   "bugs": {
     "url": "https://github.com/dotnetprofessional/ABusJS/issues"
   },
-  "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-bubbles#readme",
+  "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-saga#readme",
   "dependencies": {
-    "abus2": "0.6.0-alpha-1",
-    "diff": "^3.5.0",
-    "chalk": "^2.4.2"
+    "abus2": "0.6.0-alpha-1"
   },
   "peerDependencies": {
     "abus2": "0.6.0-alpha-1"

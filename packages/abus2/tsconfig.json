@@ -6,10 +6,5 @@
     "include": [
         "src/**/*.ts",
         "Features/**/*.ts"
-    ],
-    "references": [
-        {
-            "path": "../bubbles"
-        }
     ]
 }
