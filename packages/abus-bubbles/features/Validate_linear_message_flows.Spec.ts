@@ -185,7 +185,7 @@ feature(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (>request)(:response))
+                (>request)(:response)
 
                 request: {"type":"request"}
                 response: "response"

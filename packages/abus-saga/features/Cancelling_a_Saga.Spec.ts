@@ -8,7 +8,7 @@ feature(`Cancelling a Saga
 
     Saga's can be cancelled by calling the 'complete' method. This will prevent further processing of the
     Saga instance. If a message arrives for the Saga instance that is not one that creates a new instance then
-    The SagaNotFound method is called, which if not overriden, will throw and exception.
+    The SagaNotFound method is called, which if not overridden, will throw and exception.
 
     NB: All messages that are sent to a Saga must include a suitable Id for the Saga to identify the Saga instance.
 

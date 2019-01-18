@@ -2,7 +2,7 @@ import { Bubbles } from "../../../src";
 import { AgreementsProcess } from "../AgreementsProcess";
 import { AgreementService } from "../services/AgreementService";
 
-feature(`Agreements Process`, () => {
+feature.only(`Agreements Process`, () => {
     let bubbles: Bubbles;
 
     background(``, () => {
@@ -28,8 +28,6 @@ feature(`Agreements Process`, () => {
             """
             `, async () => {
                 await bubbles.executeAsync(stepContext.docString);
-
-                const mermaid = bubbles.toMermaidSequenceDiagram();
                 debugger;
             });
 

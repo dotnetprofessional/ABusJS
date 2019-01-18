@@ -63,13 +63,65 @@ for a given test. This can then be included as part of the test output, in the s
   (name) - a message definition ie (submit-order)
     * names should use dashes notation
   
-  ## Message definitions
-  name: type: SUBMIT_ORDER, orderId:123456
-  ! - message is supplied by the test
+  # Bubbles
+  Bubbles is a library to make testing message based systems much easier. It allows a test to be defined declaratively
+  by defining the expected message flows. Bubbles will then execute the message flow and validate that the actual messages
+  sent on the bus match the definition. It also provides mocking abilities to override some messages, such as to inject
+  error conditions.
+
+  ## Bubbles Spec
+  (..)    - Defines a bubble or message definition eg: (submit-order)
+  key     - a key used to define the bubble, which is used to lookup the bubble definition. eg: submit-order
+  !       - bubbles will send this message eg: (!submit-order)
+  -       - a 1 time period (default 10ms) delay before sending a message. Only makes sense when the next bubble has a ! eg: ---(!submit-order)
+
+  # Message types
+  :       - response to a sent message (context.reply) eg: (:submit-order-response)
+  >       - message was/is sent expecting a reply (bus.sendWithReply) eg: (>api-request)(:api-response)
+  *       - message was/is published (bus.publish) eg: (*order-complete)
+  default - message will be sent (bus.send) (submit-order)
+
+  # Bubble definition
+  Each bubble must have a definition that matches the key used for the bubble. The definitions describe both the a message that will be sent
+  as well as the message that is expected to arrive on the bus. Therefore they act, both as a mock definition as well as validation.
+
+  key:    - the bubble key ie submit-order
+  message - the message definition in json eg: {"type":"submit-order", "payload":"orderId": "2345" ...}
+
+  # Patterns
+  ## request response
+  To override a request with a supplied response. This will prevent the sent message from being received by the original handler. This is
+  effectively mocking the handler for request.
+
+  (!request:response)     - immediate response
+  (!request:---response)  - delayed response
+  ---(!request:response)  - wait 3 time periods before sending request response. Has same affect as previous, but previous is more logical
+
+  ## supply a message
+  This will send the message to the bus and allow the message to be handled by any subscribers
+
+  (previous-message)(!request)      - send message to the bus after the previous-message is received
+  ---(!request)                     - wait 3 time periods before sending the request
+
+  ## errors
+  Its possible to handle errors in two ways, either by injecting an error or validating that an error was sent. Either way
+  a special bubble error definition is used to define an error.
+
+  Assuming the following bubble definitions.
+
+  api-request: {"type":"api-request}
+  api-response: {"error":"an error occurred"}
+
+  ### inject error
+  (!api-request:api-response)
+
+  ### validate error was returned
+  (api-request:api-response)
+
+  
+
   = - messages are sent in parallel  
-  : - response to a sent message
   * - published message
-  > - send with reply (only )
   !* - published message supplied by the test
   !: - response to a sent message supplied by the test
   - - represents a time period default is 10ms
@@ -92,19 +144,4 @@ for a given test. This can then be included as part of the test output, in the s
   bubbles.validate(messages, workflow, bus?);
 
 
-# Patterns
 
-## request response
-To override a request with a supplied response. This will prevent the message from being received by the 
-original handler.
-
-### 
-(!request:response)     - immediate response
-(!request:---response)  - delayed response
----(!request:response)  - wait 3 time periods before sending request response. Has same affect as previous, but previous is more logical
-
-## supply a message
-This will send the message to the bus and allow the message to be handled by any subscribers
-
-(previous-message)(!request)      - send message to the bus after the previous-message is received
----(!request)                     - wait 3 time periods before sending the request

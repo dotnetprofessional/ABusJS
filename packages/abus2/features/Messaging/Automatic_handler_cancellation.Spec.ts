@@ -5,12 +5,12 @@
 
 // feature.skip(`Automatic handler cancellation
 //     There are times when a several messages are sent in quick succession and it would be
-//     a waste of resources to process them all completion.
+//     a waste of resources to process them all to completion.
 
 //     In these scenarios its helpful to be able to automatically cancel or otherwise handle the messages
 //     differently.
 
-//     Rules: subscribing
+//     Rules: defined when subscribing
 
 //     cancellationPolicy: cancelExisting | ignoreIfDuplicate | ignoreIfExisting
 //         cancelExisting:
@@ -19,11 +19,12 @@
 //             It will not stop the code currently executing within the handler.
 
 //         ignoreIfDuplicate:
-//             when a new message is sent, will compare the message being sent with message being processed
+//             when a new message is sent, will compare the message being sent with the message being processed
 //             by the current handler. If the messages match the message will be ignored.
 
 //         ignoreIfExisting:
-//             when a new message is sent, and the handler is busy the new message will be ignored.
+//             when a new message is sent, and the handler is already processing a previous message then 
+//             the new message will be ignored.
 
 //         `, function () {
 //         this.timeout(5000);
