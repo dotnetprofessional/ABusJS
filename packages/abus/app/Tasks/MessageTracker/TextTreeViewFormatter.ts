@@ -35,7 +35,7 @@ export class TextTreeViewFormatter extends NodeFormatter {
 
         this.writeLine(`${filter.process()} --> ${filter.action()} (${node.message.metaData.endProcessing - node.message.metaData.startProcessing} ms)`);
 
-        for (let i = 0; i < node.nodes.length; i++){
+        for (let i = 0; i < node.nodes.length; i++) {
             this.printNode(node.nodes[i], node, indent, i === node.nodes.length - 1);
         }
     }

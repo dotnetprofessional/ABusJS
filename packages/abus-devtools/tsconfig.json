@@ -1,18 +1,19 @@
 {
   "extends": "../tsconfig.settings.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist",
+    "jsx": "react"
   },
   "include": [
     "src/**/*.ts",
-    "Features/**/*.ts"
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "features/**/*.ts",
+    "features/**/*.tsx"
   ],
   "references": [
     {
       "path": "../abus2"
-    },
-    {
-      "path": "../abus-visualizations"
     }
   ]
 }

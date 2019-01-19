@@ -1,6 +1,6 @@
 {
   "name": "redux-abus",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha-1",
   "description": "Integrates ABUS with react-redux",
   "author": "Garry McGlennon",
   "ts:main": "src/index.ts",

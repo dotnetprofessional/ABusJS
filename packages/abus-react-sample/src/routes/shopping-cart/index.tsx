@@ -8,11 +8,11 @@ import { getAllProducts } from "./actions";
 import { Bus } from "abus2";
 import App from "./containers/App";
 import { composeWithDevTools } from "redux-devtools-extension";
-import { DevTools, DevToolsTask } from "../devtools";
 import reduxAbusMiddleware from "redux-abus";
 import reduxAbusThunkMiddleware from "redux-abus-thunk";
 import { MessageTracingTask } from "../abus-tracing/MessageTracingTask";
 import { MessagePerformanceTask } from "../abus-tracing/MessagePerformanceTask";
+import { DevTools } from "abus-devtools";
 
 const bus = new Bus();
 const busDevTools = new Bus();

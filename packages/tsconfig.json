@@ -8,6 +8,12 @@
             "path": "abus-bubbles"
         },
         {
+            "path": "abus-devtools"
+        },
+        {
+            "path": "abus-visualizations"
+        },
+        {
             "path": "abus-saga"
         },
         {

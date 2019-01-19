@@ -10,10 +10,16 @@
 			"path": "packages\\abus2"
 		},
 		{
+			"path": "packages\\abus-bubbles"
+		},
+		{
+			"path": "packages\\abus-devtools"
+		},
+		{
 			"path": "packages\\abus-saga"
 		},
 		{
-			"path": "packages\\abus-bubbles"
+			"path": "packages\\abus-visualizations"
 		},
 		{
 			"path": "packages\\redux-abus"

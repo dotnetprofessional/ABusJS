@@ -5,7 +5,7 @@ import { Route } from 'react-router-dom'
 import App from './App'
 import UserPage from './UserPage'
 import RepoPage from './RepoPage'
-import { DevTools } from "../../devtools";
+import { DevTools } from "abus-devtools";
 
 const Root = ({ store, busDevTools }) => {
   return (

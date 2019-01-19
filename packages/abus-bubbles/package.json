@@ -36,7 +36,8 @@
     "chalk": "^2.4.2"
   },
   "peerDependencies": {
-    "abus2": "0.6.0-alpha-1"
+    "abus2": "0.6.0-alpha-1",
+    "abus-visualizations": "0.1.0-alpha-1"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",

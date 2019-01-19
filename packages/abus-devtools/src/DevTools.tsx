@@ -1,13 +1,13 @@
-import * as React from 'react';
-import { cloneElement, Children, Component } from 'react';
-import * as PropTypes from 'prop-types';
-import Dock from 'react-dock';
-import { toggleVisibility, changeMonitor, changePosition, changeSize } from './actions';
-import reducer from './reducers';
-const parseKey = require('parse-key');
-import { POSITIONS } from './constants';
-import { IBus } from 'abus2';
-import { ABusMonitor } from './Abus-Monitor';
+import * as React from "react";
+import { cloneElement, Children, Component } from "react";
+import * as PropTypes from "prop-types";
+import Dock from "react-dock";
+import { toggleVisibility, changeMonitor, changePosition, changeSize } from "./actions";
+import reducer from "./reducers";
+const parseKey = require("parse-key");
+import { POSITIONS } from "./constants";
+import { IBus } from "abus2";
+import { ABusMonitor } from "./Abus-Monitor";
 
 export class DevTools extends React.PureComponent<{ bus: IBus }> {
     // toggleVisibilityKey = 'ctrl-h'
@@ -16,9 +16,9 @@ export class DevTools extends React.PureComponent<{ bus: IBus }> {
     render() {
         const monitor = <ABusMonitor bus={this.props.bus} />;
         return (
-            <DockMonitor toggleVisibilityKey='ctrl-h'
-                changePositionKey='ctrl-q'
-                changeMonitorKey='ctrl-m'
+            <DockMonitor toggleVisibilityKey="ctrl-h"
+                changePositionKey="ctrl-q"
+                changeMonitorKey="ctrl-m"
                 fluid={true}
             // monitorState={{
             //     isVisible: true,
@@ -29,12 +29,12 @@ export class DevTools extends React.PureComponent<{ bus: IBus }> {
             >
                 {monitor}
             </DockMonitor>
-        )
+        );
     }
 }
 
 
-export class DockMonitor extends React.PureComponent<{ toggleVisibilityKey: string, changePositionKey: string, changeMonitorKey: string, fluid: boolean }, { isVisible: boolean }>{
+export class DockMonitor extends React.PureComponent<{ toggleVisibilityKey: string, changePositionKey: string, changeMonitorKey: string, fluid: boolean }, { isVisible: boolean }> {
     static update = reducer;
 
     static propTypes = {
@@ -70,26 +70,26 @@ export class DockMonitor extends React.PureComponent<{ toggleVisibilityKey: stri
         const childrenCount = Children.count(props.children);
         if (childrenCount === 0) {
             console.error(
-                '<DockMonitor> requires at least one monitor inside. ' +
-                'Why don’t you try <LogMonitor>? You can get it at ' +
-                'https://github.com/gaearon/redux-devtools-log-monitor.'
+                "<DockMonitor> requires at least one monitor inside. " +
+                "Why don’t you try <LogMonitor>? You can get it at " +
+                "https://github.com/gaearon/redux-devtools-log-monitor."
             );
         } else if (childrenCount > 1 && !props.changeMonitorKey) {
             console.error(
-                'You specified multiple monitors inside <DockMonitor> ' +
-                'but did not provide `changeMonitorKey` prop to change them. ' +
-                'Try specifying <DockMonitor changeMonitorKey="ctrl-m" /> ' +
-                'and then press Ctrl-M.'
+                "You specified multiple monitors inside <DockMonitor> " +
+                "but did not provide `changeMonitorKey` prop to change them. " +
+                "Try specifying <DockMonitor changeMonitorKey=\"ctrl-m\" /> " +
+                "and then press Ctrl-M."
             );
         }
     }
 
     componentDidMount() {
-        window.addEventListener('keydown', this.handleKeyDown);
+        window.addEventListener("keydown", this.handleKeyDown);
     }
 
     componentWillUnmount() {
-        window.removeEventListener('keydown', this.handleKeyDown);
+        window.removeEventListener("keydown", this.handleKeyDown);
     }
 
     matchesKey(key, event) {
@@ -107,14 +107,14 @@ export class DockMonitor extends React.PureComponent<{ toggleVisibilityKey: stri
     }
 
     handleKeyDown(e) {
-        // Ignore regular keys when focused on a field
+        // ignore regular keys when focused on a field
         // and no modifiers are active.
         if ((
             !e.ctrlKey && !e.metaKey && !e.altKey
         ) && (
-                e.target.tagName === 'INPUT' ||
-                e.target.tagName === 'SELECT' ||
-                e.target.tagName === 'TEXTAREA' ||
+                e.target.tagName === "INPUT" ||
+                e.target.tagName === "SELECT" ||
+                e.target.tagName === "TEXTAREA" ||
                 e.target.isContentEditable
             )) {
             return;
@@ -170,7 +170,7 @@ export class DockMonitor extends React.PureComponent<{ toggleVisibilityKey: stri
                 // size={.3}
                 fluid={fluid}
                 onSizeChange={this.handleSizeChange}
-                dimMode='none'>
+                dimMode="none">
                 {Children.map(children, (child, index) =>
                     this.renderChild(child, index, rest)
                 )}

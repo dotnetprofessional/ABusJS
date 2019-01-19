@@ -3,9 +3,9 @@ import {
     CHANGE_POSITION,
     CHANGE_SIZE,
     TOGGLE_VISIBILITY
-} from './actions';
-import { POSITIONS } from './constants';
-import { Children } from 'react';
+} from "./actions";
+import { POSITIONS } from "./constants";
+import { Children } from "react";
 
 function position(props, state = props.defaultPosition, action) {
     return (action.type === CHANGE_POSITION) ?
@@ -26,7 +26,7 @@ function isVisible(props, state = props.defaultIsVisible, action) {
 }
 
 function childMonitorStates(props, state = [], action) {
-    return Children.map(props.children, (child, index) =>
+    return Children.map(props.children, (child: any, index) =>
         child.type.update(child.props, state[index], action)
     );
 }
@@ -40,14 +40,14 @@ function childMonitorIndex(props, state = 0, action) {
     }
 }
 
-export default function reducer(props, state = {}, action) {
+export default function reducer(props, state: any = {}, action: any) {
     if (!state.childMonitorStates) {
-        Children.forEach(props.children, (child, index) => {
-            if (typeof child.type.update !== 'function') {
+        Children.forEach(props.children, (child: any, index) => {
+            if (typeof child.type.update !== "function") {
                 console.error(
                     `Child of <DockMonitor> with the index ${index} ` +
                     `(${child.type.displayName || child.type.name || child.type}) ` +
-                    'does not appear to be a valid Redux DevTools monitor.'
+                    "does not appear to be a valid Redux DevTools monitor."
                 );
             }
         });

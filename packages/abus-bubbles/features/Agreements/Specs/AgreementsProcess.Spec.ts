@@ -2,7 +2,7 @@ import { Bubbles } from "../../../src";
 import { AgreementsProcess } from "../AgreementsProcess";
 import { AgreementService } from "../services/AgreementService";
 
-feature.only(`Agreements Process`, () => {
+feature(`Agreements Process`, () => {
     let bubbles: Bubbles;
 
     background(``, () => {
@@ -28,7 +28,6 @@ feature.only(`Agreements Process`, () => {
             """
             `, async () => {
                 await bubbles.executeAsync(stepContext.docString);
-                debugger;
             });
 
         then(`the headers are returned for the tpid`, () => {
@@ -49,7 +48,6 @@ feature.only(`Agreements Process`, () => {
             """
             `, async () => {
                 await bubbles.executeAsync(stepContext.docString);
-                debugger;
             });
 
         then(`an exception is returned via a status update`, () => {

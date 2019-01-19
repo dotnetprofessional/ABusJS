@@ -3,5 +3,19 @@
     "compilerOptions": {},
     "include": [
         "src/**/*.ts"
+    ],
+    "references": [
+        {
+            "path": "../abus2"
+        },
+        {
+            "path": "../abus-devtools"
+        },
+        {
+            "path": "../redux-abus"
+        },
+        {
+            "path": "../redux-abus-thunk"
+        }
     ]
 }

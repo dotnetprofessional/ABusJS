@@ -10,9 +10,6 @@
   "references": [
     {
       "path": "../abus2"
-    },
-    {
-      "path": "../abus-bubbles"
     }
   ]
 }

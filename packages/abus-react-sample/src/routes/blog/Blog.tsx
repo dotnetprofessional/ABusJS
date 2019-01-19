@@ -1,6 +1,5 @@
 import * as React from "react";
 import "./Blog.scss";
-import { Sample } from "redux-abus-thunk/dist/sample";
 
 export class Blogs extends React.Component {
 	public render() {
@@ -25,7 +24,6 @@ export class Blogs extends React.Component {
 					voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla
 					pariatur
 				</p>
-				<Sample />
 			</div>
 		);
 	}

@@ -5,7 +5,7 @@ import * as React from "react";
 import * as ReactDom from "react-dom";
 import Dock from "react-dock";
 import { IBus, IMessageHandlerContext, IMessage, newGuid, IMessageTask, handler } from "abus2";
-import "../../devTools.scss";
+import "./devTools.scss";
 import {
   Diagram,
   DiagramComponent,

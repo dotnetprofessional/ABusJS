@@ -1,4 +1,4 @@
-const data: [] = [
+const data: any = [
     {
         "type": "GetAgreementHeadersCommand",
         "payload": {
