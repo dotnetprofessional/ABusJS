@@ -1,6 +1,6 @@
 import "chai";
-import { Bubbles } from '../src';
-import { IBus, Bus, IMessageHandlerContext } from 'abus2';
+import { Bubbles } from "../src";
+import { IBus, Bus, IMessageHandlerContext } from "abus2";
 
 feature(`Validate bubbles works with more complex workflows`, () => {
     scenarioOutline(`Authorize user form an API
@@ -40,7 +40,7 @@ feature(`Validate bubbles works with more complex workflows`, () => {
                 authorize-api: {"type": "authorize", "payload":{"authorizedUser":"<user>"}}
                 authorize-api-reply: "<authorized-user-reply>"
                 authorize-user-reply: "<authorized-user-reply>"
-                """        
+                """
             `, async () => {
                     await bubbles.executeAsync(stepContext.docString);
                     debugger;
@@ -53,9 +53,9 @@ feature(`Validate bubbles works with more complex workflows`, () => {
                 });
         });
 
-    scenarioOutline.skip(`Authenticate User 
+    scenarioOutline.skip(`Authenticate User
         ** SCENARIO DOESN'T WARRANT A SAGA - NEEDS TO BE REWORKED ***
-        This scenario simulates authenticating a user and if required also requiring 2FA authentication. This 
+        This scenario simulates authenticating a user and if required also requiring 2FA authentication. This
         example also uses a SAGA to control the business logic.
 
         Examples:
@@ -91,7 +91,7 @@ feature(`Validate bubbles works with more complex workflows`, () => {
                 authorize-api: {"type": "authorize", "payload":{"authorizedUser":"<user>"}}
                 authorize-api-reply: "<authorized-user-reply>"
                 authorize-user-reply: "<authorized-user-reply>"
-                """        
+                """
             `, async () => {
                     await bubbles.executeAsync(stepContext.docString);
                 });

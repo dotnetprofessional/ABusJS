@@ -1,4 +1,4 @@
-import data from "./samples/get-headers-process";
+import { data } from "./samples/get-headers-process";
 import { Mermaid } from "../src/Mermaid";
 import "livedoc-mocha";
 import * as chai from "chai";

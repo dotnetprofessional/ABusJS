@@ -1,4 +1,4 @@
-import { IMessage } from "abus2";
+import { IMessage, IMessageTracing } from "abus2";
 import { Convert } from "./Convert";
 import { IMessageNode } from "./IMessageNode";
 
@@ -17,7 +17,13 @@ export class TextVisualizations {
     }
 
     private printNode(logger: Logger, tree: IMessageNode, indent: string, last: boolean): void {
-        logger.writeLine(indent + (last ? "└╴ " : "├╴ ") + tree.message.type);
+        const metaData: IMessageTracing = tree.message.metaData as IMessageTracing;
+        const duration: number = metaData.endProcessing - metaData.startProcessing;
+        let durationDisplay: string = "";
+        if (!isNaN(duration)) {
+            durationDisplay = `(${duration}ms)`;
+        }
+        logger.writeLine(indent + (last ? "└╴ " : "├╴ ") + tree.message.type + ` ${durationDisplay}`);
         indent += last ? "   " : "│  ";
 
         for (let i: number = 0; i < tree.nodes.length; i++) {

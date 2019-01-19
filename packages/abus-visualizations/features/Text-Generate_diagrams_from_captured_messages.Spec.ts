@@ -1,4 +1,4 @@
-import data from "./samples/get-headers-process";
+import { data } from "./samples/get-headers-process";
 import "livedoc-mocha";
 import * as chai from "chai";
 import { TextVisualizations } from "../src/TextVisualizations";
@@ -20,12 +20,12 @@ feature(`Text: Generate diagrams from captured messages`, () => {
         then(`the follow ASCII tree is produced
             """
             start
-            ├╴ GetAgreementHeadersCommand
-            │  ├╴ AgreementProcessStatusEvent
-            │  ├╴ GetAgreementHeadersRequest
-            │  ├╴ ParentCompanyHeadersEvent
-            │  └╴ AgreementProcessStatusEvent
-            └╴ GetAgreementHeadersRequest.reply
+            ├╴ GetAgreementHeadersCommand (1ms)
+            │  ├╴ AgreementProcessStatusEvent 
+            │  ├╴ GetAgreementHeadersRequest (0ms)
+            │  ├╴ ParentCompanyHeadersEvent 
+            │  └╴ AgreementProcessStatusEvent 
+            └╴ GetAgreementHeadersRequest.reply (0ms)
             """
         `, () => {
                 diagramResult.should.be.eq(stepContext.docString + "\n");

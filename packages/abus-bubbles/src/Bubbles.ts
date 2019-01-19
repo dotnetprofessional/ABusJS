@@ -2,7 +2,7 @@ import { IBubbleMessage } from "./IBubbleMessage";
 import { IBubbleFlowResult } from "./IBubbleFlowResult";
 import {
     IMessage, IBus, MessageTracingTask, Intents, IMessageHandlerContext, MessageHandlerContext,
-    SendOptions, TimeSpan, Bus, MessageException, IMessageSubscription
+    SendOptions, TimeSpan, Bus, MessageException, IMessageSubscription, MessagePerformanceTask
 } from "abus2";
 import { IBubble } from "./IBubble";
 import { IColorTheme } from "./IColorTheme";
@@ -38,8 +38,9 @@ export class Bubbles {
         this.bus.usingRegisteredTransportToMessageType("*")
             .outboundPipeline
             .useLocalMessagesReceivedTasks(new MessageTracingTask()).and
-            .useTransportMessageReceivedTasks(new BubblesTask(this));
-        // .andAlso()
+            .useTransportMessageReceivedTasks(new BubblesTask(this))
+            .andAlso()
+            .outboundPipeline.useTransportMessageReceivedTasks(new MessagePerformanceTask);
         // .inboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("inbound:")).andAlso()
         // .outboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("outbound:"));
 

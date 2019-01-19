@@ -28,6 +28,8 @@ feature(`Agreements Process`, () => {
             """
             `, async () => {
                 await bubbles.executeAsync(stepContext.docString);
+                debugger;
+                bubbles.visualizations.printAsciiTree();
             });
 
         then(`the headers are returned for the tpid`, () => {
