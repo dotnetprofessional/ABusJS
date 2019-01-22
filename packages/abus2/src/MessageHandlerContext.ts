@@ -9,6 +9,8 @@ import { Bus } from "./Bus";
 import { MessageException } from "./tasks/MessageException";
 
 export class MessageHandlerContext implements IMessageHandlerContext {
+    public isCancelled: boolean;
+
     constructor(protected bus: IBus, public parentMessage: IMessage<any>, public activeMessage: IMessage<any>) {
         this.shouldTerminatePipeline = false;
     }
@@ -16,6 +18,9 @@ export class MessageHandlerContext implements IMessageHandlerContext {
     public shouldTerminatePipeline: boolean;
 
     public async replyAsync<T>(reply: T): Promise<void> {
+        if (this.isCancelled) {
+            return;
+        }
         // Ensure the active message has someone listening for a reply
         if (!this.activeMessageMetaData || this.activeMessageMetaData.intent !== Intents.sendReply) {
             throw new Error(`Unable to reply to a message that wasn't sent with the ${Intents.sendReply} intent`);
@@ -40,21 +45,30 @@ export class MessageHandlerContext implements IMessageHandlerContext {
     }
 
     public publishAsync<T>(message: T | IMessage<T>, options?: SendOptions): Promise<void> {
+        if (this.isCancelled) {
+            return;
+        }
+
         return (this.bus as Bus).publishAsync(message, options, this.activeMessage);
     }
 
     public sendWithReply<T, R>(message: T, options?: SendOptions): ReplyRequest {
+        if (this.isCancelled) {
+            return;
+        }
+
         return (this.bus as Bus).sendWithReply(message, options, this.activeMessage);
     }
+
     public sendAsync<T>(message: T | IMessage<T>, options?: SendOptions): Promise<void> {
+        if (this.isCancelled) {
+            return;
+        }
+
         return (this.bus as Bus).sendAsync(message, options, this.activeMessage);
     }
 
     private get activeMessageMetaData(): IBusMetaData {
         return this.activeMessage.metaData as IBusMetaData
     }
-
-    // private getNewContext(message: any): IMessageHandlerContext {
-    //     return new MessageHandlerContext(this.bus, Object.assign({}, this.activeMessage), message);
-    // }
 }

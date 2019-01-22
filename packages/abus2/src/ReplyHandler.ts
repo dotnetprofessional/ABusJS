@@ -1,3 +1,5 @@
+import { IMessageHandlerContext } from './IMessageHandlerContext';
+
 export class ReplyHandler {
     constructor() {
 
@@ -6,4 +8,5 @@ export class ReplyHandler {
     public reject: any;
     // public replyTo: string;
     public isCancelled: boolean = false;
+    public context: IMessageHandlerContext;
 }

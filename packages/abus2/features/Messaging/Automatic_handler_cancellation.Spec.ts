@@ -1,109 +1,116 @@
-// import { CancellationPolicy } from "../../src/ISubscriptionOptions";
-// import { sleep } from "../Utils";
-// import { IMessageHandlerContext } from "../../src";
-// import { Bubbles } from "abus-bubbles";
+import { CancellationPolicy } from "../../src/ISubscriptionOptions";
+import { sleep, MessageLogger, waitUntilAsync } from "../Utils";
+import { IMessageHandlerContext, Bus, IMessage } from "../../src";
 
-// feature.skip(`Automatic handler cancellation
-//     There are times when a several messages are sent in quick succession and it would be
-//     a waste of resources to process them all to completion.
+feature.only(`Automatic handler cancellation
+    There are times when a several messages are sent in quick succession and it would be
+    a waste of resources to process them all to completion.
 
-//     In these scenarios its helpful to be able to automatically cancel or otherwise handle the messages
-//     differently.
+    In these scenarios its helpful to be able to automatically cancel or otherwise handle the messages
+    differently.
 
-//     Rules: defined when subscribing
+    Rules: defined when subscribing
 
-//     cancellationPolicy: cancelExisting | ignoreIfDuplicate | ignoreIfExisting
-//         cancelExisting:
-//             when a new message is sent, will set the existing running handlers context to isCancelled.
-//             This will prevent messages being sent or received by the current instance of the handler. 
-//             It will not stop the code currently executing within the handler.
+    cancellationPolicy: cancelExisting | ignoreIfDuplicate | ignoreIfExisting
+        cancelExisting:
+            when a new message is sent, will set the existing running handlers context to isCancelled.
+            This will prevent messages being sent or received by the current instance of the handler. 
+            It will not stop the code currently executing within the handler.
 
-//         ignoreIfDuplicate:
-//             when a new message is sent, will compare the message being sent with the message being processed
-//             by the current handler. If the messages match the message will be ignored.
+        ignoreIfDuplicate:
+            when a new message is sent, will compare the message being sent with the message being processed
+            by the current handler. If the messages match the message will be ignored.
 
-//         ignoreIfExisting:
-//             when a new message is sent, and the handler is already processing a previous message then 
-//             the new message will be ignored.
+        ignoreIfExisting:
+            when a new message is sent, and the handler is already processing a previous message then 
+            the new message will be ignored.
 
-//         `, function () {
-//         this.timeout(5000);
+        `, function () {
+        let bus: Bus;
+        let logger: MessageLogger;
+        let messageToSend: IMessage<any>[];
 
-//         scenario(`Not specifying the cancellation policy will process every message`, () => {
-//             let bubbles: Bubbles;
-//             given(`a handler set configured to handle `, () => {
-//                 bubbles = new Bubbles();
-//                 bubbles.bus.subscribe("FAST-AND-FURIOUS", async (message: any, context: IMessageHandlerContext) => {
-//                     console.log("I was executed");
-//                     // simulate work that will take some time so new messages will be executed before this completes
-//                     await sleep(40);
-//                     context.sendAsync({ type: "NOT-SO-FAST", id: message.id });
-//                 }, { cancellationPolicy: CancellationPolicy.cancelExisting, identifier: "FURIOUS PROCESS" });
-//             });
-//             when(`sending the same message in quick succession
-//             """
-//             (!request1)(!request2)(!request3)(!request4)(!request5)(reply1)(reply2)(reply3)(reply4)(reply5)--------------
+        background(``, () => {
+            given(`a handler will send the message 'NOT-SO-FAST' when receiving 'FAST-AND-FURIOUS'`, () => {
+                bus = new Bus()
+                logger = new MessageLogger();
+                bus.start();
+                bus.usingRegisteredTransportToMessageType("*").outboundPipeline.useLocalMessagesReceivedTasks(logger);
+                const replyType = stepContext.values[0];
+                bus.subscribe(stepContext.values[1], async (message: any, context: IMessageHandlerContext) => {
+                    // simulate work that will take some time so new messages will be executed before this completes
+                    await sleep(40);
+                    context.sendAsync({ type: replyType, id: message.id });
+                }, { identifier: stepContext.values[1] });
 
-//             request1: {"type":"FAST-AND-FURIOUS",  "id":1}
-//             request2: {"type":"FAST-AND-FURIOUS", "id":2}
-//             request3: {"type":"FAST-AND-FURIOUS", "id":3}
-//             request4: {"type":"FAST-AND-FURIOUS", "id":4}
-//             request5: {"type":"FAST-AND-FURIOUS", "id":5}
-//             reply1: {"type": "NOT-SO-FAST", "id":1}
-//             reply2: {"type": "NOT-SO-FAST", "id":2}
-//             reply3: {"type": "NOT-SO-FAST", "id":3}
-//             reply4: {"type": "NOT-SO-FAST", "id":4}
-//             reply5: {"type": "NOT-SO-FAST", "id":5}
-//             """        
-//                 `, async () => {
-//                     debugger;
-//                     await bubbles.executeAsync(stepContext.docString);
-//                     debugger;
-//                 });
+                // register a dummy handler to prevent errors
+                bus.subscribe(stepContext.values[0], () => { });
+            });
+        });
 
-//             then(`the message flow matches
-//                 `, () => {
-//                     bubbles.validate();
-//                 });
+        scenario(`Not specifying the cancellation policy will process every message`, () => {
+            when(`sending the same message 'FAST-AND-FURIOUS' in quick succession`, () => {
+                for (let i = 1; i <= 5; i++) {
+                    bus.sendAsync({ type: stepContext.values[0], id: i });
+                }
+            });
 
-//         });
+            then(`the message flow matches
+                """
+                [{"type":"FAST-AND-FURIOUS",  "id":1},
+                {"type":"FAST-AND-FURIOUS", "id":2},
+                {"type":"FAST-AND-FURIOUS", "id":3},
+                {"type":"FAST-AND-FURIOUS", "id":4},
+                {"type":"FAST-AND-FURIOUS", "id":5},
+                {"type": "NOT-SO-FAST", "id":1},
+                {"type": "NOT-SO-FAST", "id":2},
+                {"type": "NOT-SO-FAST", "id":3},
+                {"type": "NOT-SO-FAST", "id":4},
+                {"type": "NOT-SO-FAST", "id":5}
+                ]
+                """        
+                `, async () => {
+                    await waitUntilAsync(() => logger.messages.length === 10, 100);
+                    debugger;
+                    const messages = logger.messages;
+                    messageToSend = stepContext.docStringAsEntity;
+                    for (let i = 0; i < messageToSend.length; i++) {
+                        messages[i].type.should.be.eq(messageToSend[i].type);
+                        messages[i]["id"].should.be.eq(messageToSend[i]["id"]);
+                    }
+                    debugger;
+                });
 
-//         scenario(`Specifying the cancellation policy cancelExisting`, () => {
-//             let bubbles: Bubbles;
-//             given(`a handler set configured to handle `, () => {
-//                 bubbles = new Bubbles();
-//                 bubbles.bus.subscribe("FAST-AND-FURIOUS", async (message: any, context: IMessageHandlerContext) => {
-//                     console.log("I was executed");
-//                     // simulate work that will take some time so new messages will be 
-//                     await sleep(40);
-//                     context.sendAsync({ type: "NOT-SO-FAST", id: message.id });
-//                 }, { cancellationPolicy: CancellationPolicy.cancelExisting, identifier: "FURIOUS PROCESS" });
-//             });
-//             //(!request2)(!request3)--(reply)(!request4)--(reply)(!request5)(reply)-----
-//             //(!request1)--(!reply)--(!request2)--(reply)
-//             when(`sending the same message in quick succession
-//             """
-//             (!request1)(!request2)(!request3)(!request4)(reply)---
+        });
 
-//             request1: {"type":"FAST-AND-FURIOUS",  "id":1}
-//             request2: {"type":"FAST-AND-FURIOUS", "id":2}
-//             request3: {"type":"FAST-AND-FURIOUS", "id":3}
-//             request4: {"type":"FAST-AND-FURIOUS", "id":4}
-//             request5: {"type":"FAST-AND-FURIOUS", "id":5}
-//             reply: {"type": "NOT-SO-FAST", "id":5}
-//             """        
-//                 `, async () => {
-//                     debugger;
-//                     await bubbles.executeAsync(stepContext.docString);
-//                     // const result = bubbles.result();
-//                     console.log(JSON.stringify((bubbles as any).actualMessageFlow, null, 5));
-//                     debugger;
-//                 });
+        scenario.skip(`Specifying the cancellation policy cancelExisting`, () => {
+            when(`sending the same message 'FAST-AND-FURIOUS' in quick succession`, () => {
+                for (let i = 1; i <= 5; i++) {
+                    bus.sendAsync({ type: stepContext.values[0], id: i });
+                }
+            });
 
-//             then(`the message flow matches
-//                 `, () => {
-//                     // bubbles.validate();
-//                 });
+            then(`the message flow matches
+                """
+                [{"type":"FAST-AND-FURIOUS",  "id":1},
+                {"type":"FAST-AND-FURIOUS", "id":2},
+                {"type":"FAST-AND-FURIOUS", "id":3},
+                {"type":"FAST-AND-FURIOUS", "id":4},
+                {"type":"FAST-AND-FURIOUS", "id":5},
+                {"type": "NOT-SO-FAST", "id":5}
+                ]
+                """        
+                `, async () => {
+                    await sleep(600);
+                    debugger;
+                    const messages = logger.messages;
+                    messageToSend = stepContext.docStringAsEntity;
+                    for (let i = 0; i < messageToSend.length; i++) {
+                        messages[i].type.should.be.eq(messageToSend[i].type);
+                        messages[i]["id"].should.be.eq(messageToSend[i]["id"]);
+                    }
+                    debugger;
+                });
 
-//         });
-//     });
+        });
+    });

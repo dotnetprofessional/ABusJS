@@ -21,7 +21,7 @@ import { MessageExceptionTask } from "./tasks/MessageExceptionTask";
 import { MessageException } from "./tasks/MessageException";
 import { getTypeNamespace } from "./Utils";
 import { IMessageHandlerContext } from "./IMessageHandlerContext";
-import { ISubscriptionOptions } from "./ISubscriptionOptions";
+import { ISubscriptionOptions, CancellationPolicy } from "./ISubscriptionOptions";
 
 export class Bus implements IBus {
     private registeredTransports: IHashTable<IRegisteredTransport> = {};
@@ -190,10 +190,12 @@ export class Bus implements IBus {
         // replies require an Id to have been set which isn't required otherwise. Middleware may also add this so
         // use an existing one if available.
         msg.metaData.messageId = msg.metaData.messageId || newGuid();
+        const context = new MessageHandlerContext(this, parentMessage, message);
 
         const replyHandlerPromise = new Promise((resolve, reject) => {
             replyHandler.resolve = resolve;
             replyHandler.reject = reject;
+            replyHandler.context = context;
             this.messageReplyHandlers[msg.metaData.messageId] = replyHandler;
             // Add a timeout here too. This can be a default but also supplied as part of the sendOptions
         });
@@ -205,7 +207,6 @@ export class Bus implements IBus {
         }
 
         // Now send the message
-        const context = new MessageHandlerContext(this, parentMessage, message);
         this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.sendReply), context, options);
         return new ReplyRequest(replyHandler, replyHandlerPromise);
     }
@@ -281,6 +282,10 @@ export class Bus implements IBus {
             if (message.metaData["intent"] === Intents.reply) {
                 handler = () => {
                     const replyHandler = this.messageReplyHandlers[message.metaData.replyTo];
+                    if (replyHandler.context.isCancelled) {
+                        // the context for this reply was cancelled so don't pass to handler
+                        return;
+                    }
                     if (!replyHandler.isCancelled) {
                         if (message.payload && message.payload.constructor && message.payload.constructor.name === MessageException.name) {
                             replyHandler.reject(message.payload);
@@ -288,11 +293,13 @@ export class Bus implements IBus {
                             replyHandler.resolve(message.payload);
                         }
                     } else {
-                        replyHandler.resolve();
+                        replyHandler.resolve(new Error());
                     }
                     // remove handler now its been completed
                     delete this.messageReplyHandlers[message.metaData.replyTo];
                 };
+                // TODO: Change to pass in or think again, calling from here has no subscription its dynamic
+                // maybe pass in a context as that's what's needed to assign to the sub which can be done outside then?
                 await this.processInboundMessage(message, handler);
             } else {
                 // Locate the handlers for the message
@@ -315,11 +322,21 @@ export class Bus implements IBus {
                 }
                 const shouldClone = subscribers.length > 1;
                 subscribers.forEach(async s => {
+                    // if this s
+
                     // tag message with the identifer if it exists
                     if (s.options && s.options.identifier) {
                         message.metaData.receivedBy = s.options.identifier;
                     }
-                    await this.processInboundMessage(shouldClone ? this.cloneMessage(message) : message, s.handler);
+                    try {
+                        // track that this handler is doing something to support cancellation
+                        s.isProcessing = true;
+                        await this.processInboundMessage(shouldClone ? this.cloneMessage(message) : message, s);
+                    } finally {
+                        // track that this handler has now completed
+                        s.isProcessing = false;
+                        s.context = undefined;
+                    }
                 });
 
             }
@@ -329,6 +346,27 @@ export class Bus implements IBus {
             this.publishAsync({ type: MessageException.type, payload: new MessageException(e.message, e) });
         }
     }
+
+    private shouldBeCancelled(subscription: IMessageSubscription<any>): boolean {
+        if (subscription.options && subscription.options.cancellationPolicy) {
+            // check what the cancellation policy is
+            switch (subscription.options.cancellationPolicy) {
+                case CancellationPolicy.cancelExisting:
+                    if (subscription.isProcessing) {
+                        // mark the context as cancelled
+                        subscription.context.isCancelled = true;
+                        return true;
+                    }
+                    break;
+                case CancellationPolicy.ignoreIfDuplicate:
+                    break;
+                case CancellationPolicy.ignoreIfExisting:
+                    break;
+
+            }
+        }
+    }
+
     private cloneCount = 0;
     private cloneMessage(message: IMessage<any>): IMessage<any> {
         const copy = Object.assign({}, message);
@@ -338,14 +376,17 @@ export class Bus implements IBus {
         return copy;
     }
 
-    private async processInboundMessage(message: IMessage<any>, handler: IMessageHandler<any>): Promise<void> {
+    private async processInboundMessage(message: IMessage<any>, subscription: IMessageSubscription<any>): Promise<void> {
         // find the transport for this message
         const transport = this.getTransport(message.type);
-        const handlerTask = new ExecuteHandlerTask(handler);
+        const handlerTask = new ExecuteHandlerTask(subscription.handler);
         const tasks = transport.pipeline.inboundStages;
 
         const pipelineTasks = [...tasks.transportMessageReceived, ...tasks.logicalMessageReceived, ...tasks.invokeHandlers, handlerTask];
         const context = new MessageHandlerContext(this, null, message);
+
+        // update the subscription with the current context for this subscription
+        subscription.context = context;
         this.executePipelineTasks(pipelineTasks, message, context);
     }
 

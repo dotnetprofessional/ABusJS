@@ -54,4 +54,13 @@ export interface IMessageHandlerContext extends ISendMessages {
      * @memberof IMessageHandlerContext
      */
     shouldTerminatePipeline: boolean;
+
+    /**
+     * Indicates if this context has been cancelled. When cancelled
+     * receiving and sending of messages will be ignored.
+     *
+     * @type {boolean}
+     * @memberof IMessageHandlerContext
+     */
+    isCancelled: boolean;
 }
