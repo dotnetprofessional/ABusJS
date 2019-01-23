@@ -10,5 +10,6 @@ export class MessagePerformanceTask implements IMessageTask {
         await next();
 
         metaData.endProcessing = Date.now();
+        metaData.ms = metaData.endProcessing - metaData.startProcessing;
     }
 }

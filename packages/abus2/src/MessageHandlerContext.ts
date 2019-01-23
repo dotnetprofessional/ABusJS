@@ -7,9 +7,10 @@ import { IBusMetaData } from "./IBusMetaData";
 import { Intents } from "./Intents";
 import { Bus } from "./Bus";
 import { MessageException } from "./tasks/MessageException";
+import * as Exceptions from "./Exceptions";
 
 export class MessageHandlerContext implements IMessageHandlerContext {
-    public isCancelled: boolean;
+    public wasCancelled: boolean;
 
     constructor(protected bus: IBus, public parentMessage: IMessage<any>, public activeMessage: IMessage<any>) {
         this.shouldTerminatePipeline = false;
@@ -18,16 +19,18 @@ export class MessageHandlerContext implements IMessageHandlerContext {
     public shouldTerminatePipeline: boolean;
 
     public async replyAsync<T>(reply: T): Promise<void> {
-        if (this.isCancelled) {
-            return;
-        }
-        // Ensure the active message has someone listening for a reply
+        // ensure the active message has someone listening for a reply
         if (!this.activeMessageMetaData || this.activeMessageMetaData.intent !== Intents.sendReply) {
             throw new Error(`Unable to reply to a message that wasn't sent with the ${Intents.sendReply} intent`);
         }
 
+        if (this.wasCancelled) {
+            // the context for this reply was cancelled so substitute original with ane exception
+            reply = new Exceptions.ReplyHandlerCancelled("Reply not delivered due to handler being cancelled.", reply) as any;
+        }
+
         let replyMessage: any = reply;
-        if (typeof replyMessage === "object" && replyMessage.name === "Error") {
+        if (replyMessage instanceof Error) {
             // upgrade to an exception message
             const error = replyMessage as Error;
             replyMessage = new MessageException(error.message, (reply as unknown) as Error);
@@ -45,7 +48,7 @@ export class MessageHandlerContext implements IMessageHandlerContext {
     }
 
     public publishAsync<T>(message: T | IMessage<T>, options?: SendOptions): Promise<void> {
-        if (this.isCancelled) {
+        if (this.wasCancelled) {
             return;
         }
 
@@ -53,15 +56,15 @@ export class MessageHandlerContext implements IMessageHandlerContext {
     }
 
     public sendWithReply<T, R>(message: T, options?: SendOptions): ReplyRequest {
-        if (this.isCancelled) {
-            return;
+        if (this.wasCancelled) {
+            throw new Exceptions.HandlerCancelled("Request not sent due to handler being cancelled.", message);
         }
 
         return (this.bus as Bus).sendWithReply(message, options, this.activeMessage);
     }
 
     public sendAsync<T>(message: T | IMessage<T>, options?: SendOptions): Promise<void> {
-        if (this.isCancelled) {
+        if (this.wasCancelled) {
             return;
         }
 

@@ -8,5 +8,5 @@ export interface IMessageSubscription<T> {
     options: ISubscriptionOptions;
     handler: IMessageHandler<T>;
     isProcessing: boolean;
-    context: IMessageHandlerContext;
+    context?: IMessageHandlerContext;
 }

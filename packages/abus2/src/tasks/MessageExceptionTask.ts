@@ -13,7 +13,7 @@ export class MessageExceptionTask implements IMessageTask {
         } catch (error) {
             const exception = new MessageException(error.message, error);
             message.metaData = message.metaData || {};
-            message.metaData[this.errorKey] = exception.description;
+            message.metaData[this.errorKey] = exception.message;
             message.metaData[this.errorCount] = (message.metaData[this.errorCount] || 0) + 1;
             context.publishAsync({ type: MessageException.type, payload: exception });
         }

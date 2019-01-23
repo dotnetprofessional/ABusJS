@@ -36,7 +36,7 @@ feature(`Exceptions are published`, () => {
         then(`an exception with the message 'Blowed Up!' is published`, async () => {
             // give the system time to process the messages
             await waitUntilAsync(() => exceptionMessage, 200);
-            exceptionMessage.description.should.be.equal(stepContext.values[0]);
+            exceptionMessage.message.should.be.equal(stepContext.values[0]);
         });
     });
 });

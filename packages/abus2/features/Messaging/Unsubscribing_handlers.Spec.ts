@@ -50,7 +50,7 @@ feature(`Unsubscribing handlers`, () => {
             // give the system time to process the messages
             await waitUntilAsync(() => exception, 200);
 
-            exception.description.should.be.eq(stepContext.values[0]);
+            exception.message.should.be.eq(stepContext.values[0]);
         });
     });
 

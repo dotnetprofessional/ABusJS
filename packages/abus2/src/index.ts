@@ -17,4 +17,4 @@ export { MessageTracingTask } from "./tasks/abus-tracing/MessageTracingTask";
 export { MessagePerformanceTask } from "./tasks/abus-tracing/MessagePerformanceTask";
 export { MessageException } from "./tasks/MessageException";
 export { IMessageTracing } from "./tasks/abus-tracing/IMessageTracing";
-export { IMessageSubscription } from "./IMessageSubscription"; 
+export { IMessageSubscription } from "./IMessageSubscription";

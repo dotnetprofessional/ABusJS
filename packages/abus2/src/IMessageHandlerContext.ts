@@ -62,5 +62,5 @@ export interface IMessageHandlerContext extends ISendMessages {
      * @type {boolean}
      * @memberof IMessageHandlerContext
      */
-    isCancelled: boolean;
+    wasCancelled: boolean;
 }

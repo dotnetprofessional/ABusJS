@@ -1,10 +1,7 @@
+import { CancellationPolicy } from "./CancellationPolicy";
+
 export interface ISubscriptionOptions {
     identifier?: string;
-    cancellationPolicy?: CancellationPolicy
+    cancellationPolicy?: CancellationPolicy;
 }
 
-export enum CancellationPolicy {
-    cancelExisting,
-    ignoreIfDuplicate,
-    ignoreIfExisting
-}
