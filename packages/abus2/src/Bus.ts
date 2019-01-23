@@ -1,6 +1,7 @@
 import { IBus } from "./IBus";
 import { IMessage } from "./IMessage";
-import { SendOptions } from "./SendOptions";
+import { ISendOptions } from "./ISendOptions";
+import { CancellationToken } from "./CancellationToken";
 import { IMessageTransport } from "./Transports/IMessageTransport";
 import { IHashTable } from "./IHashTable";
 import { Intents } from "./Intents";
@@ -15,7 +16,6 @@ import { AbusGrammar, TransportGrammar } from "./fluent/transportGrammar";
 import { IMessageTask } from "./tasks/IMessageTask";
 import { MessageHandlerContext } from "./MessageHandlerContext";
 import { ReplyHandler } from "./ReplyHandler";
-import { ReplyRequest } from "./ReplyRequest";
 import { ExpressMemoryTransport } from "./Transports/ExpressMemoryTransport";
 import { MessageExceptionTask } from "./tasks/MessageExceptionTask";
 import { MessageException } from "./tasks/MessageException";
@@ -25,6 +25,7 @@ import { ISubscriptionOptions } from "./ISubscriptionOptions";
 import { CancellationPolicy } from "./CancellationPolicy";
 import * as Exceptions from "./Exceptions";
 import { AutoCancellationTask } from './tasks/AutoCancellationTask';
+import { TimeSpan } from './Timespan';
 
 export class Bus implements IBus {
     private registeredTransports: IHashTable<IRegisteredTransport> = {};
@@ -179,28 +180,36 @@ export class Bus implements IBus {
             }
         }
     }
-    public publishAsync<T>(message: T | IMessage<T>, options?: SendOptions, parentMessage?: IMessage<any>): Promise<void> {
+    public publishAsync<T>(message: T | IMessage<T>, options?: ISendOptions, parentMessage?: IMessage<any>): Promise<void> {
         message = this.convertToIMessageIfNot(message);
         const context = new MessageHandlerContext(this, parentMessage, message);
         return this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.publish), context, options);
     }
 
-    public sendWithReply<T, R>(message: T | IMessage<T>, options?: SendOptions, parentMessage?: IMessage<any>): ReplyRequest {
+    public sendWithReply<R>(message: object | IMessage<any>, options?: ISendOptions, parentMessage?: IMessage<any>): Promise<R> {
         message = this.convertToIMessageIfNot(message);
         let replyHandler = new ReplyHandler();
-        const msg = message as IMessage<T>;
+        const msg = message as IMessage<any>;
         msg.metaData = msg.metaData || {};
         // replies require an Id to have been set which isn't required otherwise. Middleware may also add this so
         // use an existing one if available.
         msg.metaData.messageId = msg.metaData.messageId || newGuid();
-        const context = new MessageHandlerContext(this, parentMessage, message);
+        const context = new MessageHandlerContext(this, parentMessage, message as IMessage<any>);
 
-        const replyHandlerPromise = new Promise((resolve, reject) => {
+        const replyHandlerPromise = new Promise<R>((resolve, reject) => {
             replyHandler.resolve = resolve;
             replyHandler.reject = reject;
             replyHandler.context = context;
+            replyHandler.cancellationToken = (options && options.cancellationToken) || new CancellationToken();
             this.messageReplyHandlers[msg.metaData.messageId] = replyHandler;
-            // add a timeout here too. This can be a default but also supplied as part of the sendOptions
+
+            // All requests have a timeout specified to ensure broken requests do not leave the caller waiting forever!
+            replyHandler.timeoutToken = setTimeout(
+                () => {
+                    replyHandler.hasTimedOut = true;
+                    replyHandler.reject(new Exceptions.TimeoutException(`The request ${msg.type} has timed out`));
+                },
+                (options && options.timeout && options.timeout.totalMilliseconds) || TimeSpan.FromSeconds(60).totalMilliseconds);
         });
 
         // replies dont have their message types associated with a transport. If this types reply hasn't been
@@ -211,10 +220,10 @@ export class Bus implements IBus {
 
         // now send the message
         this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.sendReply), context, options);
-        return new ReplyRequest(replyHandler, replyHandlerPromise);
+        return replyHandlerPromise;
     }
 
-    public sendAsync<T>(message: T | IMessage<T>, options?: SendOptions, parentMessage?: IMessage<any>): Promise<void> {
+    public sendAsync<T>(message: T | IMessage<T>, options?: ISendOptions, parentMessage?: IMessage<any>): Promise<void> {
         message = this.convertToIMessageIfNot(message);
         const context = new MessageHandlerContext(this, parentMessage, message);
 
@@ -263,7 +272,7 @@ export class Bus implements IBus {
         return transport;
     }
 
-    private async processOutboundMessageAsync(message: IMessage<any>, context: IMessageHandlerContext, options: SendOptions): Promise<void> {
+    private async processOutboundMessageAsync(message: IMessage<any>, context: IMessageHandlerContext, options: ISendOptions): Promise<void> {
         // find the transport for this message
         const transport = this.getTransport(message.type);
 
@@ -285,9 +294,15 @@ export class Bus implements IBus {
             if (message.metaData.intent === Intents.reply) {
                 handler = () => {
                     const replyHandler: ReplyHandler = this.messageReplyHandlers[message.metaData.replyTo];
-                    if (replyHandler.isCancelled) {
+                    if (replyHandler.hasTimedOut) {
+                        // nothing more to do
+                        return;
+                    }
+                    // cancel the timeout
+                    clearTimeout(replyHandler.timeoutToken);
+                    if (replyHandler.cancellationToken.wasCancelled) {
                         // the context for this reply was cancelled so don't pass to handler
-                        replyHandler.reject(new Exceptions.ReplyHandlerCancelled("Reply not delivered due to handler being cancelled. XX", message));
+                        replyHandler.reject(new Exceptions.ReplyHandlerCancelledException("Reply not delivered due to handler being cancelled.", message));
                     }
 
                     if (message.payload && message.payload.constructor && message.payload.constructor.name === MessageException.name) {
@@ -329,8 +344,6 @@ export class Bus implements IBus {
                         message.metaData.receivedBy = s.options.identifier;
                     }
                     // track that this handler is doing something to support cancellation
-                    console.log("processing....", message["id"]);
-
                     await this.processInboundMessage(shouldClone ? this.cloneMessage(message) : message, s.handler, s);
                 }
 
@@ -350,7 +363,6 @@ export class Bus implements IBus {
                     if (subscription.isProcessing) {
                         // mark the context as cancelled
                         subscription.context.wasCancelled = true;
-                        console.log(`cancelled: ${subscription.messageFilter}: ${subscription.context.activeMessage.id}`);
                         return true;
                     }
                     break;
@@ -373,7 +385,7 @@ export class Bus implements IBus {
         return copy;
     }
 
-    private async processInboundMessage(message: IMessage<any>, handler: IMessageHandler<any>, subscription?: IMessageSubscription): Promise<void> {
+    private async processInboundMessage(message: IMessage<any>, handler: IMessageHandler<any>, subscription?: IMessageSubscription<any>): Promise<void> {
         // find the transport for this message
         const transport = this.getTransport(message.type);
         const handlerTask = new ExecuteHandlerTask(handler);

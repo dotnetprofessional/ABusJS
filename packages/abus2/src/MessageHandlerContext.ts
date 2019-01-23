@@ -1,8 +1,7 @@
 import { IMessageHandlerContext } from "./IMessageHandlerContext";
 import { IMessage } from "./IMessage";
-import { SendOptions } from "./SendOptions"
+import { ISendOptions } from "./ISendOptions"
 import { IBus } from "./IBus";
-import { ReplyRequest } from "./ReplyRequest";
 import { IBusMetaData } from "./IBusMetaData";
 import { Intents } from "./Intents";
 import { Bus } from "./Bus";
@@ -26,7 +25,7 @@ export class MessageHandlerContext implements IMessageHandlerContext {
 
         if (this.wasCancelled) {
             // the context for this reply was cancelled so substitute original with ane exception
-            reply = new Exceptions.ReplyHandlerCancelled("Reply not delivered due to handler being cancelled.", reply) as any;
+            reply = new Exceptions.ReplyHandlerCancelledException("Reply not delivered due to handler being cancelled.", reply) as any;
         }
 
         let replyMessage: any = reply;
@@ -47,7 +46,7 @@ export class MessageHandlerContext implements IMessageHandlerContext {
         this.shouldTerminatePipeline = true;
     }
 
-    public publishAsync<T>(message: T | IMessage<T>, options?: SendOptions): Promise<void> {
+    public publishAsync<T>(message: T | IMessage<T>, options?: ISendOptions): Promise<void> {
         if (this.wasCancelled) {
             return;
         }
@@ -55,15 +54,15 @@ export class MessageHandlerContext implements IMessageHandlerContext {
         return (this.bus as Bus).publishAsync(message, options, this.activeMessage);
     }
 
-    public sendWithReply<T, R>(message: T, options?: SendOptions): ReplyRequest {
+    public sendWithReply<R>(message: any, options?: ISendOptions): Promise<R> {
         if (this.wasCancelled) {
-            throw new Exceptions.HandlerCancelled("Request not sent due to handler being cancelled.", message);
+            throw new Exceptions.HandlerCancelledException("Request not sent due to handler being cancelled.", message);
         }
 
         return (this.bus as Bus).sendWithReply(message, options, this.activeMessage);
     }
 
-    public sendAsync<T>(message: T | IMessage<T>, options?: SendOptions): Promise<void> {
+    public sendAsync<T>(message: T | IMessage<T>, options?: ISendOptions): Promise<void> {
         if (this.wasCancelled) {
             return;
         }

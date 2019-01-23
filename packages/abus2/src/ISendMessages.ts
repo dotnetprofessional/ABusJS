@@ -1,6 +1,5 @@
 import { IMessage } from "./IMessage";
-import { SendOptions } from "./SendOptions";
-import { ReplyRequest } from "./ReplyRequest";
+import { ISendOptions } from "./ISendOptions";
 
 export interface ISendMessages {
     /**
@@ -10,11 +9,11 @@ export interface ISendMessages {
  *
  * @template T
  * @param {(IMessage<T> | T)} message
- * @param {SendOptions} [options]
+ * @param {ISendOptions} [options]
  *
  * @memberOf MessageHandlerContext
  */
-    publishAsync<T>(message: IMessage<T> | T, options?: SendOptions): Promise<void>;
+    publishAsync<T>(message: IMessage<T> | T, options?: ISendOptions): Promise<void>;
 
     /**
      * Sends a message using the current messages context. This makes the sent
@@ -24,12 +23,12 @@ export interface ISendMessages {
      * @template T, R
      * @param {(T | IMessage<T>)} message
      * @param {R} return message
-     * @param {SendOptions} [options]
+     * @param {ISendOptions} [options]
      * @returns {Promise<ReplyRequest>}
      *
      * @memberOf MessageHandlerContext
      */
-    sendWithReply<T, R>(message: T | IMessage<T>, options?: SendOptions): ReplyRequest;
+    sendWithReply<R>(message: object | IMessage<any>, options?: ISendOptions): Promise<R>;
 
     /**
      * Sends a message using the current messages context. This makes the sent
@@ -38,10 +37,10 @@ export interface ISendMessages {
      *
      * @template T
      * @param {(T | IMessage<T>)} message
-     * @param {SendOptions} [options]
+     * @param {ISendOptions} [options]
      * @returns {Promise<any>}
      *
      * @memberOf MessageHandlerContext
      */
-    sendAsync<T>(message: T | IMessage<T>, options?: SendOptions): Promise<void>;
+    sendAsync<T>(message: T | IMessage<T>, options?: ISendOptions): Promise<void>;
 }

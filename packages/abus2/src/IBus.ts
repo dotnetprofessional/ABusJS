@@ -45,7 +45,7 @@ export interface IBus extends ISendMessages {
      * Registers a handler to receive messages matching the type of the filter.
      * This can be a specific type or one of two wildcards
      * string* : matches any type that starts with the string
-     * *string : mathes any type that ends with the string 
+     * *string : matches any type that ends with the string 
      *
      * @param {string} filter
      * @param {IMessageHandler<any>} handler

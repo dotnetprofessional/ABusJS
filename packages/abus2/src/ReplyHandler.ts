@@ -1,4 +1,5 @@
 import { IMessageHandlerContext } from './IMessageHandlerContext';
+import { CancellationToken } from "./CancellationToken";
 
 export class ReplyHandler {
     constructor() {
@@ -6,7 +7,8 @@ export class ReplyHandler {
     }
     public resolve: any;
     public reject: any;
-    // public replyTo: string;
-    public isCancelled: boolean = false;
+    public cancellationToken: CancellationToken;
     public context: IMessageHandlerContext;
+    public timeoutToken: any;
+    public hasTimedOut: boolean;
 }

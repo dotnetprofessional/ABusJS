@@ -4,13 +4,13 @@ import { IMessageTask } from './IMessageTask'
 import { IBusMetaData } from "../IBusMetaData";
 import { Intents } from '../Intents';
 import { IRegisteredTransport } from '../IRegisteredTransport';
-import { SendOptions } from '../SendOptions';
+import { ISendOptions } from '../ISendOptions';
 import { TimeSpan } from '../Timespan';
 
 export class TransportDispatchTask implements IMessageTask {
     private timeToDelay: TimeSpan;
 
-    public constructor(protected transport: IRegisteredTransport, protected options: SendOptions) {
+    public constructor(protected transport: IRegisteredTransport, protected options: ISendOptions) {
         this.timeToDelay = (options && options.timeToDelay) || undefined;
     }
 

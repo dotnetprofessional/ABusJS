@@ -2,7 +2,7 @@ import { CancellationPolicy } from "../../src/CancellationPolicy";
 import { sleep, MessageLogger, waitUntilAsync } from "../Utils";
 import { IMessageHandlerContext, Bus, IMessage, MessagePerformanceTask } from "../../src";
 
-feature.only(`Automatic handler cancellation
+feature(`Automatic handler cancellation
     There are times when a several messages are sent in quick succession and it would be
     a waste of resources to process them all to completion.
 
@@ -21,7 +21,7 @@ feature.only(`Automatic handler cancellation
             In this scenario the caller is waiting for a response. As such even if the handler is cancelled
             the caller must still receive a response otherwise it will wait forever. Returning an empty response
             however would still allow the code to execute afterwards, which could lead to unexpected results.
-            As such the Abus will thrown a "ReplyHandlerCancelled" exception. This can then be handled and ignored
+            As such the Abus will thrown a "ReplyHandlerCancelledException" exception. This can then be handled and ignored
             or handled as appropriate. Its also important to note that the reply will still be delivered with the
             payload being this exception as this is the only way to communicate with the caller.
 
@@ -31,7 +31,7 @@ feature.only(`Automatic handler cancellation
 
             Using sendWithReply:
             This scenario has the same behavior as reply. The only difference is that if the handler has been cancelled
-            prior to sending the message then the message will not be dispatched and the "ReplyHandlerCancelled" will be
+            prior to sending the message then the message will not be dispatched and the "ReplyHandlerCancelledException" will be
             thrown back to the caller.
 
         ignoreIfDuplicate:
@@ -65,7 +65,7 @@ feature.only(`Automatic handler cancellation
             });
         });
 
-        scenario.skip(`Not specifying the cancellation policy will process every message`, () => {
+        scenario(`Not specifying the cancellation policy will process every message`, () => {
             given(`a handler for 'FAST-AND-FURIOUS' sends a message 'NOT-SO-FAST' and has NO cancellation policy defined `, () => {
                 const replyType = stepContext.values[1];
                 bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
@@ -110,7 +110,7 @@ feature.only(`Automatic handler cancellation
 
         });
 
-        scenario.skip(`Specifying the cancellation policy cancelExisting`, () => {
+        scenario(`Specifying the cancellation policy cancelExisting`, () => {
             given(`a handler for 'FAST-AND-FURIOUS' sends a message 'NOT-SO-FAST' and has the cancelIfExisting policy defined `, () => {
                 const replyType = stepContext.values[1];
                 bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
@@ -165,7 +165,7 @@ feature.only(`Automatic handler cancellation
             when(`sending the same message 'FAST-AND-FURIOUS' in quick succession`, () => {
                 const executeHandler = async (index: number) => {
                     try {
-                        const result = await bus.sendWithReply({ type: stepContext.values[0], id: index }).responseAsync<{ type: string, id: number }>();
+                        const result = await bus.sendWithReply<{ type: string, id: number }>({ type: stepContext.values[0], id: index });
                     } catch (e) {
                         // console.log(`ERROR: name: ${e.name} - ${e.message}`);
                     }
@@ -183,10 +183,10 @@ feature.only(`Automatic handler cancellation
                 {"type":"FAST-AND-FURIOUS", "id":3},
                 {"type":"FAST-AND-FURIOUS", "id":4},
                 {"type":"FAST-AND-FURIOUS", "id":5},
-                {"type":"FAST-AND-FURIOUS.reply","payload": {"error": {"name": "ReplyHandlerCancelled","reply": {"type": "NOT-SO-FAST","id": 1}}}},
-                {"type":"FAST-AND-FURIOUS.reply","payload": {"error": {"name": "ReplyHandlerCancelled","reply": {"type": "NOT-SO-FAST","id": 2}}}},
-                {"type":"FAST-AND-FURIOUS.reply","payload": {"error": {"name": "ReplyHandlerCancelled","reply": {"type": "NOT-SO-FAST","id": 3}}}},
-                {"type":"FAST-AND-FURIOUS.reply","payload": {"error": {"name": "ReplyHandlerCancelled","reply": {"type": "NOT-SO-FAST","id": 4}}}},
+                {"type":"FAST-AND-FURIOUS.reply","payload": {"error": {"name": "ReplyHandlerCancelledException","reply": {"type": "NOT-SO-FAST","id": 1}}}},
+                {"type":"FAST-AND-FURIOUS.reply","payload": {"error": {"name": "ReplyHandlerCancelledException","reply": {"type": "NOT-SO-FAST","id": 2}}}},
+                {"type":"FAST-AND-FURIOUS.reply","payload": {"error": {"name": "ReplyHandlerCancelledException","reply": {"type": "NOT-SO-FAST","id": 3}}}},
+                {"type":"FAST-AND-FURIOUS.reply","payload": {"error": {"name": "ReplyHandlerCancelledException","reply": {"type": "NOT-SO-FAST","id": 4}}}},
                 {"type": "FAST-AND-FURIOUS.reply", "payload": {"type": "NOT-SO-FAST","id": 5}}
                 ]
                 """        
@@ -201,9 +201,7 @@ feature.only(`Automatic handler cancellation
                         messages[i]["id"].should.be.eq(messageToSend[i]["id"]);
                     }
 
-                    console.log(JSON.stringify(messages, null, 5));
                     for (let i = 5; i < 9; i++) {
-                        console.log(i);
                         const message: any = messages[i] as any;
                         message.type.should.be.eq(messageToSend[i].type);
                         message.payload.error.name.should.be.eq(messageToSend[i].payload.error.name);

@@ -2,11 +2,10 @@ import { Bus } from "../../src/Bus";
 import * as chai from "chai";
 import { IMessageHandlerContext } from "../../src/IMessageHandlerContext";
 import { sleep } from "../Utils";
-import { CancellationToken } from "../../src/CancellationToken";
+import { TimeSpan } from '../../src';
+import { TimeoutException } from '../../src/Exceptions';
 
-const should = chai.should();
-
-feature(`Send a message and receive a reply`, () => {
+feature(`Send message with reply using a timeout`, () => {
     let bus: Bus
     const type = "UNIT_TEST";
 
@@ -20,12 +19,14 @@ feature(`Send a message and receive a reply`, () => {
 
     });
 
-    scenario(`Sending a message with a reply`, () => {
+    scenario(`Sending a message with a reply that executes within timeout`, () => {
         let result: string;
 
         given(`an event handler is registered to receive the message type ${type}`, () => {
             // configure handler
             bus.subscribe(type, async (message: any, context: IMessageHandlerContext) => {
+                // a small delay 
+                await sleep(10);
                 context.replyAsync("response");
             });
         });
@@ -35,7 +36,7 @@ feature(`Send a message and receive a reply`, () => {
         });
 
         when(`sending a message with type '${type}'`, async () => {
-            const p = await bus.sendWithReply<string>({ type: type });
+            const p = await bus.sendWithReply<string>({ type: type }, { timeout: TimeSpan.FromMilliseconds(20) });
             result = await p;
         });
 
@@ -45,14 +46,14 @@ feature(`Send a message and receive a reply`, () => {
         });
     });
 
-    scenario(`Sending a message with a reply which is cancelled before reply is received`, () => {
-        let result: string;
-        let exception: Error;
+    scenario(`Sending a message with a reply that exceeds the timeout`, () => {
+        let exception: TimeoutException;
 
         given(`an event handler is registered to receive the message type ${type}`, () => {
             // configure handler
             bus.subscribe(type, async (message: any, context: IMessageHandlerContext) => {
-                await sleep(20); // Wait a long time before sending the reply
+                // a small delay 
+                await sleep(10);
                 context.replyAsync("response");
             });
         });
@@ -63,23 +64,15 @@ feature(`Send a message and receive a reply`, () => {
 
         when(`sending a message with type '${type}'`, async () => {
             try {
-                const cancellationToken = new CancellationToken();
-                const p = bus.sendWithReply<string>({ type: type }, { cancellationToken });
-                cancellationToken.cancel();
-                result = await p;
+                const result = await bus.sendWithReply<string>({ type: type }, { timeout: TimeSpan.FromMilliseconds(5) });
             } catch (e) {
                 exception = e;
             }
         });
 
-        then(`a reply is received`, async () => {
+        then(`a timeout error 'TimeoutException' is received`, async () => {
             // give the system time to process the messages
-            should.equal(undefined, result);
-        });
-
-        and(`a 'ReplyHandlerCancelledException' exception is thrown`, () => {
-            exception.name.should.eq(stepContext.values[0]);
+            exception.name.should.be.equal(stepContext.values[0]);
         });
     });
-
 });

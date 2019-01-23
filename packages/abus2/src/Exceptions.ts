@@ -11,14 +11,20 @@ export class ErrorEx extends Error {
     }
 }
 
-export class ReplyHandlerCancelled extends ErrorEx {
+export class ReplyHandlerCancelledException extends ErrorEx {
     constructor(message: string, public reply: any) {
         super(message, new.target.prototype);
     }
 }
 
-export class HandlerCancelled extends ErrorEx {
+export class HandlerCancelledException extends ErrorEx {
     constructor(message: string, public reply: any) {
+        super(message, new.target.prototype);
+    }
+}
+
+export class TimeoutException extends ErrorEx {
+    constructor(message: string) {
         super(message, new.target.prototype);
     }
 }
