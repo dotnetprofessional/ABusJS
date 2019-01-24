@@ -54,12 +54,12 @@ export class MessageHandlerContext implements IMessageHandlerContext {
         return (this.bus as Bus).publishAsync(message, options, this.activeMessage);
     }
 
-    public sendWithReply<R>(message: any, options?: ISendOptions): Promise<R> {
+    public sendWithReplyAsync<R>(message: any, options?: ISendOptions): Promise<R> {
         if (this.wasCancelled) {
             throw new Exceptions.HandlerCancelledException("Request not sent due to handler being cancelled.", message);
         }
 
-        return (this.bus as Bus).sendWithReply(message, options, this.activeMessage);
+        return (this.bus as Bus).sendWithReplyAsync(message, options, this.activeMessage);
     }
 
     public sendAsync<T>(message: T | IMessage<T>, options?: ISendOptions): Promise<void> {

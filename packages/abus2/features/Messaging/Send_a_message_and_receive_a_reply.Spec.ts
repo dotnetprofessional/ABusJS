@@ -35,7 +35,7 @@ feature(`Send a message and receive a reply`, () => {
         });
 
         when(`sending a message with type '${type}'`, async () => {
-            const p = await bus.sendWithReply<string>({ type: type });
+            const p = await bus.sendWithReplyAsync<string>({ type: type });
             result = await p;
         });
 
@@ -64,7 +64,7 @@ feature(`Send a message and receive a reply`, () => {
         when(`sending a message with type '${type}'`, async () => {
             try {
                 const cancellationToken = new CancellationToken();
-                const p = bus.sendWithReply<string>({ type: type }, { cancellationToken });
+                const p = bus.sendWithReplyAsync<string>({ type: type }, { cancellationToken });
                 cancellationToken.cancel();
                 result = await p;
             } catch (e) {

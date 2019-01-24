@@ -19,7 +19,7 @@ import { ReplyHandler } from "./ReplyHandler";
 import { ExpressMemoryTransport } from "./Transports/ExpressMemoryTransport";
 import { MessageExceptionTask } from "./tasks/MessageExceptionTask";
 import { MessageException } from "./tasks/MessageException";
-import { getTypeNamespace } from "./Utils";
+import { getTypeNamespace, shallowEqual } from "./Utils";
 import { IMessageHandlerContext } from "./IMessageHandlerContext";
 import { ISubscriptionOptions } from "./ISubscriptionOptions";
 import { CancellationPolicy } from "./CancellationPolicy";
@@ -186,7 +186,7 @@ export class Bus implements IBus {
         return this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.publish), context, options);
     }
 
-    public sendWithReply<R>(message: object | IMessage<any>, options?: ISendOptions, parentMessage?: IMessage<any>): Promise<R> {
+    public sendWithReplyAsync<R>(message: object | IMessage<any>, options?: ISendOptions, parentMessage?: IMessage<any>): Promise<R> {
         message = this.convertToIMessageIfNot(message);
         let replyHandler = new ReplyHandler();
         const msg = message as IMessage<any>;
@@ -337,7 +337,10 @@ export class Bus implements IBus {
                 for (let i = 0; i < subscribers.length; i++) {
                     const s = subscribers[i];
                     // determine if a cancellation policy is to be enforced
-                    this.shouldBeCancelled(s, message);
+                    if (this.shouldBeCancelled(s, message)) {
+                        // this message should be ignored for this subscription
+                        return;
+                    }
 
                     // tag message with the identifer if it exists
                     if (s.options && s.options.identifier) {
@@ -356,19 +359,26 @@ export class Bus implements IBus {
     }
 
     private shouldBeCancelled(subscription: IMessageSubscription<any>, message: any): boolean {
+        // only need to process this if the handler is currently busy
+        if (!subscription.isProcessing) {
+            return false;
+        }
+
         if (subscription.options && subscription.options.cancellationPolicy) {
             // check what the cancellation policy is
             switch (subscription.options.cancellationPolicy) {
                 case CancellationPolicy.cancelExisting:
-                    if (subscription.isProcessing) {
-                        // mark the context as cancelled
-                        subscription.context.wasCancelled = true;
-                        return true;
-                    }
+                    // mark the context as cancelled
+                    subscription.context.wasCancelled = true;
+                    return false;
                     break;
                 case CancellationPolicy.ignoreIfDuplicate:
-                    break;
+                    // if a shallow equal matches then the messages are the same
+                    return shallowEqual(subscription.context.activeMessage, message);
                 case CancellationPolicy.ignoreIfExisting:
+                    // mark the context as cancelled
+                    subscription.context.wasCancelled = true;
+                    return true;
                     break;
             }
 

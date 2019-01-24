@@ -1,47 +1,11 @@
-import { CancellationPolicy } from "../../src/CancellationPolicy";
-import { sleep, MessageLogger, waitUntilAsync } from "../Utils";
-import { IMessageHandlerContext, Bus, IMessage, MessagePerformanceTask } from "../../src";
+import { CancellationPolicy } from "../../../src/CancellationPolicy";
+import { sleep, MessageLogger, waitUntilAsync } from "../../Utils";
+import { IMessageHandlerContext, Bus, IMessage, MessagePerformanceTask } from "../../../src";
 
-feature(`Automatic handler cancellation
-    There are times when a several messages are sent in quick succession and it would be
-    a waste of resources to process them all to completion.
+feature.only(`Cancel existing handler
+    @link:_Cancellation.md#cancelExisting
 
-    In these scenarios its helpful to be able to automatically cancel or otherwise handle the messages
-    differently.
-
-    Rules: defined when subscribing
-
-    cancellationPolicy: cancelExisting | ignoreIfDuplicate | ignoreIfExisting
-        cancelExisting:
-            when a new message is sent, will set the existing running handlers context to wasCancelled.
-            This will prevent messages being sent or received by the current instance of the handler. 
-            It will not stop the code currently executing within the handler.
-
-            Using reply:
-            In this scenario the caller is waiting for a response. As such even if the handler is cancelled
-            the caller must still receive a response otherwise it will wait forever. Returning an empty response
-            however would still allow the code to execute afterwards, which could lead to unexpected results.
-            As such the Abus will thrown a "ReplyHandlerCancelledException" exception. This can then be handled and ignored
-            or handled as appropriate. Its also important to note that the reply will still be delivered with the
-            payload being this exception as this is the only way to communicate with the caller.
-
-            Using send/publish:
-            In this scenario a handler is attempting to dispatch a message after the handler has been cancelled. As
-            these are fire and forget methods. Abus will simply not dispatch the message.
-
-            Using sendWithReply:
-            This scenario has the same behavior as reply. The only difference is that if the handler has been cancelled
-            prior to sending the message then the message will not be dispatched and the "ReplyHandlerCancelledException" will be
-            thrown back to the caller.
-
-        ignoreIfDuplicate:
-            when a new message is sent, will compare the message being sent with the message being processed
-            by the current handler. If the messages match the message will be ignored.
-
-        ignoreIfExisting:
-            when a new message is sent, and the handler is already processing a previous message then 
-            the new message will be ignored.
-
+    Applying the cancelExisting cancellation policy to a subscription
         `, function () {
         let bus: Bus;
         let outboundLogger: MessageLogger;
@@ -65,52 +29,7 @@ feature(`Automatic handler cancellation
             });
         });
 
-        scenario(`Not specifying the cancellation policy will process every message`, () => {
-            given(`a handler for 'FAST-AND-FURIOUS' sends a message 'NOT-SO-FAST' and has NO cancellation policy defined `, () => {
-                const replyType = stepContext.values[1];
-                bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
-                    // simulate work that will take some time so new messages will be executed before this completes
-                    // console.log(message.type + ": " + message.id);
-                    await sleep(40);
-                    context.sendAsync({ type: replyType, id: message.id });
-                }, { identifier: stepContext.values[1] });
-
-            });
-
-            when(`sending the same message 'FAST-AND-FURIOUS' in quick succession`, () => {
-                for (let i = 1; i <= 5; i++) {
-                    bus.sendAsync({ type: stepContext.values[0], id: i });
-                }
-            });
-
-            then(`the message flow matches
-                """
-                [{"type":"FAST-AND-FURIOUS",  "id":1},
-                {"type":"FAST-AND-FURIOUS", "id":2},
-                {"type":"FAST-AND-FURIOUS", "id":3},
-                {"type":"FAST-AND-FURIOUS", "id":4},
-                {"type":"FAST-AND-FURIOUS", "id":5},
-                {"type": "NOT-SO-FAST", "id":1},
-                {"type": "NOT-SO-FAST", "id":2},
-                {"type": "NOT-SO-FAST", "id":3},
-                {"type": "NOT-SO-FAST", "id":4},
-                {"type": "NOT-SO-FAST", "id":5}
-                ]
-                """        
-                `, async () => {
-                    await waitUntilAsync(() => outboundLogger.messages.length >= 10, 100);
-                    await sleep(10); // provide a little buffer to ensure additional messages don't arrive unexpectedly
-                    const messages = outboundLogger.messages;
-                    messageToSend = stepContext.docStringAsEntity;
-                    for (let i = 0; i < messageToSend.length; i++) {
-                        messages[i].type.should.be.eq(messageToSend[i].type);
-                        messages[i]["id"].should.be.eq(messageToSend[i]["id"]);
-                    }
-                });
-
-        });
-
-        scenario(`Specifying the cancellation policy cancelExisting`, () => {
+        scenario.skip(`Sending a message in quick succession`, () => {
             given(`a handler for 'FAST-AND-FURIOUS' sends a message 'NOT-SO-FAST' and has the cancelIfExisting policy defined `, () => {
                 const replyType = stepContext.values[1];
                 bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
@@ -121,13 +40,14 @@ feature(`Automatic handler cancellation
                 }, { cancellationPolicy: CancellationPolicy.cancelExisting, identifier: stepContext.values[1] });
 
             });
+
             when(`sending the same message 'FAST-AND-FURIOUS' in quick succession`, () => {
                 for (let i = 1; i <= 5; i++) {
                     bus.sendAsync({ type: stepContext.values[0], id: i });
                 }
             });
 
-            then(`the message flow matches
+            then(`the handler will only send a response for the last message
                 """
                 [{"type":"FAST-AND-FURIOUS",  "id":1},
                 {"type":"FAST-AND-FURIOUS", "id":2},
@@ -143,6 +63,7 @@ feature(`Automatic handler cancellation
                     await sleep(10); // provide a little buffer to ensure additional messages don't arrive unexpectedly
 
                     const messages = outboundLogger.messages;
+                    messages.length.should.eq(messageToSend.length);
                     for (let i = 0; i < messageToSend.length; i++) {
                         messages[i].type.should.be.eq(messageToSend[i].type, "for index: " + i);
                         messages[i]["id"].should.be.eq(messageToSend[i]["id"], "for index: " + i);
@@ -151,7 +72,61 @@ feature(`Automatic handler cancellation
 
         });
 
-        scenario(`Specifying the cancellation policy cancelExisting with request/response pattern`, () => {
+        // NOTE: This scenario doesn't work as expected as each request extends the effective length of the message. Ie you need to
+        // wait until the last message is fully done before sending a new one.
+        scenario(`Sending a message in quick succession with small delays`, () => {
+            given(`a handler for 'FAST-AND-FURIOUS' sends a message 'NOT-SO-FAST' and has the cancelIfExisting policy defined `, () => {
+                const replyType = stepContext.values[1];
+                bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
+                    // simulate work that will take some time so new messages will be executed before this completes
+                    console.log(message.type + " before: " + message.id);
+                    await sleep(50);
+                    console.log(message.type + " after: " + message.id);
+                    context.sendAsync({ type: replyType, id: message.id });
+                }, { cancellationPolicy: CancellationPolicy.cancelExisting, identifier: stepContext.values[1] });
+
+            });
+
+            and(`each message takes approx 10ms to complete`, () => {
+
+            });
+
+            when(`sending the same message type 'FAST-AND-FURIOUS' '5' times every '40' ms`, async () => {
+                for (let i = 1; i <= stepContext.values[1]; i++) {
+                    bus.sendAsync({ type: stepContext.values[0], id: i });
+                    await sleep(stepContext.values[2]);
+                }
+            });
+
+            then(`the handler will only send a response for 2 messages
+                """
+                [{"type":"FAST-AND-FURIOUS",  "id":1},
+                {"type":"FAST-AND-FURIOUS", "id":2},
+                {"type":"FAST-AND-FURIOUS", "id":3},
+                {"type":"FAST-AND-FURIOUS", "id":4},
+                {"type":"FAST-AND-FURIOUS", "id":5},
+                {"type": "NOT-SO-FAST", "id":4},
+                {"type": "NOT-SO-FAST", "id":5}
+                ]
+                """        
+                `, async () => {
+                    messageToSend = stepContext.docStringAsEntity;
+                    await waitUntilAsync(() => outboundLogger.messages.length >= messageToSend.length, 100);
+                    await sleep(500); // provide a little buffer to ensure additional messages don't arrive unexpectedly
+
+                    const messages = outboundLogger.messages;
+                    console.log(JSON.stringify(messages, null, 5));
+                    debugger;
+                    messages.length.should.eq(messageToSend.length);
+                    for (let i = 0; i < messageToSend.length; i++) {
+                        messages[i].type.should.be.eq(messageToSend[i].type, "for index: " + i);
+                        messages[i]["id"].should.be.eq(messageToSend[i]["id"], "for index: " + i);
+                    }
+                });
+
+        });
+
+        scenario.skip(`Sending a message in quick succession using the .sendWithReplyAsync method`, () => {
             given(`a handler for 'FAST-AND-FURIOUS' replies to the message 'NOT-SO-FAST' and has the cancelIfExisting policy defined `, () => {
                 const replyType = stepContext.values[1];
                 bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
@@ -162,10 +137,11 @@ feature(`Automatic handler cancellation
                 }, { cancellationPolicy: CancellationPolicy.cancelExisting, identifier: stepContext.values[1] });
 
             });
+
             when(`sending the same message 'FAST-AND-FURIOUS' in quick succession`, () => {
                 const executeHandler = async (index: number) => {
                     try {
-                        const result = await bus.sendWithReply<{ type: string, id: number }>({ type: stepContext.values[0], id: index });
+                        const result = await bus.sendWithReplyAsync<{ type: string, id: number }>({ type: stepContext.values[0], id: index });
                     } catch (e) {
                         // console.log(`ERROR: name: ${e.name} - ${e.message}`);
                     }
@@ -176,7 +152,7 @@ feature(`Automatic handler cancellation
                 }
             });
 
-            then(`the message flow matches
+            then(`the handler will send errors for each cancelled request and a valid response for the last message
                 """
                 [{"type":"FAST-AND-FURIOUS",  "id":1},
                 {"type":"FAST-AND-FURIOUS", "id":2},
@@ -194,8 +170,8 @@ feature(`Automatic handler cancellation
                     messageToSend = stepContext.docStringAsEntity;
                     await waitUntilAsync(() => outboundLogger.messages.length >= messageToSend.length, 200);
                     await sleep(10); // provide a little buffer to ensure additional messages don't arrive unexpectedly
-                    debugger;
                     const messages = outboundLogger.messages;
+                    messages.length.should.eq(messageToSend.length);
                     for (let i = 0; i < 5; i++) {
                         messages[i].type.should.be.eq(messageToSend[i].type);
                         messages[i]["id"].should.be.eq(messageToSend[i]["id"]);

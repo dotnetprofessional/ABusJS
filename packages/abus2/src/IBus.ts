@@ -9,7 +9,7 @@ export interface IBus extends ISendMessages {
      *
      * @memberof IBus
      */
-    start();
+    start(): void;
 
     /**
      * Returns the registered transport for the supplied message type
@@ -29,7 +29,7 @@ export interface IBus extends ISendMessages {
      * @param {string} messageType
      * @memberof IBus
      */
-    routeToTransport(transportId: string, messageType: string);
+    routeToTransport(transportId: string, messageType: string): void;
 
     /**
      * registers the message types within the namespace/object with a previously
@@ -39,7 +39,7 @@ export interface IBus extends ISendMessages {
      * @param {Function} namespace
      * @memberof IBus
      */
-    routeToTransport(transportId: string, namespace: Function);
+    routeToTransport(transportId: string, namespace: Function): void;
 
     /**
      * Registers a handler to receive messages matching the type of the filter.
@@ -61,7 +61,7 @@ export interface IBus extends ISendMessages {
      * @param {string} subscriptionId
      * @memberof IBus
      */
-    unsubscribe(subscriptionId: string);
+    unsubscribe(subscriptionId: string): void;
 
     /**
      * Registers any event handlers within a class, class instance or exported object

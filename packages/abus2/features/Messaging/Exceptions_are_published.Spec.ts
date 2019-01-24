@@ -4,7 +4,7 @@ import { waitUntilAsync } from "../Utils";
 
 feature(`Exceptions are published`, () => {
     let bus: Bus;
-    const type = "UNIT_TEST";
+    const type: string = "UNIT_TEST";
 
     background(``, () => {
         given(`abus is configured with the ExpressMemoryTransport`, () => {
@@ -21,7 +21,7 @@ feature(`Exceptions are published`, () => {
         given(`a handler for type '${type}' and it throws an error`, () => {
             // configure handler
             bus.subscribe(type, async (message: any) => {
-                throw new Error("Blowed Up!");
+                throw new Error("Blew Up!");
             });
 
             bus.subscribe(MessageException.type, async (message: MessageException) => {
@@ -33,7 +33,7 @@ feature(`Exceptions are published`, () => {
             await bus.sendAsync({ type: `${stepContext.values[0]}` });
         });
 
-        then(`an exception with the message 'Blowed Up!' is published`, async () => {
+        then(`an exception with the message 'Blew Up!' is published`, async () => {
             // give the system time to process the messages
             await waitUntilAsync(() => exceptionMessage, 200);
             exceptionMessage.message.should.be.equal(stepContext.values[0]);

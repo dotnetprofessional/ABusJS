@@ -28,7 +28,7 @@ export interface ISendMessages {
      *
      * @memberOf MessageHandlerContext
      */
-    sendWithReply<R>(message: object | IMessage<any>, options?: ISendOptions): Promise<R>;
+    sendWithReplyAsync<R>(message: object | IMessage<any>, options?: ISendOptions): Promise<R>;
 
     /**
      * Sends a message using the current messages context. This makes the sent

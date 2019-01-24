@@ -49,7 +49,6 @@ feature("Override type identifier", () => {
 
             when("a message of that type is sent", () => {
                 // using publish as there is more than one receiver of the message
-                debugger;
                 bus.publishAsync(new SampleMessageForMangling());
             });
 

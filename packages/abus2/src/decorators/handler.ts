@@ -1,4 +1,6 @@
 import { getTypeNamespace } from "../Utils";
+import { ISendOptions } from '../ISendOptions';
+import { ISubscriptionOptions } from '../ISubscriptionOptions';
 
 /**
  * Defines a function as a message handler which must implement the IMessageHandler interface.
@@ -7,7 +9,7 @@ import { getTypeNamespace } from "../Utils";
  * @param {string} type
  * @returns
  */
-export function handler(type: string | Function) {
+export function handler(type: string | Function, options?: ISubscriptionOptions) {
     return function handler_decorator(target: any, key: string, descriptor: PropertyDescriptor) {
         if (typeof (type) === "function") {
             // Will return the full namespace of the type
@@ -22,7 +24,7 @@ export function handler(type: string | Function) {
         }
 
         // Record the details of this handler for later binding.
-        target["__messageHandlers"].push({ type: type, handler: key });
+        target["__messageHandlers"].push({ type: type, handler: key, options });
 
         let originalMethod = descriptor.value;
         descriptor.value = function (...args: any[]) {
