@@ -19,7 +19,7 @@ export class AutoCancellationTask implements IMessageTask {
     }
     public async invokeAsync(message: IMessage<any>, context: IMessageHandlerContext, next: any): Promise<void> {
         try {
-            console.log(`processing:before: ${this.subscription.isProcessing} id: ${message.id} wasCancelled: ${context.wasCancelled}`);
+            // console.log(`processing:before: ${this.subscription.isProcessing} id: ${message.id} wasCancelled: ${context.wasCancelled}`);
             this.subscription.isProcessing = true;
             await next();
         } finally {
@@ -28,7 +28,7 @@ export class AutoCancellationTask implements IMessageTask {
             if (!context.wasCancelled) {
                 this.subscription.isProcessing = false;
             }
-            console.log(`processing:after: ${this.subscription.isProcessing} id: ${message.id} wasCancelled: ${context.wasCancelled}`);
+            // console.log(`processing:after: ${this.subscription.isProcessing} id: ${message.id} wasCancelled: ${context.wasCancelled}`);
         }
     }
 }

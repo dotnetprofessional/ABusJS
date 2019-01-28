@@ -4,7 +4,7 @@ import { InMemoryKeyValueStore } from "../src/InMemoryKeyValueStore";
 import { SagaDemo } from "./samples/SagaDemo";
 import "livedoc-mocha";
 
-feature(`Cancelling a Saga
+feature.only(`Cancelling a Saga
 
     Saga's can be cancelled by calling the 'complete' method. This will prevent further processing of the
     Saga instance. If a message arrives for the Saga instance that is not one that creates a new instance then
@@ -21,27 +21,27 @@ feature(`Cancelling a Saga
                 InMemoryKeyValueStore.forceClear();
 
                 bubbles = new Bubbles();
-                bubbles.bus.registerHandlers(SagaDemo);
                 // bubbles.bus.usingRegisteredTransportToMessageType("*")
                 //     .inboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("inbound:")).andAlso()
                 //     .outboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("outbound:"));
             });
+
+            and(`a Saga has been started`, () => {
+                bubbles.bus.registerHandlers(SagaDemo);
+            });
         });
 
-        scenario(`Cancelling an already started Saga`, () => {
-            given(`a Saga has been started`, () => {
-            });
-
+        scenario.only(`Cancelling an already started Saga`, () => {
             when(`sending a message to the Saga to cancel the instance
-            """
-            (start)(saga-started)---(!cancel)---(!process-order)(error)---
-        
-            saga-started: {"type":"SAGA_STARTED"}
-            start: {"type": "START_SAGA", "payload":{"id":"test1"}}
-            cancel: {"type": "CANCEL_ORDER", "payload":{"id":"test1"}}
-            process-order: {"type":"PROCESS_ORDER", "payload":{"id":"test1"}}
-            error: {"error":"Received message type: PROCESS_ORDER, however unable to find Saga instance for key: test1. This may be due to the Saga not being started or being already complete."}
-            """
+                """
+                (start)(saga-started)---(!cancel)---(!process-order)(error)---
+            
+                saga-started: {"type":"SAGA_STARTED"}
+                start: {"type": "START_SAGA", "payload":{"id":"test1"}}
+                cancel: {"type": "CANCEL_ORDER", "payload":{"id":"test1"}}
+                process-order: {"type":"PROCESS_ORDER", "payload":{"id":"test1"}}
+                error: {"error":"Received message type: PROCESS_ORDER, however unable to find Saga instance for key: test1. This may be due to the Saga not being started or being already complete."}
+                """
             `, async () => {
                     await bubbles.executeAsync(stepContext.docString);
                 });
@@ -56,9 +56,6 @@ feature(`Cancelling a Saga
         });
 
         scenario(`Cancelling a Saga that has not been started`, () => {
-            given(`a Saga not been started`, () => {
-            });
-
             when(`sending a message to the Saga that doesn't start the Saga
             """
             (process-order)(error)

@@ -2,8 +2,8 @@ import { CancellationPolicy } from "../../../src/CancellationPolicy";
 import { sleep, MessageLogger, waitUntilAsync } from "../../Utils";
 import { IMessageHandlerContext, Bus, IMessage, MessagePerformanceTask } from "../../../src";
 
-feature(`Ignore duplicate messages
-    @link:_Cancellation.md#ignoreIfDuplicate
+feature(`Ignore if exists
+    @link:_Cancellation.md#ignoreIfExists
 
     Applying the ignoreIfDuplicate cancellation policy to a subscription
         `, function () {
@@ -37,23 +37,23 @@ feature(`Ignore duplicate messages
                     // console.log(message.type + ": " + message.id);
                     await sleep(40);
                     context.sendAsync({ type: replyType, id: message.id });
-                }, { cancellationPolicy: CancellationPolicy.ignoreIfDuplicate, identifier: stepContext.values[1] });
+                }, { cancellationPolicy: CancellationPolicy.ignoreIfExisting, identifier: stepContext.values[1] });
 
             });
 
             when(`sending the same message 'FAST-AND-FURIOUS' in quick succession`, () => {
                 for (let i = 1; i <= 5; i++) {
-                    bus.sendAsync({ type: stepContext.values[0], id: 1 });
+                    bus.sendAsync({ type: stepContext.values[0], id: i });
                 }
             });
 
             then(`the handler will only send a response for the first message
                 """
                 [{"type":"FAST-AND-FURIOUS",  "id":1},
-                {"type":"FAST-AND-FURIOUS", "id":1},
-                {"type":"FAST-AND-FURIOUS", "id":1},
-                {"type":"FAST-AND-FURIOUS", "id":1},
-                {"type":"FAST-AND-FURIOUS", "id":1},
+                {"type":"FAST-AND-FURIOUS", "id":2},
+                {"type":"FAST-AND-FURIOUS", "id":3},
+                {"type":"FAST-AND-FURIOUS", "id":4},
+                {"type":"FAST-AND-FURIOUS", "id":5},
                 {"type": "NOT-SO-FAST", "id":1}
                 ]
                 """
@@ -63,7 +63,6 @@ feature(`Ignore duplicate messages
                     await sleep(10); // provide a little buffer to ensure additional messages don't arrive unexpectedly
 
                     const messages = outboundLogger.messages;
-
                     messages.length.should.eq(messageToSend.length);
                     for (let i = 0; i < messageToSend.length; i++) {
                         messages[i].type.should.be.eq(messageToSend[i].type, "for index: " + i);
@@ -81,7 +80,7 @@ feature(`Ignore duplicate messages
                     // console.log(message.type + ": " + message.id);
                     await sleep(20);
                     context.sendAsync({ type: replyType, id: message.id });
-                }, { cancellationPolicy: CancellationPolicy.ignoreIfDuplicate, identifier: stepContext.values[1] });
+                }, { cancellationPolicy: CancellationPolicy.ignoreIfExisting, identifier: stepContext.values[1] });
 
             });
             and(`it takes 20ms to process the message`, () => {
@@ -116,11 +115,9 @@ feature(`Ignore duplicate messages
                 {"type":"FAST-AND-FURIOUS", "id":1},
                 {"type":"FAST-AND-FURIOUS", "id":2},
                 {"type": "NOT-SO-FAST", "id":1},
-                {"type": "NOT-SO-FAST", "id":2},
                 {"type":"FAST-AND-FURIOUS", "id":2},
                 {"type":"FAST-AND-FURIOUS", "id":1},
-                {"type": "NOT-SO-FAST", "id":2},
-                {"type": "NOT-SO-FAST", "id":1}
+                {"type": "NOT-SO-FAST", "id":2}
                 ]
                 """
                 `, async () => {

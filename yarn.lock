@@ -720,6 +720,11 @@
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.1.7.tgz#1b8e33b61a8c09cbe1f85133071baa0dbf9fa71a"
   integrity sha512-2Y8uPt0/jwjhQ6EiluT0XCri1Dbplr0ZxfFXUz+ye13gaqE8u5gL5ppao1JrUYr9cIip5S6MvQzBS7Kke7U9VA==
 
+"@types/diff@3.5.2":
+  version "3.5.2"
+  resolved "https://registry.yarnpkg.com/@types/diff/-/diff-3.5.2.tgz#bd92300d32675bbe9f7853480730250aa859a90a"
+  integrity sha512-T1y8ed2DipuUGqgzWzBDUMlJM1bD1CG73ETOi08VURsGArjRfC4nqfeC5owrV7SFvgbeKDbonI/Es4vQgJ2IKA==
+
 "@types/mocha@^2.2.40":
   version "2.2.48"
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-2.2.48.tgz#3523b126a0b049482e1c3c11877460f76622ffab"
@@ -4120,10 +4125,10 @@ libnpmteam@^1.0.1:
     get-stream "^4.0.0"
     npm-registry-fetch "^3.8.0"
 
-livedoc-mocha@^0.4.0-beta-4:
-  version "0.4.0-beta-4"
-  resolved "https://registry.yarnpkg.com/livedoc-mocha/-/livedoc-mocha-0.4.0-beta-4.tgz#46f7fceacbb6b800425ab4e4ffb6509713ac88d8"
-  integrity sha512-/KJeE+w3dCIlH1F5lImWWm9qqGbJ47xpxhEHfRAapyIX6gCo2YvufY3aJtWgMAdCC9JS1frvJREpp+nRA+RYTg==
+livedoc-mocha@0.4.0-beta-5:
+  version "0.4.0-beta-5"
+  resolved "https://registry.yarnpkg.com/livedoc-mocha/-/livedoc-mocha-0.4.0-beta-5.tgz#0cbaf597da209fe6f9d75c972e6662a234f78e30"
+  integrity sha512-icySzvTkaknBiuwkRhguvxp7pwK3Jl2ErSmnCFiaYGupPr2BqBGqO4i089Gg1+ClNhEGtk26Bw5h3rux1RWR4g==
   dependencies:
     "@types/mocha" "^5.2.1"
     callsites "^2.0.0"
@@ -4137,6 +4142,7 @@ livedoc-mocha@^0.4.0-beta-4:
     source-map "^0.7.3"
     source-map-support "^0.5.6"
     strip-ansi "^4.0.0"
+    wordwrap "^1.0.0"
 
 load-json-file@^1.0.0:
   version "1.1.0"
@@ -6795,7 +6801,7 @@ trim-off-newlines@^1.0.0:
   dependencies:
     glob "^7.1.2"
 
-tslib@^1.8.0, tslib@^1.8.1, tslib@^1.9.0:
+tslib@1.9.3, tslib@^1.8.0, tslib@^1.8.1, tslib@^1.9.0:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.9.3.tgz#d7e4dd79245d85428c4d7e4822a79917954ca286"
   integrity sha512-4krF8scpejhaOgqzBEcGM7yDIEfi0/8+8zDRZhNZZ2kjmHJ4hv3zCbQWxoJGz1iw5U0Jl0nma13xzHXcncMavQ==
@@ -7246,15 +7252,15 @@ wordwrap@0.0.2:
   resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-0.0.2.tgz#b79669bb42ecb409f83d583cad52ca17eaa1643f"
   integrity sha1-t5Zpu0LstAn4PVg8rVLKF+qhZD8=
 
+wordwrap@^1.0.0, wordwrap@~1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-1.0.0.tgz#27584810891456a4171c8d0226441ade90cbcaeb"
+  integrity sha1-J1hIEIkUVqQXHI0CJkQa3pDLyus=
+
 wordwrap@~0.0.2:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-0.0.3.tgz#a3d5da6cd5c0bc0008d37234bbaf1bed63059107"
   integrity sha1-o9XabNXAvAAI03I0u68b7WMFkQc=
-
-wordwrap@~1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-1.0.0.tgz#27584810891456a4171c8d0226441ade90cbcaeb"
-  integrity sha1-J1hIEIkUVqQXHI0CJkQa3pDLyus=
 
 wrap-ansi@^2.0.0:
   version "2.1.0"

@@ -7,7 +7,7 @@
   "types": "dist/src/index.d.ts",
   "main": "dist/src/index.js",
   "scripts": {
-    "test": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=+summary+list\" --recursive dist/Features/",
+    "_test": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=+summary+list\" --recursive dist/Features/",
     "test-spec": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=spec+summary+list\" --recursive dist/Features/",
     "prepublishOnly": "npm run copy-resources && tsc -b .",
     "watch": "tsc -b --watch",
@@ -46,14 +46,6 @@
     "redux": "^4.0.1"
   },
   "devDependencies": {
-    "@types/chai": "^4.1.7",
-    "@types/mocha": "^5.2.5",
-    "@types/node": "^10.12.10",
-    "livedoc-mocha": "^0.4.0-beta-4",
-    "mocha": "^5.2.0",
-    "chai": "^4.2.0",
-    "rimraf": "^2.6.2",
-    "tslint": "^5.11.0",
-    "typescript": "^3.2.2"
+    "mocha": "^5.2.0"
   }
 }

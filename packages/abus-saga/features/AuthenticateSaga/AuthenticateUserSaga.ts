@@ -29,11 +29,11 @@ export class UserLoginSaga extends Saga<any>{
     @handler(LoginRequest)
     public async authenticate(message: LoginRequest, context: IMessageHandlerContext) {
         // Authenticate with the authentication service
-        const response = await context.sendWithReply(new AuthenticateUserRequest(message.user)).responseAsync<AuthenticateUserResponse>();
+        const response = await context.sendWithReplyAsync<AuthenticateUserResponse>(new AuthenticateUserRequest(message.user));
 
         if (response.result === AuthenticationStatus.requires2FA) {
             // Now verify with 2FA too
-            const twoFAResult = await context.sendWithReply(new TwoFactorAuthenticateUserRequest(message.user)).responseAsync<TwoFactorAuthenticateUserResponse>();
+            const twoFAResult = await context.sendWithReplyAsync<TwoFactorAuthenticateUserResponse>(new TwoFactorAuthenticateUserRequest(message.user));
             context.replyAsync(twoFAResult.result);
         } else {
             context.replyAsync(response.result);

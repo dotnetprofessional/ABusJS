@@ -1,7 +1,7 @@
-/*
-  bubble|timeperiod|group
-*/
+
 export enum BubbleSource {
-    supplied = "supplied",
-    generated = "generated"
+  system = "system",
+  inject = "inject",
+  substitute = "substitute",
+  override = "override"
 }

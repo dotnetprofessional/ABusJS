@@ -2,7 +2,7 @@ import { CancellationPolicy } from "../../../src/CancellationPolicy";
 import { sleep, MessageLogger, waitUntilAsync } from "../../Utils";
 import { IMessageHandlerContext, Bus, IMessage, MessagePerformanceTask } from "../../../src";
 
-feature.only(`Cancel existing handler
+feature(`Cancel existing handler
     @link:_Cancellation.md#cancelExisting
 
     Applying the cancelExisting cancellation policy to a subscription
@@ -29,7 +29,7 @@ feature.only(`Cancel existing handler
             });
         });
 
-        scenario.skip(`Sending a message in quick succession`, () => {
+        scenario(`Sending a message in quick succession`, () => {
             given(`a handler for 'FAST-AND-FURIOUS' sends a message 'NOT-SO-FAST' and has the cancelIfExisting policy defined `, () => {
                 const replyType = stepContext.values[1];
                 bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
@@ -72,61 +72,7 @@ feature.only(`Cancel existing handler
 
         });
 
-        // NOTE: This scenario doesn't work as expected as each request extends the effective length of the message. Ie you need to
-        // wait until the last message is fully done before sending a new one.
-        scenario(`Sending a message in quick succession with small delays`, () => {
-            given(`a handler for 'FAST-AND-FURIOUS' sends a message 'NOT-SO-FAST' and has the cancelIfExisting policy defined `, () => {
-                const replyType = stepContext.values[1];
-                bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
-                    // simulate work that will take some time so new messages will be executed before this completes
-                    console.log(message.type + " before: " + message.id);
-                    await sleep(50);
-                    console.log(message.type + " after: " + message.id);
-                    context.sendAsync({ type: replyType, id: message.id });
-                }, { cancellationPolicy: CancellationPolicy.cancelExisting, identifier: stepContext.values[1] });
-
-            });
-
-            and(`each message takes approx 10ms to complete`, () => {
-
-            });
-
-            when(`sending the same message type 'FAST-AND-FURIOUS' '5' times every '40' ms`, async () => {
-                for (let i = 1; i <= stepContext.values[1]; i++) {
-                    bus.sendAsync({ type: stepContext.values[0], id: i });
-                    await sleep(stepContext.values[2]);
-                }
-            });
-
-            then(`the handler will only send a response for 2 messages
-                """
-                [{"type":"FAST-AND-FURIOUS",  "id":1},
-                {"type":"FAST-AND-FURIOUS", "id":2},
-                {"type":"FAST-AND-FURIOUS", "id":3},
-                {"type":"FAST-AND-FURIOUS", "id":4},
-                {"type":"FAST-AND-FURIOUS", "id":5},
-                {"type": "NOT-SO-FAST", "id":4},
-                {"type": "NOT-SO-FAST", "id":5}
-                ]
-                """        
-                `, async () => {
-                    messageToSend = stepContext.docStringAsEntity;
-                    await waitUntilAsync(() => outboundLogger.messages.length >= messageToSend.length, 100);
-                    await sleep(500); // provide a little buffer to ensure additional messages don't arrive unexpectedly
-
-                    const messages = outboundLogger.messages;
-                    console.log(JSON.stringify(messages, null, 5));
-                    debugger;
-                    messages.length.should.eq(messageToSend.length);
-                    for (let i = 0; i < messageToSend.length; i++) {
-                        messages[i].type.should.be.eq(messageToSend[i].type, "for index: " + i);
-                        messages[i]["id"].should.be.eq(messageToSend[i]["id"], "for index: " + i);
-                    }
-                });
-
-        });
-
-        scenario.skip(`Sending a message in quick succession using the .sendWithReplyAsync method`, () => {
+        scenario(`Sending a message in quick succession using the .sendWithReplyAsync method`, () => {
             given(`a handler for 'FAST-AND-FURIOUS' replies to the message 'NOT-SO-FAST' and has the cancelIfExisting policy defined `, () => {
                 const replyType = stepContext.values[1];
                 bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
@@ -187,6 +133,70 @@ feature.only(`Cancel existing handler
                     const i: number = 9;
                     messages[i].type.should.be.eq(messageToSend[i].type);
                     messages[i].payload.id.should.be.eq(messageToSend[i].payload.id);
+                });
+
+        });
+
+        scenario(`Sending a series of messages at different intervals`, () => {
+            given(`a handler for 'FAST-AND-FURIOUS' sends a message 'NOT-SO-FAST' and has the cancelExisting policy defined `, () => {
+                const replyType = stepContext.values[1];
+                bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
+                    // simulate work that will take some time so new messages will be executed before this completes
+                    // console.log(message.type + ": " + message.id);
+                    await sleep(20);
+                    context.sendAsync({ type: replyType, id: message.id });
+                }, { cancellationPolicy: CancellationPolicy.cancelExisting, identifier: stepContext.values[1] });
+
+            });
+            and(`it takes 20ms to process the message`, () => {
+
+            });
+
+            when(`sending the message 'FAST-AND-FURIOUS' with id '1'`, () => {
+                bus.sendAsync({ type: stepContext.values[0], id: stepContext.values[1] });
+            });
+
+            and(`waiting '5'ms before sending the same message'`, async () => {
+                await sleep(stepContext.values[0]);
+                bus.sendAsync({ type: 'FAST-AND-FURIOUS', id: 1 });
+            });
+
+            and(`sending the message 'FAST-AND-FURIOUS' with id '2'`, () => {
+                bus.sendAsync({ type: stepContext.values[0], id: stepContext.values[1] });
+            });
+
+            and(`waiting '30'ms before sending the same message'`, async () => {
+                await sleep(stepContext.values[0]);
+                bus.sendAsync({ type: 'FAST-AND-FURIOUS', id: 2 });
+            });
+
+            and(`sending the message 'FAST-AND-FURIOUS' with id '1' again`, () => {
+                bus.sendAsync({ type: 'FAST-AND-FURIOUS', id: 1 });
+            });
+
+            then(`the handler will only send a response once for each message unique message
+                """
+                [{"type":"FAST-AND-FURIOUS",  "id":1},
+                {"type":"FAST-AND-FURIOUS", "id":1},
+                {"type":"FAST-AND-FURIOUS", "id":2},
+                {"type": "NOT-SO-FAST", "id":2},
+                {"type":"FAST-AND-FURIOUS", "id":2},
+                {"type":"FAST-AND-FURIOUS", "id":1},
+                {"type": "NOT-SO-FAST", "id":1}
+                ]
+                """
+                `, async () => {
+                    messageToSend = stepContext.docStringAsEntity;
+                    await waitUntilAsync(() => outboundLogger.messages.length >= messageToSend.length, 100);
+                    await sleep(10); // provide a little buffer to ensure additional messages don't arrive unexpectedly
+
+                    const messages = outboundLogger.messages;
+                    debugger;
+                    messages.length.should.eq(messageToSend.length);
+                    for (let i = 0; i < messageToSend.length; i++) {
+                        messages[i].type.should.be.eq(messageToSend[i].type, "for index: " + i);
+                        messages[i]["id"].should.be.eq(messageToSend[i]["id"], "for index: " + i);
+                    }
                 });
 
         });

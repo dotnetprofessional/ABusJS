@@ -9,12 +9,13 @@ import { IColorTheme } from "./IColorTheme";
 import chalk from "chalk";
 import { BubblesTask } from "./BubblesTask";
 import { IBubbleResult } from "./IBubbleResult";
-import { BubbleType } from "./BubbleType";
+import { BubbleIntent } from "./BubbleIntent";
 import { IDelayBubble } from "./IDelayBubble";
 import { BubbleSource } from "./BubbleSource";
 import { TextBlockReader } from "./TextBlockReader";
-import diff from "diff";
+import * as diff from "diff";
 import { Visualizations } from "./Visualizations";
+import { IOverrideBubble } from './IOverrideBubble';
 
 export class Bubbles {
     private messages: IBubbleMessage[];
@@ -71,11 +72,12 @@ export class Bubbles {
 
     public validate(): void {
         // remove all the delay bubbles before comparing
-        const bubbleFlow = this.bubbleFlow.filter(b => b.type !== BubbleType.delay);
+        const bubbleFlow = this.bubbleFlow.filter(b => b.intent !== BubbleIntent.delay);
 
         for (let i = 0; i < this.actualMessageFlow.length; i++) {
-            const actualMessage = this.actualMessageFlow[i];
+            let actualMessage = this.actualMessageFlow[i];
             let expectedBubble = bubbleFlow[i];
+
             if (!expectedBubble) {
                 let errorMessage: string = `bubble: extra!!, message index: ${i}\n`;
                 if (actualMessage.type === MessageException.type) {
@@ -83,6 +85,10 @@ export class Bubbles {
                 }
                 errorMessage;
                 throw new Error(errorMessage);
+            }
+            if (expectedBubble.source === BubbleSource.substitute) {
+                // skip this actual message as it was substituted for a different one
+                actualMessage = this.actualMessageFlow[++i];
             }
             const expectedMessage = this.getBubbleMessage(expectedBubble.name).message;
             const bubbleResult = this.validateResult(expectedMessage, actualMessage, expectedBubble);
@@ -186,60 +192,80 @@ export class Bubbles {
         try {
             if (this.tracingEnabled) { console.info(`BUBBLES: Received ${message.type}: ${Date.now() - this.offset}ms`); }
 
+            // record that this message was sent to the bus
             this.actualMessageFlow.push(message);
+            const bubble = this.bubbleFlow[this.bubbleFlowIndex];
 
-            // work out the basics of this message
-            const handleMessage = this.shouldHandleRequest(message);
+            if (this.executionPromise.isComplete) {
+                // flow is complete so 
+                return this.hasRegisteredHandler(message);
+            }
 
-            const processNextMessageAsync = async (nextIndex: number, message: IMessage<any>, context: IMessageHandlerContext) => {
-                let delay: number;
-                let nextMessageBubble = this.bubbleFlow[nextIndex];
-                if (nextMessageBubble && nextMessageBubble.type === BubbleType.delay) {
-                    delay = (nextMessageBubble as IDelayBubble).delay;
-                    nextIndex++;
-                    this.bubbleFlowIndex++;
-                    nextMessageBubble = this.bubbleFlow[nextIndex];
-                }
-                if (nextMessageBubble && nextMessageBubble.source === BubbleSource.supplied) {
-                    this.handleBubbleMessage(nextMessageBubble, context, delay);
-                } else {
-                    // this message will come from the system or it could be a final delay in the definition
-                    if (this.isLastMessage(nextIndex)) {
-                        this.completeFlow(delay);
-                    }
-                }
-            };
+            let messageHandled: boolean = false;
+
+            switch (bubble.source) {
+                case BubbleSource.substitute:
+                    debugger;
+                    this.substituteMessage(bubble, context);
+                    messageHandled = true;
+                    break;
+                case BubbleSource.override:
+                    debugger;
+                    this.overrideMessage(bubble as IOverrideBubble, context);
+                    messageHandled = true;
+                    break;
+            }
 
             // process the next message without blocking
             this.bubbleFlowIndex++;
-            processNextMessageAsync(this.bubbleFlowIndex, message, context);
+            this.processNextMessageAsync(this.bubbleFlowIndex, message, context);
             // if the current message has a handler the bubbles won't handle it
-            return handleMessage;
+            return messageHandled || this.shouldHandleRequest(bubble, message);
         } catch (e) {
             context.DoNotContinueDispatchingCurrentMessageToHandlers();
             this.executionPromise.reject(e);
         }
     }
 
+    private async processNextMessageAsync(nextIndex: number, message: IMessage<any>, context: IMessageHandlerContext) {
+        // this handles injection scenarios
+        // let delay: number;
+        let nextMessageBubble = this.bubbleFlow[nextIndex];
+        // if (nextMessageBubble && nextMessageBubble.intent === BubbleIntent.delay) {
+        //     delay = (nextMessageBubble as IDelayBubble).delay;
+        //     nextIndex++;
+        //     this.bubbleFlowIndex++;
+        //     nextMessageBubble = this.bubbleFlow[nextIndex];
+        // }
+        if (nextMessageBubble && nextMessageBubble.source === BubbleSource.inject) {
+            this.injectMessage(nextMessageBubble, context);
+        }
+
+        // this message will come from the system or it could be a final delay in the definition
+        this.resolveIfComplete(nextIndex);
+    };
+
+
     public enableTracing(): void {
         this.tracingEnabled = true;
+    }
+
+    private resolveIfComplete(index: number, delay: number = 300) {
+        if (this.isLastMessage(index)) {
+            this.completeFlow(delay);
+        }
     }
 
     private isLastMessage(index: number): boolean {
         return index >= this.bubbleFlow.length;
     }
 
-    private shouldHandleRequest(message: IMessage<any>): boolean {
-        const nextBubble = this.bubbleFlow[this.bubbleFlowIndex + 1];
-
-        let shouldHandle: boolean;
-        if (nextBubble && nextBubble.type === BubbleType.reply && nextBubble.source === BubbleSource.supplied) {
-            shouldHandle = true;
-        }
-        shouldHandle = shouldHandle || !this.hasRegisteredHandler(message);
+    private shouldHandleRequest(bubble: IBubble, message: IMessage<any>): boolean {
+        const hasHandler = this.hasRegisteredHandler(message);
+        const shouldHandle = !hasHandler;
 
         if (shouldHandle && this.tracingEnabled) {
-            console.log(`BUBBLES: handled type: ${message.type}`);
+            console.log(`BUBBLES: handled: ${bubble.name}`);
         }
         return shouldHandle;
     }
@@ -271,54 +297,121 @@ export class Bubbles {
 
         // 2. get any messages that have been defined
         this.extractMessageDefinitions(blockReader);
+
+        // 3. Add any synthetic messages which are needed for substitutions
+        this.addSyntheticMessages();
+    }
+
+    private addSyntheticMessages(): void {
+        for (let i = 0; i < this.bubbleFlow.length; i++) {
+            const bubble = this.bubbleFlow[i];
+            if (!bubble.name.endsWith(".original") && bubble.source === BubbleSource.substitute) {
+                // find message
+                const m = this.getBubbleMessage(bubble.name);
+                // add a synthetic message
+
+                this.messages.push({ name: m.name + ".original", message: { type: m.message.type } });
+            }
+        }
     }
 
     private async executeBubbleFlowAsync(): Promise<void> {
         try {
             const firstBubble: IBubble = this.bubbleFlow[0];
 
-            this.handleBubbleMessage(firstBubble);
+            this.injectMessage(firstBubble, null);
         } catch (e) {
             this.executionPromise.reject(e);
         }
     }
 
-    private handleBubbleMessage(bubble: IBubble, context?: IMessageHandlerContext, delay?: number): void {
-        let bubbleMessage: any;
-        bubbleMessage = this.getBubbleMessage(bubble.name).message;
-        if (bubble.type !== BubbleType.reply) {
-            bubbleMessage = Object.assign({}, bubbleMessage);
-        }
+    private injectMessage(bubble: IBubble, context: IMessageHandlerContext) {
+        console.log(`BUBBLES: injected: ${bubble.name}`);
+        const bubbleMessage = this.getBubbleMessage(bubble.name).message;
 
+        this.dispatchMessage(bubble, bubbleMessage, context);
+    }
+
+    private overrideMessage(bubble: IOverrideBubble, context: IMessageHandlerContext) {
+        console.log(`BUBBLES: overridden: ${bubble.name} with ${bubble.overrideWith}`);
+
+        const bubbleMessage = this.getBubbleMessage(bubble.overrideWith).message;
+
+        this.dispatchMessage(bubble, bubbleMessage, context)
+    }
+
+    private substituteMessage(bubble: IBubble, context: IMessageHandlerContext) {
+        console.log(`BUBBLES: substituted: ${bubble.name} for type: ${context.activeMessage.type}`);
+
+        const bubbleMessage = this.getBubbleMessage(bubble.name).message;
+
+        this.dispatchMessage(bubble, bubbleMessage, context)
+    }
+
+    private dispatchMessage(bubble: IBubble, message: any, context: IMessageHandlerContext, delay?: number) {
         context = context || new MessageHandlerContext(this.bus, null, null);
-        if (bubbleMessage.error) {
-            // this is an error so we need to convert it to a bus exception
-            const error = new Error(bubbleMessage.error);
-            bubbleMessage = new MessageException(error.message, error);
-        }
+
         let options: SendOptions;
         if (delay) {
             options = { timeToDelay: new TimeSpan(delay) };
         }
 
-        switch (bubble.type) {
-            case BubbleType.publish:
-                this.executeWithDelay(() => context.publishAsync(bubbleMessage), options);
+        switch (bubble.intent) {
+            case BubbleIntent.publish:
+                this.executeWithDelay(() => context.publishAsync(message), options);
                 break;
-            case BubbleType.send:
-                this.executeWithDelay(() => context.sendAsync(bubbleMessage), options);
+            case BubbleIntent.send:
+                this.executeWithDelay(() => context.sendAsync(message), options);
                 break;
-            case BubbleType.sendReply:
-                this.executeWithDelay(() => context.sendWithReply(bubbleMessage), options);
+            case BubbleIntent.sendReply:
+                if (bubble.source === BubbleSource.override) {
+                    this.executeWithDelay(() => context.replyAsync(message), options);
+                } else {
+                    this.executeWithDelay(() => context.sendWithReplyAsync(message), options);
+                }
                 break;
-            case BubbleType.reply:
+            case BubbleIntent.reply:
                 // replies don't inheritably support delays but for testing this may be useful to simulate delays
-                this.executeWithDelay(() => context.replyAsync(bubbleMessage), options);
+                this.executeWithDelay(() => context.replyAsync(message), options);
                 break;
             default:
-                throw new Error("Unsupported bubble type: " + bubble.type);
+                throw new Error("Unsupported bubble intent: " + bubble.intent);
         }
     }
+
+    // private handleBubbleMessage(bubble: IOverrideBubble, context?: IMessageHandlerContext, delay?: number): void {
+    //     let bubbleMessage: any;
+    //     debugger;
+    //     bubbleMessage = this.getBubbleMessage(bubble.name).message;
+    //     if (bubble.intent !== BubbleIntent.reply) {
+    //         bubbleMessage = Object.assign({}, bubbleMessage);
+    //     }
+
+    //     context = context || new MessageHandlerContext(this.bus, null, null);
+    //     if (bubbleMessage.error) {
+    //         // this is an error so we need to convert it to a bus exception
+    //         const error = new Error(bubbleMessage.error);
+    //         bubbleMessage = new MessageException(error.message, error);
+    //     }
+
+    //     switch (bubble.intent) {
+    //         case BubbleIntent.publish:
+    //             this.executeWithDelay(() => context.publishAsync(bubbleMessage), options);
+    //             break;
+    //         case BubbleIntent.send:
+    //             this.executeWithDelay(() => context.sendAsync(bubbleMessage), options);
+    //             break;
+    //         case BubbleIntent.sendReply:
+    //             this.executeWithDelay(() => context.sendWithReplyAsync(bubbleMessage), options);
+    //             break;
+    //         case BubbleIntent.reply:
+    //             // replies don't inheritably support delays but for testing this may be useful to simulate delays
+    //             this.executeWithDelay(() => context.replyAsync(bubbleMessage), options);
+    //             break;
+    //         default:
+    //             throw new Error("Unsupported bubble intent: " + bubble.intent);
+    //     }
+    // }
 
     private executeWithDelay(f: Function, options: SendOptions): void {
         if (options && options.timeToDelay) {
@@ -337,7 +430,7 @@ export class Bubbles {
     private validateDefinition(): void {
         // validate that every bubble has an associated definition
         this.bubbleFlow.forEach(b => {
-            if (b.type === BubbleType.delay) {
+            if (b.intent === BubbleIntent.delay) {
                 return;
             }
 
@@ -346,7 +439,7 @@ export class Bubbles {
                 throw new Error("Unable to locate a bubble definition for: " + b.name);
             }
 
-            if (b.type !== BubbleType.reply && !msg.message.error && !(msg.message as any).type) {
+            if (b.intent !== BubbleIntent.reply && !msg.message.error && !(msg.message as any).type) {
                 throw new Error(`[Bubble: ${b.name}] messages must have a type defined.`);
             }
         });
@@ -375,6 +468,9 @@ export class Bubbles {
             const existingMessage: IBubbleMessage = this.getBubbleMessage(name);
             if (existingMessage) {
                 // merge definition with existing one
+                if (typeof existingMessage.message === "string") {
+                    throw Error(`Definition: ${definition}\nUnable to merge strings, must be an object`);
+                }
                 existingMessage.message = Object.assign(existingMessage.message, message);
             } else {
                 this.messages.push({ name, message });
@@ -404,50 +500,85 @@ export class Bubbles {
                     this.addBubble(capture, bubbleFlow);
                     break;
                 case "-":
-                    this.addDelay(bubbleFlow);
+                    throw Error("Time delays are not supported outside of a bubble");
             }
         }
         return bubbleFlow;
     }
 
-    private addBubble(bubbleDefinition: string, bubbleFlow: any[]): void {
+    private addBubble(bubbleDefinition: string, bubbleFlow: IBubble[]): void {
+        const bubble = this.getBubble(bubbleDefinition);
+        if (bubble.name.indexOf(":") > 0) {
+            // this is an override definition
+            if (bubble.source !== BubbleSource.inject) {
+                throw Error(`Bubble: ${bubble.name}\nExpected bubble to start with '!', did you mean (A)(B)?`);
+            }
+            const parts = bubble.name.split(":");
+            bubble.name = parts[0];
+            bubble.source = BubbleSource.override;
+            const override = parts[1];
+            const overrideBubble = this.getBubble(override);
+            bubbleFlow.push({ ...bubble, overrideWith: overrideBubble.name } as IOverrideBubble);
+            bubbleFlow.push(overrideBubble);
+        } else if (bubble.source === BubbleSource.substitute) {
+            // As there will be two messages being captured there needs to be an additional bubble to account for that
+            const originalType = bubble.name + ".original";
+            bubbleFlow.push({ name: originalType, intent: bubble.intent, source: bubble.source });
+            bubble.source = BubbleSource.system;
+            bubbleFlow.push(bubble);
+        } else {
+            bubbleFlow.push(bubble);
+        }
+    }
+
+    private getBubble(bubbleDefinition: string): { source: BubbleSource, name: string, intent: BubbleIntent } {
         // defaults
-        let source: BubbleSource = BubbleSource.generated;
-        let type: BubbleType = BubbleType.send;
+        let source: BubbleSource = BubbleSource.system;
+        let intent: BubbleIntent = BubbleIntent.send;
 
         let classifier: string = bubbleDefinition[0];
         if (classifier === "!") {
-            source = BubbleSource.supplied;
+            source = BubbleSource.inject;
             // strip first character off
+            bubbleDefinition = bubbleDefinition.substr(1);
+            classifier = bubbleDefinition[0];
+        }
+
+        if (classifier === ":") {
+            source = BubbleSource.substitute;
             bubbleDefinition = bubbleDefinition.substr(1);
             classifier = bubbleDefinition[0];
         }
 
         let name: string = bubbleDefinition.substring(1);
         switch (classifier) {
-            case ":":
-                type = BubbleType.reply;
-                break;
             case "*":
-                type = BubbleType.publish;
+                intent = BubbleIntent.publish;
                 break;
             case ">":
-                type = BubbleType.sendReply;
+                intent = BubbleIntent.sendReply;
+                break;
+            case "@":
+                intent = BubbleIntent.reply;
                 break;
             default:
                 name = bubbleDefinition;
         }
-        bubbleFlow.push({ type, source, name });
-    }
 
-    private addDelay(bubbleFlow: IBubble[]): void {
-        const lastBubble: IDelayBubble = bubbleFlow[bubbleFlow.length - 1] as IDelayBubble;
-        if (lastBubble.type === "delay") {
-            lastBubble.delay += 10;
-        } else {
-            bubbleFlow.push({ type: BubbleType.delay, source: BubbleSource.supplied, delay: 10, name: "delay" } as IDelayBubble);
+        return {
+            name,
+            intent,
+            source
         }
     }
+    // private addDelay(bubbleFlow: IBubble[]): void {
+    //     const lastBubble: IDelayBubble = bubbleFlow[bubbleFlow.length - 1] as IDelayBubble;
+    //     if (lastBubble.intent === "delay") {
+    //         lastBubble.delay += 10;
+    //     } else {
+    //         bubbleFlow.push({ intent: BubbleIntent.delay, source: BubbleSource.inject, delay: 10, name: "delay" } as IDelayBubble);
+    //     }
+    // }
 
     /**
      * Returns a string highlighting the differences between the actual
@@ -480,7 +611,7 @@ export class Bubbles {
         function notBlank(line: string): boolean {
             return typeof line !== "undefined" && line !== null;
         }
-        var msg: string = diff.createPatch("string", JSON.stringify(actual, null, 5), JSON.stringify(expected, null, 5));
+        var msg: string = diff.createPatch("string", JSON.stringify(actual, null, 5), JSON.stringify(expected, null, 5), "", "");
         var lines: string[] = msg.split("\n").splice(5);
         return (
             "\n" +

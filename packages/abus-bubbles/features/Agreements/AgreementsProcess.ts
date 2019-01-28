@@ -28,9 +28,7 @@ export class AgreementsProcess {
             // check the cache for the request
             let apiResponse = this.getAgreementsFromCache(message);
             if (!apiResponse) {
-                apiResponse = await context.sendWithReply(new GetAgreementHeadersRequest(tpid, sortOrder, nextPageKey))
-                    .responseAsync<GetAgreementHeadersResponse>();
-
+                apiResponse = await context.sendWithReplyAsync<GetAgreementHeadersResponse>(new GetAgreementHeadersRequest(tpid, sortOrder, nextPageKey));
                 if (!this.data.tpids[message.tpid]) {
                     this.data.tpids[message.tpid] = {};
                 }

@@ -230,10 +230,6 @@ export class Bus implements IBus {
         return this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.send), context, options);
     }
 
-    public DoNotContinueDispatchingCurrentMessageToHandlers(): void {
-        throw new Error("Method not implemented.");
-    }
-
     public subscribe(filter: string, handler: IMessageHandler<any>, options?: ISubscriptionOptions): string {
         if (!filter) {
             throw new TypeError("A subscription requires a valid filter, such as a message type.");
@@ -377,9 +373,7 @@ export class Bus implements IBus {
                     return shallowEqual(subscription.context.activeMessage, message);
                 case CancellationPolicy.ignoreIfExisting:
                     // mark the context as cancelled
-                    subscription.context.wasCancelled = true;
                     return true;
-                    break;
             }
 
             return false;

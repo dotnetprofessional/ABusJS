@@ -2,7 +2,7 @@ import { Bubbles } from "../../../src";
 import { AgreementsProcess } from "../AgreementsProcess";
 import { AgreementService } from "../services/AgreementService";
 
-feature(`Agreements Process`, () => {
+feature.skip(`Agreements Process`, () => {
     let bubbles: Bubbles;
 
     background(``, () => {

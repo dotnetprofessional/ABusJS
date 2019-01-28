@@ -18,7 +18,7 @@
   },
   "scripts": {
     "pretest": "tsc -p .",
-    "test": "mocha --recursive compile/Tests/",
+    "_test": "mocha --recursive compile/Tests/",
     "release-web": "npm run compile-web && npm run compile-web-minify",
     "compile-web": "rimraf out && tsc -p tsconfig.web.json",
     "compile-web-minify": "uglifyjs out/abus.js --output out/abus.min.js --compress dead_code,drop_debugger,conditionals,booleans,loops,properties,drop_console --mangle --wrap abus",

@@ -2,7 +2,7 @@ import "chai";
 import { Bubbles } from "../src";
 import { IBus, Bus, IMessageHandlerContext } from "abus2";
 
-feature(`Validate bubbles works with more complex workflows`, () => {
+feature.skip(`Validate bubbles works with more complex workflows`, () => {
     scenarioOutline(`Authorize user form an API
         This scenario simulates authenticating a user against an API and supplying different inputs to the flow
         The only input supplied by the test/spec is the first message to request authorization of a particular user.
@@ -20,7 +20,7 @@ feature(`Validate bubbles works with more complex workflows`, () => {
                 bus = new Bus();
                 bus.start();
                 bus.subscribe(stepContext.values[0], async (m, c: IMessageHandlerContext) => {
-                    const result = await c.sendWithReply({ type: "authorize", payload: { authorizedUser: m.user } }).responseAsync<string>();
+                    const result = await c.sendWithReplyAsync<string>({ type: "authorize", payload: { authorizedUser: m.user } });
                     c.replyAsync(result);
                 }, { identifier: "AuthenticationService" });
 
@@ -71,7 +71,7 @@ feature(`Validate bubbles works with more complex workflows`, () => {
                 bus = new Bus();
                 bus.start();
                 bus.subscribe(stepContext.values[0], async (m, c: IMessageHandlerContext) => {
-                    const result = await c.sendWithReply({ type: "authorize", payload: { authorizedUser: m.user } }).responseAsync<string>();
+                    const result = await c.sendWithReplyAsync<string>({ type: "authorize", payload: { authorizedUser: m.user } });
                     c.replyAsync(result);
                 });
 
