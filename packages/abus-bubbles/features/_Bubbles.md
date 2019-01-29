@@ -162,7 +162,7 @@ request: {"type": "request"}
 response: {"mocked response"}
 ```
 
-### inject a message {inject}
+### inject a message
 This will send the message to the bus and allow the message to be handled by any subscribers. This pattern maybe useful to simulate how the system operates when receiving multiple input messages.
 
 __send message to the bus after the previous-message is received__

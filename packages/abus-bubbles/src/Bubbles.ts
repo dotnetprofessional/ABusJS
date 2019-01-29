@@ -222,30 +222,30 @@ export class Bubbles {
         }
     }
 
-    private async processNextMessageAsync(nextIndex: number, message: IMessage<any>, context: IMessageHandlerContext) {
+    private async processNextMessageAsync(nextIndex: number, message: IMessage<any>, context: IMessageHandlerContext): Promise<void> {
         // this handles injection scenarios
-        // let delay: number;
+        let delay: number;
         let nextMessageBubble = this.bubbleFlow[nextIndex];
-        // if (nextMessageBubble && nextMessageBubble.intent === BubbleIntent.delay) {
-        //     delay = (nextMessageBubble as IDelayBubble).delay;
-        //     nextIndex++;
-        //     this.bubbleFlowIndex++;
-        //     nextMessageBubble = this.bubbleFlow[nextIndex];
-        // }
+        if (nextMessageBubble && nextMessageBubble.intent === BubbleIntent.delay) {
+            delay = (nextMessageBubble as IDelayBubble).delay;
+            nextIndex++;
+            this.bubbleFlowIndex++;
+            nextMessageBubble = this.bubbleFlow[nextIndex];
+        }
+
         if (nextMessageBubble && nextMessageBubble.source === BubbleSource.inject) {
-            this.injectMessage(nextMessageBubble, context);
+            this.injectMessage(nextMessageBubble, context, delay);
         }
 
         // this message will come from the system or it could be a final delay in the definition
-        this.resolveIfComplete(nextIndex);
+        this.resolveIfComplete(nextIndex, delay);
     }
-
 
     public enableTracing(): void {
         this.tracingEnabled = true;
     }
 
-    private resolveIfComplete(index: number, delay: number = 10) {
+    private resolveIfComplete(index: number, delay: number = 10): void {
         if (this.isLastMessage(index)) {
             this.completeFlow(delay);
         }
@@ -323,11 +323,11 @@ export class Bubbles {
         }
     }
 
-    private injectMessage(bubble: IBubble, context: IMessageHandlerContext) {
+    private injectMessage(bubble: IBubble, context: IMessageHandlerContext, delay?: number) {
         if (this.tracingEnabled) console.log(`BUBBLES: injected: ${bubble.name}`);
         const bubbleMessage = this.getBubbleMessage(bubble.name).message;
 
-        this.dispatchMessage(bubble, bubbleMessage, context);
+        this.dispatchMessage(bubble, bubbleMessage, context, delay);
     }
 
     private overrideMessage(bubble: IOverrideBubble, context: IMessageHandlerContext) {
@@ -472,12 +472,20 @@ export class Bubbles {
                     this.addBubble(capture, bubbleFlow);
                     break;
                 case "-":
-                    throw Error("Time delays are not supported outside of a bubble");
+                    this.addDelay(bubbleFlow);
             }
         }
         return bubbleFlow;
     }
 
+    private addDelay(bubbleFlow: IBubble[]) {
+        const lastBubble = bubbleFlow[bubbleFlow.length - 1] as IDelayBubble;
+        if (lastBubble.intent === BubbleIntent.delay) {
+            lastBubble.delay += 10;
+        } else {
+            bubbleFlow.push({ intent: BubbleIntent.delay, source: BubbleSource.inject, delay: 10, name: "delay" } as IDelayBubble);
+        }
+    }
     private addBubble(bubbleDefinition: string, bubbleFlow: IBubble[]): void {
         const bubble = this.getBubble(bubbleDefinition);
         if (bubble.name.indexOf(":") > 0) {

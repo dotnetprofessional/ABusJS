@@ -17,10 +17,12 @@ export class TextBlockReader {
             return null;
         }
     }
+
     public next(): boolean {
         this.currentIndex++;
         return this.currentIndex >= 0 && this.currentIndex < this.count;
     }
+
     public get nextBlock(): string {
         const lines = [];
         let isNext = this.next();

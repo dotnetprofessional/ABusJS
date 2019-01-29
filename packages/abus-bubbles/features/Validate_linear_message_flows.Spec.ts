@@ -400,7 +400,7 @@ feature(`Linear message flows
             });
         });
 
-        scenario.skip(`Bubble flow can include delays at the end of flow`, () => {
+        scenario(`Bubble flow can include delays at the end of flow`, () => {
             let bubbles: Bubbles;
             let bus: IBus;
             let bubblesResult: IBubbleFlowResult[];
@@ -418,11 +418,11 @@ feature(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (request)(response)------
+                (!request)(response)------
 
                 request: {"type":"request"}
                 response: {"type": "response"}
-                """        
+                """
                 `, async () => {
                     const startTime = Date.now();
 
@@ -447,7 +447,7 @@ feature(`Linear message flows
 
         });
 
-        scenario.skip(`Bubble flow can supply a delayed message after handler sends message`, () => {
+        scenario(`Bubble flow can supply a delayed message after handler sends message`, () => {
             let bubbles: Bubbles;
             let bubblesResult: IBubbleFlowResult[];
             let executionTime: number;
@@ -461,7 +461,7 @@ feature(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (supplied-message)(handler-sent-message)-----(!supplied-message-delayed)
+                (!supplied-message)(handler-sent-message)-----(!supplied-message-delayed)
 
                 supplied-message: {"type":"SUPPLIED-MESSAGE"}
                 handler-sent-message: {"type": "HANDLER-SENT-MESSAGE"}
@@ -490,7 +490,7 @@ feature(`Linear message flows
 
         });
 
-        scenario.skip(`Bubble flow can supply a message after supplying the previous message`, () => {
+        scenario(`Bubble flow can supply a message after supplying the previous message`, () => {
             let bubbles: Bubbles;
             let bubblesResult: IBubbleFlowResult[];
             let executionTime: number;
@@ -513,7 +513,7 @@ feature(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (start)(start-result)(!supplied-message-1)---(!supplied-message-2)
+                (!start)(start-result)(!supplied-message-1)---(!supplied-message-2)
 
                 start: {"type":"START"}
                 start-result: {"type":"HANDLER-SENT-MESSAGE"}
