@@ -36,9 +36,7 @@ feature(`Inject Message
                 response3: {"type": "response"}
                 """
                 `, async () => {
-                    bubbles.enableTracing();
                     await bubbles.executeAsync(stepContext.docString);
-                    debugger;
                 });
 
             then(`the message flow matches

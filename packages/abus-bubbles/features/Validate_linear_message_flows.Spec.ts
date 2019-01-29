@@ -5,7 +5,7 @@ import { IBus, Bus, IMessageHandlerContext } from 'abus2';
 
 require("chai").should();
 
-feature.skip(`Linear message flows
+feature(`Linear message flows
     Provides the ability to validate simple linear message flows
     `, () => {
 
@@ -23,10 +23,10 @@ feature.skip(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (request)
+                (!request)
 
                 request: {"type":"request"}
-                """        
+                """
             `, async () => {
                     await bubbles.executeAsync(stepContext.docString);
                     bubblesResult = bubbles.result();
@@ -65,7 +65,7 @@ feature.skip(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (request)(response)
+                (!request)(response)
 
                 request: {"type":"request"}
                 response: {"type": "response"}
@@ -100,19 +100,19 @@ feature.skip(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (request)(!response)
+                (!request:response)
 
                 request: {"type":"request"}
                 response: {"type": "response", "unittest": true}
                 """
             `, async () => {
                     await bubbles.executeAsync(stepContext.docString);
-                    bubblesResult = bubbles.result();
                 });
 
             then(`the message flow matches
             `, () => {
                     bubbles.validate();
+                    bubblesResult = bubbles.result();
                 });
 
             and(`the flow result has the correct message types`, () => {
@@ -146,7 +146,7 @@ feature.skip(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (request)(api-call)(:api-call-reply)
+                (!request)(>api-call)(@api-call-reply)
 
                 request: {"type":"request"}
                 api-call: {"type": "api-call"}
@@ -185,7 +185,7 @@ feature.skip(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (>request)(:response)
+                (!>request)(@response)
 
                 request: {"type":"request"}
                 response: "response"
@@ -220,7 +220,7 @@ feature.skip(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (!>request)(!:response)
+                (!>request:@response)
 
                 request: {"type":"request"}
                 response: "response"
@@ -241,7 +241,7 @@ feature.skip(`Linear message flows
             });
         });
 
-        scenario(`message handler sends a requrest/response which is overridden by supplied request/response message`, () => {
+        scenario(`message handler sends a request/response which is overridden by supplied request/response message`, () => {
             let bubbles: Bubbles;
             let bubblesResult: IBubbleFlowResult[];
 
@@ -260,7 +260,7 @@ feature.skip(`Linear message flows
 
             when(`sending the message 'api-request'
                 """
-                (api-request)(>request)(!:response)
+                (!api-request)(!>request:@response)
 
                 api-request: {"type":"api-request"}
                 request: {"type":"request"}
@@ -269,7 +269,6 @@ feature.skip(`Linear message flows
                 `, async () => {
                     await bubbles.executeAsync(stepContext.docString);
                     bubblesResult = bubbles.result();
-                    debugger;
                 });
 
             then(`the message flow matches
@@ -300,7 +299,7 @@ feature.skip(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (request)(*response))
+                (!request)(*response)
 
                 request: {"type":"request"}
                 response: {"type": "response"}
@@ -338,7 +337,7 @@ feature.skip(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (request)(!*response)
+                (!request:*response)
 
                 request: {"type":"request"}
                 response: {"type": "response"}
@@ -380,11 +379,11 @@ feature.skip(`Linear message flows
 
             when(`sending the message 'request'
                 """
-                (request)(response)
+                (!request)(response)
 
                 request: {"type":"request"}
                 response: {"error":"I'm blowing up on purpose!"}
-                """        
+                """
                 `, async () => {
                     await bubbles.executeAsync(stepContext.docString);
                     bubblesResult = bubbles.result();
@@ -401,7 +400,7 @@ feature.skip(`Linear message flows
             });
         });
 
-        scenario(`Bubble flow can include delays at the end of flow`, () => {
+        scenario.skip(`Bubble flow can include delays at the end of flow`, () => {
             let bubbles: Bubbles;
             let bus: IBus;
             let bubblesResult: IBubbleFlowResult[];
@@ -448,7 +447,7 @@ feature.skip(`Linear message flows
 
         });
 
-        scenario(`Bubble flow can supply a delayed message after handler sends message`, () => {
+        scenario.skip(`Bubble flow can supply a delayed message after handler sends message`, () => {
             let bubbles: Bubbles;
             let bubblesResult: IBubbleFlowResult[];
             let executionTime: number;
@@ -491,7 +490,7 @@ feature.skip(`Linear message flows
 
         });
 
-        scenario(`Bubble flow can supply a message after supplying the previous message`, () => {
+        scenario.skip(`Bubble flow can supply a message after supplying the previous message`, () => {
             let bubbles: Bubbles;
             let bubblesResult: IBubbleFlowResult[];
             let executionTime: number;

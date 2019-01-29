@@ -2,7 +2,7 @@ import { Bubbles } from "../../../src";
 import { AgreementsProcess } from "../AgreementsProcess";
 import { AgreementService } from "../services/AgreementService";
 
-feature.skip(`Agreements Process`, () => {
+feature(`Agreements Process`, () => {
     let bubbles: Bubbles;
 
     background(``, () => {
@@ -17,7 +17,7 @@ feature.skip(`Agreements Process`, () => {
     scenario(`Retrieve agreement headers for TPID`, () => {
         when(`requesting the agreement headers the following flow occurs
             """
-            (request-headers)(*status-executing)(>api-request)(:api-response)(*request-headers-event)(*status-complete)
+            (!request-headers)(*status-executing)(>api-request)(@api-response)(*request-headers-event)(*status-complete)
         
             request-headers: {"type":"GetAgreementHeadersCommand", "payload": {"tpid": "12345"}}
             api-request: {"type":"GetAgreementHeadersRequest", "payload": {"tpid": "12345"}}
@@ -28,8 +28,6 @@ feature.skip(`Agreements Process`, () => {
             """
             `, async () => {
                 await bubbles.executeAsync(stepContext.docString);
-                debugger;
-                bubbles.visualizations.printAsciiTree();
             });
 
         then(`the headers are returned for the tpid`, () => {
@@ -40,12 +38,12 @@ feature.skip(`Agreements Process`, () => {
     scenario(`Retrieve agreement headers for TPID that doesn't exist`, () => {
         when(`requesting the agreement headers the following flow occurs
             """
-            (request-headers)(*status-executing)(>api-request)(!:api-response)(*status-error)
+            (!request-headers)(*status-executing)(>api-request)(@api-response)(*status-error)
         
             request-headers: {"type":"GetAgreementHeadersCommand", "payload": {"tpid": "XXX"}}
             status-executing: {"type":"AgreementProcessStatusEvent", "payload": {"operation": "GetAgreementHeadersCommand", "status": "EXECUTING"}}
             api-request: {"type":"GetAgreementHeadersRequest", "payload": {"tpid": "XXX"}}
-            api-response: {"error":"Unable to locate tpid: XXXX-from test!!"}
+            api-response: {"error":"Unable to locate tpid: XXX"}
             status-error: {"type":"AgreementProcessStatusEvent", "payload": {"operation": "GetAgreementHeadersCommand", "status": "ERROR"}}
             """
             `, async () => {

@@ -43,8 +43,6 @@ feature.skip(`Validate bubbles works with more complex workflows`, () => {
                 """
             `, async () => {
                     await bubbles.executeAsync(stepContext.docString);
-                    debugger;
-                    bubbles.visualizations.printAsciiTree();
                 });
 
             then(`the message flow matches

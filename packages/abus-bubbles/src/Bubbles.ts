@@ -15,7 +15,7 @@ import { BubbleSource } from "./BubbleSource";
 import { TextBlockReader } from "./TextBlockReader";
 import * as diff from "diff";
 import { Visualizations } from "./Visualizations";
-import { IOverrideBubble } from './IOverrideBubble';
+import { IOverrideBubble } from "./IOverrideBubble";
 
 export class Bubbles {
     private messages: IBubbleMessage[];
@@ -86,10 +86,7 @@ export class Bubbles {
                 errorMessage;
                 throw new Error(errorMessage);
             }
-            if (expectedBubble.source === BubbleSource.substitute) {
-                // skip this actual message as it was substituted for a different one
-                actualMessage = this.actualMessageFlow[++i];
-            }
+
             const expectedMessage = this.getBubbleMessage(expectedBubble.name).message;
             const bubbleResult = this.validateResult(expectedMessage, actualMessage, expectedBubble);
             this.bubbleFlowResult.push({ bubble: expectedBubble, actual: actualMessage, expected: expectedMessage.message, result: bubbleResult });
@@ -122,7 +119,7 @@ export class Bubbles {
                 throw new Error(`[Bubble: ${bubble.name}] Bubble definitions for a reply should contain just the payload.`);
             }
             if (this.isMessageExceptionReply(message)) {
-                actual = this.trimToExpected(expected, { error: message.payload.description });
+                actual = this.trimToExpected(expected, { error: message.payload.message });
             } else {
                 actual = this.trimToExpected(expected, message.payload);
             }
@@ -130,7 +127,7 @@ export class Bubbles {
             // we maybe trying to validate an exception or there just may have been an
             // unexpected one so need to treat those differently
             if (!expected.type) {
-                actual = this.trimToExpected(expected, { error: message.payload.description });
+                actual = this.trimToExpected(expected, { error: message.payload.message });
             } else {
                 throw new Error(`[Bubble: ${bubble.name}] An error occurred processing the flow. \n${JSON.stringify(message, null, 2)}`);
             }
@@ -190,14 +187,14 @@ export class Bubbles {
 
     public async messageHandlerAsync(message: IMessage<any>, context: IMessageHandlerContext): Promise<boolean> {
         try {
-            if (this.tracingEnabled) { console.info(`BUBBLES: Received ${message.type}: ${Date.now() - this.offset}ms`); }
+            if (this.tracingEnabled) { console.log(`BUBBLES: Received ${message.type}: ${Date.now() - this.offset}ms`); }
 
             // record that this message was sent to the bus
             this.actualMessageFlow.push(message);
             const bubble = this.bubbleFlow[this.bubbleFlowIndex];
 
             if (this.executionPromise.isComplete) {
-                // flow is complete so 
+                // flow is complete so
                 return this.hasRegisteredHandler(message);
             }
 
@@ -205,12 +202,10 @@ export class Bubbles {
 
             switch (bubble.source) {
                 case BubbleSource.substitute:
-                    debugger;
                     this.substituteMessage(bubble, context);
                     messageHandled = true;
                     break;
                 case BubbleSource.override:
-                    debugger;
                     this.overrideMessage(bubble as IOverrideBubble, context);
                     messageHandled = true;
                     break;
@@ -243,14 +238,14 @@ export class Bubbles {
 
         // this message will come from the system or it could be a final delay in the definition
         this.resolveIfComplete(nextIndex);
-    };
+    }
 
 
     public enableTracing(): void {
         this.tracingEnabled = true;
     }
 
-    private resolveIfComplete(index: number, delay: number = 300) {
+    private resolveIfComplete(index: number, delay: number = 10) {
         if (this.isLastMessage(index)) {
             this.completeFlow(delay);
         }
@@ -305,12 +300,11 @@ export class Bubbles {
     private addSyntheticMessages(): void {
         for (let i = 0; i < this.bubbleFlow.length; i++) {
             const bubble = this.bubbleFlow[i];
-            if (!bubble.name.endsWith(".original") && bubble.source === BubbleSource.substitute) {
-                // find message
-                const m = this.getBubbleMessage(bubble.name);
+            if (bubble.name.endsWith(".original")) {
+                // find message 
+                const m = this.getBubbleMessage(bubble.name.substr(0, bubble.name.indexOf(".original")));
                 // add a synthetic message
-
-                this.messages.push({ name: m.name + ".original", message: { type: m.message.type } });
+                this.messages.push({ name: bubble.name, message: { type: m.message.type } });
             }
         }
     }
@@ -319,6 +313,10 @@ export class Bubbles {
         try {
             const firstBubble: IBubble = this.bubbleFlow[0];
 
+            // verify that the first message is defined as inject
+            if (firstBubble.source === BubbleSource.system) {
+                throw Error("The first bubble must be prefixed with ! ie (!request)");
+            }
             this.injectMessage(firstBubble, null);
         } catch (e) {
             this.executionPromise.reject(e);
@@ -326,26 +324,26 @@ export class Bubbles {
     }
 
     private injectMessage(bubble: IBubble, context: IMessageHandlerContext) {
-        console.log(`BUBBLES: injected: ${bubble.name}`);
+        if (this.tracingEnabled) console.log(`BUBBLES: injected: ${bubble.name}`);
         const bubbleMessage = this.getBubbleMessage(bubble.name).message;
 
         this.dispatchMessage(bubble, bubbleMessage, context);
     }
 
     private overrideMessage(bubble: IOverrideBubble, context: IMessageHandlerContext) {
-        console.log(`BUBBLES: overridden: ${bubble.name} with ${bubble.overrideWith}`);
+        if (this.tracingEnabled) console.log(`BUBBLES: overridden: ${bubble.name} with ${bubble.overrideWith.name}`);
 
-        const bubbleMessage = this.getBubbleMessage(bubble.overrideWith).message;
+        const bubbleMessage = this.getBubbleMessage(bubble.overrideWith.name).message;
 
-        this.dispatchMessage(bubble, bubbleMessage, context)
+        this.dispatchMessage(bubble.overrideWith, bubbleMessage, context);
     }
 
     private substituteMessage(bubble: IBubble, context: IMessageHandlerContext) {
-        console.log(`BUBBLES: substituted: ${bubble.name} for type: ${context.activeMessage.type}`);
-
+        if (this.tracingEnabled) console.log(`BUBBLES: substituted: ${bubble.name} for type: ${context.activeMessage.type}`);
+        bubble = this.bubbleFlow[this.bubbleFlowIndex + 1];
         const bubbleMessage = this.getBubbleMessage(bubble.name).message;
 
-        this.dispatchMessage(bubble, bubbleMessage, context)
+        this.dispatchMessage(bubble, bubbleMessage, context);
     }
 
     private dispatchMessage(bubble: IBubble, message: any, context: IMessageHandlerContext, delay?: number) {
@@ -356,6 +354,10 @@ export class Bubbles {
             options = { timeToDelay: new TimeSpan(delay) };
         }
 
+        // make a copy of the message before dispatching it if its an object
+        if (typeof message === "object") {
+            message = Object.assign({}, message);
+        }
         switch (bubble.intent) {
             case BubbleIntent.publish:
                 this.executeWithDelay(() => context.publishAsync(message), options);
@@ -364,11 +366,14 @@ export class Bubbles {
                 this.executeWithDelay(() => context.sendAsync(message), options);
                 break;
             case BubbleIntent.sendReply:
-                if (bubble.source === BubbleSource.override) {
-                    this.executeWithDelay(() => context.replyAsync(message), options);
-                } else {
-                    this.executeWithDelay(() => context.sendWithReplyAsync(message), options);
-                }
+                this.executeWithDelay(async () => {
+                    try {
+                        await context.sendWithReplyAsync(message);
+                    } catch (e) {
+                        // ignore any errors as they will be intercepted but a promise rejection may still occur
+                        debugger;
+                    }
+                }, options);
                 break;
             case BubbleIntent.reply:
                 // replies don't inheritably support delays but for testing this may be useful to simulate delays
@@ -378,40 +383,6 @@ export class Bubbles {
                 throw new Error("Unsupported bubble intent: " + bubble.intent);
         }
     }
-
-    // private handleBubbleMessage(bubble: IOverrideBubble, context?: IMessageHandlerContext, delay?: number): void {
-    //     let bubbleMessage: any;
-    //     debugger;
-    //     bubbleMessage = this.getBubbleMessage(bubble.name).message;
-    //     if (bubble.intent !== BubbleIntent.reply) {
-    //         bubbleMessage = Object.assign({}, bubbleMessage);
-    //     }
-
-    //     context = context || new MessageHandlerContext(this.bus, null, null);
-    //     if (bubbleMessage.error) {
-    //         // this is an error so we need to convert it to a bus exception
-    //         const error = new Error(bubbleMessage.error);
-    //         bubbleMessage = new MessageException(error.message, error);
-    //     }
-
-    //     switch (bubble.intent) {
-    //         case BubbleIntent.publish:
-    //             this.executeWithDelay(() => context.publishAsync(bubbleMessage), options);
-    //             break;
-    //         case BubbleIntent.send:
-    //             this.executeWithDelay(() => context.sendAsync(bubbleMessage), options);
-    //             break;
-    //         case BubbleIntent.sendReply:
-    //             this.executeWithDelay(() => context.sendWithReplyAsync(bubbleMessage), options);
-    //             break;
-    //         case BubbleIntent.reply:
-    //             // replies don't inheritably support delays but for testing this may be useful to simulate delays
-    //             this.executeWithDelay(() => context.replyAsync(bubbleMessage), options);
-    //             break;
-    //         default:
-    //             throw new Error("Unsupported bubble intent: " + bubble.intent);
-    //     }
-    // }
 
     private executeWithDelay(f: Function, options: SendOptions): void {
         if (options && options.timeToDelay) {
@@ -481,6 +452,7 @@ export class Bubbles {
 
     private getBubbleMessage(name: string): IBubbleMessage {
         const message: IBubbleMessage = this.messages.filter(m => m.name === name)[0];
+        // make a copy so the original is not modified
         return message;
     }
 
@@ -518,10 +490,10 @@ export class Bubbles {
             bubble.source = BubbleSource.override;
             const override = parts[1];
             const overrideBubble = this.getBubble(override);
-            bubbleFlow.push({ ...bubble, overrideWith: overrideBubble.name } as IOverrideBubble);
+            bubbleFlow.push({ ...bubble, overrideWith: overrideBubble } as IOverrideBubble);
             bubbleFlow.push(overrideBubble);
         } else if (bubble.source === BubbleSource.substitute) {
-            // As there will be two messages being captured there needs to be an additional bubble to account for that
+            // as there will be two messages being captured there needs to be an additional bubble to account for that
             const originalType = bubble.name + ".original";
             bubbleFlow.push({ name: originalType, intent: bubble.intent, source: bubble.source });
             bubble.source = BubbleSource.system;
@@ -569,7 +541,7 @@ export class Bubbles {
             name,
             intent,
             source
-        }
+        };
     }
     // private addDelay(bubbleFlow: IBubble[]): void {
     //     const lastBubble: IDelayBubble = bubbleFlow[bubbleFlow.length - 1] as IDelayBubble;

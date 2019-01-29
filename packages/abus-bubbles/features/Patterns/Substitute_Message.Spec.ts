@@ -6,7 +6,7 @@ import { validateMessageTypes } from './utils';
 
 require("chai").should();
 
-feature.only(`Substitute Message 
+feature(`Substitute Message
     @link:../Bubbles.md#substitute
 
     Provides the ability to substitute a message before its consumed by the handler.
@@ -24,7 +24,6 @@ feature.only(`Substitute Message
                 });
 
                 bubbles.bus.subscribe("response", async (message: any, context: IMessageHandlerContext) => {
-                    debugger;
                     context.sendAsync({ type: "receiver-response", id: message.id });
                 });
 
@@ -41,9 +40,7 @@ feature.only(`Substitute Message
                 receiver-response: {"type": "receiver-response", "id":100}
                 """
                 `, async () => {
-                    bubbles.enableTracing();
                     await bubbles.executeAsync(stepContext.docString);
-                    debugger;
                 });
 
             then(`the message flow matches

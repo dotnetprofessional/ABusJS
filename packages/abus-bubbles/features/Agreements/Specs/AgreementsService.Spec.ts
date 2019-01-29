@@ -4,7 +4,7 @@ import { AgreementService } from "../services/AgreementService";
 import { GetAgreementHeadersRequest } from "../services/GetAgreementHeadersRequest";
 import { Bubbles } from "../../../src";
 
-feature.skip(`Agreements Service`, () => {
+feature(`Agreements Service`, () => {
     let bus: IBus;
     background(``, () => {
         given(`bus initialized`, () => {
@@ -65,7 +65,7 @@ feature.skip(`Agreements Service`, () => {
 
             when(`requesting the agreements for TPID: '12345'
             """
-            (>request)(:response)
+            (!>request)(@response)
 
             request: {"type": "GetAgreementHeadersRequest", "payload": {"tpid": "12345"} }
             response:  {"tpid":"12345","agreementHeaders":[{"id":"1","name":"Agreement 1","tpid":"12345"},{"id":"2","name":"Agreement 2","tpid":"12345"}]}
@@ -93,7 +93,7 @@ feature.skip(`Agreements Service`, () => {
             * This example shows that the more complex response can be supplied via code
             '
             """
-            (>request)(:response)
+            (!>request)(@response)
 
             request: {"type": "GetAgreementHeadersRequest", "payload": {"tpid": "12345"} }
             """
@@ -119,13 +119,17 @@ feature.skip(`Agreements Service`, () => {
 
             when(`requesting the agreements for TPID: 'XXXX'
             """
-            (>request)(error)
+            (!>request)(error)
 
             request: {"type": "GetAgreementHeadersRequest", "payload": {"tpid": "XXXX"} }
             error:  {"error":"Unable to locate tpid: XXXX"}
             """
             `, async () => {
-                    await bubbles.executeAsync(stepContext.docString);
+                    try {
+                        await bubbles.executeAsync(stepContext.docString);
+                    } catch (e) {
+                        debugger;
+                    }
                 });
 
             then(`an exception is thrown`, () => {

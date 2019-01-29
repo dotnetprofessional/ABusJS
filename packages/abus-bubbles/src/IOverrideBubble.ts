@@ -1,4 +1,4 @@
 import { IBubble } from './IBubble';
 export interface IOverrideBubble extends IBubble {
-    overrideWith: string;
+    overrideWith: IBubble;
 }

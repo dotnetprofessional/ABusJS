@@ -41,9 +41,7 @@ feature(`Request Response Pattern
                 response: "response"
                 """
                 `, async () => {
-                    bubbles.enableTracing();
                     await bubbles.executeAsync(stepContext.docString);
-                    debugger;
                 });
 
             then(`the message flow matches
@@ -74,7 +72,6 @@ feature(`Request Response Pattern
                 });
 
                 bubbles.bus.subscribe("request", async (message: any, context: IMessageHandlerContext) => {
-                    debugger;
                     throw new Error("This should not be hit as bubbles overrides the handler!");
                 });
 
@@ -89,9 +86,7 @@ feature(`Request Response Pattern
                 response: "response"
                 """
                 `, async () => {
-                    bubbles.enableTracing();
                     await bubbles.executeAsync(stepContext.docString);
-                    debugger;
                 });
 
             then(`the message flow matches
