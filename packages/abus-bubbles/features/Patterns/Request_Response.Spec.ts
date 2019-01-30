@@ -6,7 +6,7 @@ import { validateMessageTypes } from './utils';
 
 require("chai").should();
 
-feature(`Request Response Pattern
+feature.only(`Request Response Pattern
     @link:../Bubbles.md#request-response
 
     Provides the ability to validate the request response pattern. This is achieved by using
@@ -100,6 +100,45 @@ feature(`Request Response Pattern
                 validateMessageTypes(expectedMessageTypes, bubblesResult);
             });
         });
-    });
 
-    // (request-headers)(*status-executing)(>api-request)(!:api-response)(*status-error)
+        scenario.skip(`Overriding a request/response initiated by a handler with a delay`, () => {
+            let bubbles: Bubbles;
+            let bubblesResult: IBubbleFlowResult[];
+
+            given(`a registered handler for the 'api-request' sends a request/response`, () => {
+                bubbles = new Bubbles();
+
+                bubbles.bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
+                    await context.sendWithReplyAsync({ type: "request" });
+                });
+
+                bubbles.bus.subscribe("request", async (message: any, context: IMessageHandlerContext) => {
+                    throw new Error("This should not be hit as bubbles overrides the handler!");
+                });
+
+            });
+
+            when(`sending the message 'api-request'
+                """
+                (!api-request)(!>request:---@response)
+
+                api-request: {"type":"api-request"}
+                request: {"type":"request"}
+                response: "response"
+                """
+                `, async () => {
+                    await bubbles.executeAsync(stepContext.docString);
+                });
+
+            then(`the message flow matches
+                `, () => {
+                    bubbles.validate();
+                    bubblesResult = bubbles.result();
+                });
+
+            and(`the flow result has the correct message types`, () => {
+                const expectedMessageTypes = ["api-request", "request", "request.reply"];
+                validateMessageTypes(expectedMessageTypes, bubblesResult);
+            });
+        });
+    });
