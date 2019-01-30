@@ -227,3 +227,176 @@ api-get-customer-response: {"error":"Invalid customer ID: 123"}
 ```
 
 In this example we're interested in validating that the `get-customer-response` Bubble actually publishes the `customer-not-found` message, thereby validating the handler is processing the api errors correctly.
+
+## API
+The Bubbles API splits the test execution into two parts:
+1. Execute the flow and record the result
+1. Validate the result
+
+The following example assumes that you have your handlers setup ready to receive any messages. For more information on how to register your handlers refer to the ABus documentation.
+
+Assuming the following reasonably complex Bubble Definition:
+```ts
+const definition = 
+    `
+    (!request-headers)(*status-executing)(>api-request)(@api-response)(*request-headers-event)(*status-complete)
+        
+    request-headers: {"type":"GetAgreementHeadersCommand", "payload": {"tpid": "12345"}}
+    api-request: {"type":"GetAgreementHeadersRequest", "payload": {"tpid": "12345"}}
+    api-response: {"tpid": "12345", "agreementHeaders": [{"id":"1"},{"id":"2"}]}
+    request-headers-event: {"type":"ParentCompanyHeadersEvent", "payload": {"tpid": "12345", "agreementHeaders": [{"id":"1"},{"id":"2"}]}}
+    status-executing: {"type":"AgreementProcessStatusEvent", "payload": {"operation": "GetAgreementHeadersCommand", "status": "EXECUTING"}}
+    status-complete: {"type":"AgreementProcessStatusEvent", "payload": {"operation": "GetAgreementHeadersCommand", "status": "COMPLETE"}}
+    `
+```
+
+To execute this definition use the following line of code:
+
+```ts
+await bubbles.executeAsync(stepContext.docString);
+```
+
+Its important to `await` the method call to ensure the execution is complete before continuing. Once complete its possible to run various visualizations if that's required. However, typically the next step is to run the validation of the results. The following line of code will validate the expected flow with the actual flow and throw detailed errors if they dont match.
+
+```ts
+bubbles.validate();
+```
+
+If the messages are simple, then this is all the code that's necessary to validate a message flow. Bubbles will automatically act as the subscriber if messages are sent by a handler that you've not registered. This helps prevent unwanted side affects, and to isolate the handler under test.
+
+To demonstrate what would happen if the definition didn't match we'll change the previous flow by removing the `(*status-executing)` bubble, so that we're missing one of the expected messages.
+
+```ts
+const definition = 
+    `
+    (!request-headers)(>api-request)(@api-response)(*request-headers-event)(*status-complete)
+        
+    request-headers: {"type":"GetAgreementHeadersCommand", "payload": {"tpid": "12345"}}
+    api-request: {"type":"GetAgreementHeadersRequest", "payload": {"tpid": "12345"}}
+    api-response: {"tpid": "12345", "agreementHeaders": [{"id":"1"},{"id":"2"}]}
+    request-headers-event: {"type":"ParentCompanyHeadersEvent", "payload": {"tpid": "12345", "agreementHeaders": [{"id":"1"},{"id":"2"}]}}
+    status-complete: {"type":"AgreementProcessStatusEvent", "payload": {"operation": "GetAgreementHeadersCommand", "status": "COMPLETE"}}
+    `
+```
+Running this now would produce the following error:
+
+```
+bubble: api-request, message index: 1                                
+                                                                     
++ expected - actual                                                  
+                                                                     
+{                                                                    
+-     "type": "AgreementProcessStatusEvent",                         
++     "type": "GetAgreementHeadersRequest",                          
+"payload": {                                                         
+-          "operation": "GetAgreementHeadersCommand",                
+-          "status": "EXECUTING"                                     
+-     },                                                             
+-     "metaData": {                                                  
+-          "intent": "publish",                                      
+-          "messageId": "82ac60ca-42d6-4b87-9c93-526a3c7d1859",      
+-          "conversationId": "7d3959ec-bbfa-48a7-b316-c18e516cf99a", 
+-          "correlationId": "ae0677bb-3d24-4cae-b248-445a03646d3d",  
+-          "receivedBy": "Bubbles"                                   
++          "tpid": "12345"                                           
+}                                                                    
+}                                                                    
+```
+Here its clearly indicating that the `AgreementProcessStatusEvent` should have arrived as the second message (`index 1`). However, instead the `GetAgreementHeadersRequest` message was received. This would let us know that there's either a bug in the code or our definition.
+
+### Visualizations
+Bubbles takes advantage of the message tracing that `Abus` supports and allows the auto-generation of several visualizations that can make it easier to understand the systems flow.
+
+Here are the diagrams that can currently be produced using the previous example as input:
+
+__Simple Ascii Tree__
+
+_code_
+```ts
+bubbles.visualizations.printAsciiTree();
+```
+
+_result_
+```
+start
+├╴ GetAgreementHeadersCommand (1ms)
+│  ├╴ AgreementProcessStatusEvent 
+│  ├╴ GetAgreementHeadersRequest (0ms)
+│  ├╴ ParentCompanyHeadersEvent 
+│  └╴ AgreementProcessStatusEvent 
+└╴ GetAgreementHeadersRequest.reply (0ms)
+```
+
+__Process Diagram__
+
+_code_
+```ts
+bubbles.visualizations.toProcessDiagram();
+```
+
+_result_
+```
+graph TD
+
+AgreementsProcess
+Bubbles
+AgreementService
+start --> |GetAgreementHeadersCommand| AgreementsProcess
+AgreementsProcess --> |AgreementProcessStatusEvent| Bubbles
+AgreementsProcess --> |GetAgreementHeadersRequest| AgreementService
+AgreementService -.-> |GetAgreementHeadersRequest.reply| AgreementsProcess
+AgreementsProcess --> |ParentCompanyHeadersEvent| Bubbles
+AgreementsProcess --> |AgreementProcessStatusEvent| Bubbles
+```
+
+_mermaid render_
+
+<img src="images/process-diagram.png" alt="drawing" width="800"/>
+
+__Sequence Diagram__
+
+_code_
+```ts
+bubbles.visualizations.toSequenceDiagram();
+```
+_result_
+```
+sequenceDiagram
+
+participant start
+participant AgreementsProcess
+participant Bubbles
+participant AgreementService
+start->>AgreementsProcess:GetAgreementHeadersCommand
+AgreementsProcess->>Bubbles:AgreementProcessStatusEvent
+AgreementsProcess->>AgreementService:GetAgreementHeadersRequest
+AgreementService-->>AgreementsProcess:GetAgreementHeadersRequest.reply
+AgreementsProcess->>Bubbles:ParentCompanyHeadersEvent
+AgreementsProcess->>Bubbles:AgreementProcessStatusEvent
+```
+_mermaid render_
+
+<img src="images/sequence-diagram.png" alt="drawing" width="800"/>
+
+### Tracing
+If you're experiencing issues with running Bubbles, you may want to enable the tracing feature. This feature will print out to the console details of how the bubble definitions are being interpreted. As an example you may think that a message should be getting handled or injected. This output will show if that's happening. This is a more advanced feature and not one that's expected to be used often.
+
+```ts
+bubbles.enableTracing();
+await bubbles.executeAsync(...);
+```
+
+_result_
+```
+BUBBLES: injected: request-headers
+BUBBLES: Received GetAgreementHeadersCommand: 11ms
+BUBBLES: Received AgreementProcessStatusEvent: 20ms
+BUBBLES: handled: status-executing
+BUBBLES: Received GetAgreementHeadersRequest: 22ms
+BUBBLES: Received GetAgreementHeadersRequest.reply: 26ms
+BUBBLES: Received ParentCompanyHeadersEvent: 33ms
+BUBBLES: handled: request-headers-event
+BUBBLES: Received AgreementProcessStatusEvent: 36ms
+BUBBLES: handled: status-complete
+```
+

@@ -2,7 +2,7 @@ import { Bubbles } from "../../../src";
 import { AgreementsProcess } from "../AgreementsProcess";
 import { AgreementService } from "../services/AgreementService";
 
-feature(`Agreements Process`, () => {
+feature.only(`Agreements Process`, () => {
     let bubbles: Bubbles;
 
     background(``, () => {
@@ -27,6 +27,7 @@ feature(`Agreements Process`, () => {
             status-complete: {"type":"AgreementProcessStatusEvent", "payload": {"operation": "GetAgreementHeadersCommand", "status": "COMPLETE"}}
             """
             `, async () => {
+                bubbles.enableTracing();
                 await bubbles.executeAsync(stepContext.docString);
             });
 

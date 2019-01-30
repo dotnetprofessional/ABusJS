@@ -110,11 +110,11 @@ feature(`Request Response Pattern
 
                 bubbles.bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
                     await context.sendWithReplyAsync({ type: "request" });
-                });
+                }, { identifier: "ProcessA" });
 
                 bubbles.bus.subscribe("request", async (message: any, context: IMessageHandlerContext) => {
                     throw new Error("This should not be hit as bubbles overrides the handler!");
-                });
+                }, { identifier: "ProcessB" });
 
             });
 

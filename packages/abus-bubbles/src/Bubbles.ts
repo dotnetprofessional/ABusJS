@@ -215,7 +215,13 @@ export class Bubbles {
             this.bubbleFlowIndex++;
             this.processNextMessageAsync(this.bubbleFlowIndex, message, context);
             // if the current message has a handler the bubbles won't handle it
-            return messageHandled || this.shouldHandleRequest(bubble, message);
+            messageHandled = messageHandled || this.shouldHandleRequest(bubble, message);
+            if (messageHandled) {
+                message.metaData = message.metaData || {};
+                (message.metaData as any).receivedBy = "Bubbles";
+            }
+
+            return messageHandled;
         } catch (e) {
             context.DoNotContinueDispatchingCurrentMessageToHandlers();
             this.executionPromise.reject(e);
@@ -340,6 +346,7 @@ export class Bubbles {
         bubble.overrideWith.forEach(override => {
             if (this.tracingEnabled) console.log(`BUBBLES: overridden: ${bubble.name} with ${override.name}`);
             const bubbleMessage = this.getBubbleMessage(override.name).message;
+            // as this is being handled by the bubbles library add an identifier proving that
             this.dispatchMessage(override, bubbleMessage, context);
         });
     }
