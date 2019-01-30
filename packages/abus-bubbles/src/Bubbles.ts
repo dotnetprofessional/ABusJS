@@ -234,7 +234,11 @@ export class Bubbles {
         }
 
         if (nextMessageBubble && nextMessageBubble.source === BubbleSource.inject) {
-            this.injectMessage(nextMessageBubble, context, delay);
+            // add any delay to the bubble definition
+            if (delay) {
+                nextMessageBubble.delay += delay;
+            }
+            this.injectMessage(nextMessageBubble, context);
         }
 
         // this message will come from the system or it could be a final delay in the definition
@@ -323,22 +327,24 @@ export class Bubbles {
         }
     }
 
-    private injectMessage(bubble: IBubble, context: IMessageHandlerContext, delay?: number) {
+    private injectMessage(bubble: IBubble, context: IMessageHandlerContext): void {
         if (this.tracingEnabled) console.log(`BUBBLES: injected: ${bubble.name}`);
         const bubbleMessage = this.getBubbleMessage(bubble.name).message;
 
-        this.dispatchMessage(bubble, bubbleMessage, context, delay);
+        this.dispatchMessage(bubble, bubbleMessage, context);
     }
 
-    private overrideMessage(bubble: IOverrideBubble, context: IMessageHandlerContext) {
-        if (this.tracingEnabled) console.log(`BUBBLES: overridden: ${bubble.name} with ${bubble.overrideWith.name}`);
+    private overrideMessage(bubble: IOverrideBubble, context: IMessageHandlerContext): void {
 
-        const bubbleMessage = this.getBubbleMessage(bubble.overrideWith.name).message;
-
-        this.dispatchMessage(bubble.overrideWith, bubbleMessage, context);
+        // dispatch as many responses as defined by the bubble
+        bubble.overrideWith.forEach(override => {
+            if (this.tracingEnabled) console.log(`BUBBLES: overridden: ${bubble.name} with ${override.name}`);
+            const bubbleMessage = this.getBubbleMessage(override.name).message;
+            this.dispatchMessage(override, bubbleMessage, context);
+        });
     }
 
-    private substituteMessage(bubble: IBubble, context: IMessageHandlerContext) {
+    private substituteMessage(bubble: IBubble, context: IMessageHandlerContext): void {
         if (this.tracingEnabled) console.log(`BUBBLES: substituted: ${bubble.name} for type: ${context.activeMessage.type}`);
         bubble = this.bubbleFlow[this.bubbleFlowIndex + 1];
         const bubbleMessage = this.getBubbleMessage(bubble.name).message;
@@ -346,12 +352,12 @@ export class Bubbles {
         this.dispatchMessage(bubble, bubbleMessage, context);
     }
 
-    private dispatchMessage(bubble: IBubble, message: any, context: IMessageHandlerContext, delay?: number) {
+    private dispatchMessage(bubble: IBubble, message: any, context: IMessageHandlerContext): void {
         context = context || new MessageHandlerContext(this.bus, null, null);
 
         let options: SendOptions;
-        if (delay) {
-            options = { timeToDelay: new TimeSpan(delay) };
+        if (bubble.delay) {
+            options = { timeToDelay: new TimeSpan(bubble.delay) };
         }
 
         // make a copy of the message before dispatching it if its an object
@@ -489,47 +495,56 @@ export class Bubbles {
 
     private addBubble(bubbleDefinition: string, bubbleFlow: IBubble[]): void {
         let bubble: IBubble;
-        if (bubbleDefinition.indexOf(":") > 0) {
+        bubble = this.getBubble(bubbleDefinition);
+        if (bubble.name.startsWith(":")) {
+            // substitution  - strip off the : from the name
+            bubble.name = bubble.name.substr(1);
+            bubble.source = BubbleSource.substitute;
+            // as there will be two messages being captured there needs to be an additional bubble to account for that
+            const originalType = bubble.name + ".original";
+            bubbleFlow.push({ name: originalType, intent: bubble.intent, source: bubble.source, delay: 0 });
+            bubble.source = BubbleSource.system;
+            bubbleFlow.push(bubble);
+        } else if (bubble.name.indexOf(":") > 0) {
+            // override
             this.addOverrideBubble(bubbleDefinition, bubbleFlow);
         } else {
             bubble = this.getBubble(bubbleDefinition);
-            if (bubble.source === BubbleSource.substitute) {
-                // as there will be two messages being captured there needs to be an additional bubble to account for that
-                const originalType = bubble.name + ".original";
-                bubbleFlow.push({ name: originalType, intent: bubble.intent, source: bubble.source });
-                bubble.source = BubbleSource.system;
-                bubbleFlow.push(bubble);
-            } else {
-                bubbleFlow.push(bubble);
-            }
+            bubbleFlow.push(bubble);
         }
     }
 
     private addOverrideBubble(bubbleDefinition: string, bubbleFlow: IBubble[]): void {
         // this is an override definition
+        const responses: IBubble[] = [];
         const parts = bubbleDefinition.split(":");
 
         const requestBubble = this.getBubble(parts[0]);
-        const responseBubble = this.getBubble(parts[1]);
-
         if (requestBubble.source !== BubbleSource.inject) {
             throw Error(`Bubble: ${requestBubble.name}\nExpected bubble to start with '!', did you mean (A)(B)?`);
         }
         requestBubble.source = BubbleSource.override;
-        bubbleFlow.push({ ...requestBubble, overrideWith: responseBubble } as IOverrideBubble);
-        bubbleFlow.push(responseBubble);
+
+        for (let i = 1; i < parts.length; i++) {
+            responses.push(this.getBubble(parts[i]));
+        }
+
+        bubbleFlow.push({ ...requestBubble, overrideWith: responses } as IOverrideBubble);
+        responses.forEach(r => {
+            bubbleFlow.push(r);
+        });
     }
 
-    private getBubble(bubbleDefinition: string): { source: BubbleSource, name: string, intent: BubbleIntent, delay: number } {
-        // javascript doesn't seem to support named groups, so this is the original to make it clearer what the RegEx is
+    private getBubble(bubbleDefinition: string): IBubble {
+        // javascript doesn't seem to support named groups, so this is the original to make it clearer what the RegEx is doing
         // this should be kept updated if the real regex is modified.
-        // /^(?<inject>[!]?)(?<intent>[>*]?)(?<delay>[-]*)(?<name>[a-zA-Z-]*)/g;
-        const regex = /^([!]?)([>*]?)([-]*)([a-zA-Z-]*)/g;
+        // /^(?<inject>[!]?)(?<delay>[-]*)(?<intent>[>*@]?)(?<name>\S*)/g
+        const regex = /^([!]?)([-]*)([>*@]?)(\S*)/g;
 
         const match: RegExpExecArray = regex.exec(bubbleDefinition);
         const source: BubbleSource = match[1] === "!" ? BubbleSource.inject : BubbleSource.system;
-        const intent: BubbleIntent = this.mapIntent(match[2]);
-        const delay: number = match[3].length * 10;
+        const delay: number = match[2].length * 10;
+        const intent: BubbleIntent = this.mapIntent(match[3]);
         const name: string = match[4];
 
         return {
@@ -555,52 +570,6 @@ export class Bubbles {
             default:
                 throw Error("Unknown intent symbol: " + symbol);
         }
-    }
-
-    private getBubble3(bubbleDefinition: string): { source: BubbleSource, name: string, intent: BubbleIntent } {
-        // defaults
-        let source: BubbleSource = BubbleSource.system;
-        let intent: BubbleIntent = BubbleIntent.send;
-        let delay: number;
-
-        let classifier: string = bubbleDefinition[0];
-        if (classifier === "!") {
-            source = BubbleSource.inject;
-            // strip first character off
-            bubbleDefinition = bubbleDefinition.substr(1);
-            classifier = bubbleDefinition[0];
-        }
-
-        if (classifier === ":") {
-            source = BubbleSource.substitute;
-            bubbleDefinition = bubbleDefinition.substr(1);
-            classifier = bubbleDefinition[0];
-        }
-
-        let name: string = bubbleDefinition.substring(1);
-        switch (classifier) {
-            case "*":
-                intent = BubbleIntent.publish;
-                break;
-            case ">":
-                intent = BubbleIntent.sendReply;
-                break;
-            case "@":
-                intent = BubbleIntent.reply;
-                break;
-            case "-":
-                // there seems to be an embedded delay defined, extract them
-
-                break;
-            default:
-                name = bubbleDefinition;
-        }
-
-        return {
-            name,
-            intent,
-            source
-        };
     }
 
     /**

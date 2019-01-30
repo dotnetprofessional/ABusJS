@@ -1,6 +1,6 @@
 export enum BubbleIntent {
     publish = "publish",
-    send = "sent",
+    send = "send",
     reply = "reply",
     sendReply = "sendReply",
     delay = "delay"

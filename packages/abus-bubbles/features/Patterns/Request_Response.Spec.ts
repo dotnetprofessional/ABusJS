@@ -6,7 +6,7 @@ import { validateMessageTypes } from './utils';
 
 require("chai").should();
 
-feature.only(`Request Response Pattern
+feature(`Request Response Pattern
     @link:../Bubbles.md#request-response
 
     Provides the ability to validate the request response pattern. This is achieved by using
@@ -101,7 +101,7 @@ feature.only(`Request Response Pattern
             });
         });
 
-        scenario.skip(`Overriding a request/response initiated by a handler with a delay`, () => {
+        scenario(`Overriding a request/response initiated by a handler with a delay`, () => {
             let bubbles: Bubbles;
             let bubblesResult: IBubbleFlowResult[];
 

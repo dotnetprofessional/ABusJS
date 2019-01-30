@@ -4,4 +4,5 @@ export interface IBubble {
     intent: BubbleIntent;
     source: BubbleSource;
     name: string;
+    delay: number;
 }

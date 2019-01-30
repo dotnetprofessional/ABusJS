@@ -12,7 +12,7 @@ feature(`Substitute Message
     Provides the ability to substitute a message before its consumed by the handler.
     `, () => {
 
-        scenario(`Send multiple messages to handler`, () => {
+        scenario(`Substitute a message that was sent by a handler`, () => {
             let bubbles: Bubbles;
             let bubblesResult: IBubbleFlowResult[];
 
