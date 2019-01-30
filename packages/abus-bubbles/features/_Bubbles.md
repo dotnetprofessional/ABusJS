@@ -12,7 +12,7 @@ The Bubble Flow describes the order of the messages that you'd expect to see on 
 As an example the flow for sending a message `A`, which then results in a message `B` being sent would look like the following:
 
 ```
-(A)(B)
+(!A)(B)
 ```
 
 As messaging has various ways to send and reply to a message. Bubbles has symbols which describe how a bubble is being sent or received. The symbols are prefixed to the bubble name. Below are the symbols used to describe the message intent:
@@ -58,7 +58,7 @@ name: type
 The name is the same one that was provided when defining the Bubble followed by a colon. The type is a valid JSON object that describes the message. The only hard requirement is that the message have a `type` defined, as this is the only mandatory field for a message. Here's the previous examples Bubble Flow and definitions:
 
 ```
-(A)(B)
+(!A)(B)
 
 A: {"type": "A"}
 B: {"type": "B"}
@@ -75,7 +75,7 @@ However, there are likely times when its desirable to make minor modifications t
 When using a request-response pattern, the value returned from the `.sendWithReplyAsync` is not a an `IMessage<T>` its just `T`. As such when defining the Bubble definition you only supply the payload and not its type.
 
 ```
-(A)(@B)
+(!>A)(@B)
 
 A: {"type": "A"}
 B: {"response"}
@@ -91,7 +91,7 @@ Errors that are produced as a result of an unhandled error of that have been sen
 This type can be used instead of a standard message type to describe that an error message will be part of the flow. This example expands the previous example to define that after sending the message `B` and error is published.
 
 ```
-(A)(B)(*X)
+(!A)(B)(*X)
 
 A: {"type": "A"}
 B: {"type": "B"}
@@ -141,7 +141,7 @@ This pattern can be tested using bubbles in two ways, either to validate the act
 
 __Validate flow__
 ```ts
-(>request)(@response)
+(!>request)(@response)
 
 request: {"type": "request"}
 response: {"real response"}
@@ -174,7 +174,7 @@ __wait 3 time periods before sending the request__
 ### substitute a message
 With this pattern you want to replace a message with a different version of that message. The handler will then receive the new version of the message, rather than the original one sent. This pattern maybe useful when overriding select messages from a handler. The message types of the original and substitute must match for this to work.
 
-(:*response)
+(!:*response)
 
 ### override a message
 With this pattern you want to override a message. This will prevent the original handler from receiving the message. As such its now the responsibility of the test to supply any message responses. This pattern is useful when a handler doesn't use a request-response pattern but sends data via an event (`.publishAsync`). 
@@ -186,7 +186,7 @@ A well tests API includes both the happy as well as the unhappy paths. Its impor
 
 custom error
 ```
-(get-customer)(*get-customer-response)
+(!get-customer)(*get-customer-response)
 
 get-customer: {"type":"get-customer", "id":"XXXX"}
 get-customer-response: {"type":"customer-invalid-format", "message": "Customer ID XXXX is not the correct format"}
@@ -194,7 +194,7 @@ get-customer-response: {"type":"customer-invalid-format", "message": "Customer I
 
 generic thrown error
 ```
-(get-customer)(*get-customer-response)
+(!get-customer)(*get-customer-response)
 
 get-customer: {"type":"get-customer", "id":"XXXX"}
 get-customer-response: {"error": "Customer ID XXXX is not the correct format"}
@@ -205,20 +205,20 @@ One of the powerful features of Bubbles is the ability to simulate conditions th
 
 __Bubble Flow - Happy Path__
 ```
-(get-customer)(>api-get-customer)(@api-get-customer-response)(*get-customer-response)
+(!get-customer)(>api-get-customer)(@api-get-customer-response)(*get-customer-response)
 ```
 
 We can modify this flow to override the api-calls and return an error condition instead.
 
 __Bubble Flow - Not Found Path__
 ```
-(get-customer)(!>api-get-customer:@api-get-customer-response)(*get-customer-response)
+(!get-customer)(!>api-get-customer:@api-get-customer-response)(*get-customer-response)
 ```
 
 Here we're overriding the message `api-get-customer` and supplying our own version which has the error call. The full Bubble Flow definition would be:
 
 ```
-(get-customer)(!>api-get-customer:@api-get-customer-response)(*get-customer-response)
+(!get-customer)(!>api-get-customer:@api-get-customer-response)(*get-customer-response)
 
 get-customer: {"type":"get-customer", "id":"123"}
 get-customer-response: {"type":"customer-not-found", "message": "Unable to locate customer ID: 123"}
