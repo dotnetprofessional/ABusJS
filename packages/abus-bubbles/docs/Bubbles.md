@@ -351,7 +351,7 @@ AgreementsProcess --> |AgreementProcessStatusEvent| Bubbles
 
 _mermaid render_
 
-<img src="images/process-diagram.png" alt="drawing" width="800"/>
+<img src="images/process-diagram.PNG" alt="drawing" width="800"/>
 
 __Sequence Diagram__
 
@@ -376,7 +376,7 @@ AgreementsProcess->>Bubbles:AgreementProcessStatusEvent
 ```
 _mermaid render_
 
-<img src="images/sequence-diagram.png" alt="drawing" width="800"/>
+<img src="images/sequence-diagram.PNG" alt="drawing" width="800"/>
 
 ### Tracing
 If you're experiencing issues with running Bubbles, you may want to enable the tracing feature. This feature will print out to the console details of how the bubble definitions are being interpreted. As an example you may think that a message should be getting handled or injected. This output will show if that's happening. This is a more advanced feature and not one that's expected to be used often.
