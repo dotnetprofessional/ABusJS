@@ -18,18 +18,21 @@ export class Mermaid {
             output += "\n" + process;
         });
 
+        // this is a small hack to make it clear which message started the whole thing
+        messages[0].metaData.sentBy = undefined;
+
         // associate messages with processes
         messages.forEach(message => {
             // lookup the parent process based on the correlationId
-            const parentMessage: IMessage<any> = this.getParentMessage(message, messages);
-            const processName: string = (parentMessage && parentMessage.metaData.receivedBy) || "start";
+            const sentByProcess: string = (message.metaData && message.metaData.sentBy) || "Start";
 
             let event: string;
             if (message.metaData.intent === Intents.reply) {
+                const parentMessage: IMessage<any> = this.getParentMessage(message, messages);
                 message.metaData.receivedBy = this.getParentMessage(parentMessage, messages).metaData.receivedBy;
-                event = `${processName} -.-> |${message.type}| ${message.metaData.receivedBy || "unhandled"}`;
+                event = `${sentByProcess} -.-> |${message.type}| ${message.metaData.receivedBy || "unhandled"}`;
             } else {
-                event = `${processName} --> |${message.type}| ${message.metaData.receivedBy || "unhandled"}`;
+                event = `${sentByProcess} --> |${message.type}| ${message.metaData.receivedBy || "unhandled"}`;
             }
 
             // at this point can add styles too
@@ -40,7 +43,7 @@ export class Mermaid {
     }
 
     public sequenceDiagram(messages: IMessage<any>[]): string {
-        let output: string = "sequenceDiagram\n\n";
+        let output: string = "sequenceDiagram\n";
 
         // define the processes
         const processes: Set<string> = this.getProcessesFromMessages(messages);

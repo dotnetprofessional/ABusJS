@@ -386,7 +386,6 @@ export class Bubbles {
                         await context.sendWithReplyAsync(message);
                     } catch (e) {
                         // ignore any errors as they will be intercepted but a promise rejection may still occur
-                        debugger;
                     }
                 }, options);
                 break;

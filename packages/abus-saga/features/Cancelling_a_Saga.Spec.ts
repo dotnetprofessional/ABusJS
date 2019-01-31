@@ -39,7 +39,6 @@ feature(`Cancelling a Saga
                 """
             `, async () => {
                     await bubbles.executeAsync(stepContext.docString);
-                    debugger;
                 });
 
             and(`sending another message to the Saga that doesn't start the saga`, () => {

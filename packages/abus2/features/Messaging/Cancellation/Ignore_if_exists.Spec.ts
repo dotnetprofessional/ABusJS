@@ -126,7 +126,6 @@ feature(`Ignore if exists
                     await sleep(10); // provide a little buffer to ensure additional messages don't arrive unexpectedly
 
                     const messages = outboundLogger.messages;
-                    debugger;
                     messages.length.should.eq(messageToSend.length);
                     for (let i = 0; i < messageToSend.length; i++) {
                         messages[i].type.should.be.eq(messageToSend[i].type, "for index: " + i);

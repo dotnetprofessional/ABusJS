@@ -125,11 +125,7 @@ feature(`Agreements Service`, () => {
             error:  {"error":"Unable to locate tpid: XXXX"}
             """
             `, async () => {
-                    try {
-                        await bubbles.executeAsync(stepContext.docString);
-                    } catch (e) {
-                        debugger;
-                    }
+                    await bubbles.executeAsync(stepContext.docString);
                 });
 
             then(`an exception is thrown`, () => {

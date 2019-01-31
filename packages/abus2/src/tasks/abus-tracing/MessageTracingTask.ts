@@ -12,6 +12,9 @@ export class MessageTracingTask implements IMessageTask {
 
         // CorrelationId becomes the current message
         metaData.correlationId = metaData.correlationId || (parentMetaData ? parentMetaData.messageId : undefined);
+
+        // the receivedBy attribute is set as the handler is receiving the message. Ideally it too would be in this task
+        // but the information isn't currently available to do that.
         if (context.parentMessage && !message.metaData.sentBy) {
             metaData.sentBy = context.parentMessage.metaData.receivedBy;
         }
