@@ -40,7 +40,7 @@ export class Mermaid {
     }
 
     public sequenceDiagram(messages: IMessage<any>[]): string {
-        let output: string = "sequenceDiagram\n\nparticipant start";
+        let output: string = "sequenceDiagram\n\n";
 
         // define the processes
         const processes: Set<string> = this.getProcessesFromMessages(messages);
@@ -50,20 +50,22 @@ export class Mermaid {
             output += "\nparticipant " + process;
         });
 
+        // this is a small hack to make it clear which message started the whole thing
+        messages[0].metaData.sentBy = undefined;
+
         // associate messages with processes
         messages.forEach(message => {
             // lookup the parent process based on the correlationId
-            const parentMessage: IMessage<any> = this.getParentMessage(message, messages);
-            const processName: string = (parentMessage && parentMessage.metaData.receivedBy) || "start";
+            const sentByProcess: string = (message.metaData && message.metaData.sentBy) || "Start";
 
             let event: string;
             // at this point can add styles too
             if (message.metaData.intent === Intents.reply) {
+                const parentMessage: IMessage<any> = this.getParentMessage(message, messages);
                 message.metaData.receivedBy = this.getParentMessage(parentMessage, messages).metaData.receivedBy;
-                event = `${processName}-->>${message.metaData.receivedBy || "unhandled"}:${message.type}`;
+                event = `${sentByProcess}-->>${message.metaData.receivedBy || "unhandled"}:${message.type}`;
             } else {
-                event = `${processName}->>${message.metaData.receivedBy || "unhandled"}:${message.type}`;
-
+                event = `${sentByProcess}->>${message.metaData.receivedBy || "unhandled"}:${message.type}`;
             }
 
             output += "\n" + event;
@@ -74,11 +76,21 @@ export class Mermaid {
 
     private getProcessesFromMessages(messages: IMessage<any>[]): Set<string> {
         const processes: Set<string> = new Set<string>();
+        // add the ones we know about and force their order
+        processes.add("Start");
+
         messages.forEach(message => {
             if (message.metaData.receivedBy) {
                 processes.add(message.metaData.receivedBy);
             }
+            if (message.metaData.sentBy) {
+                processes.add(message.metaData.sentBy);
+            }
         });
+        // change the order of the Bubbles item
+        if (processes.delete("Bubbles")) {
+            processes.add("Bubbles");
+        }
         return processes;
     }
 

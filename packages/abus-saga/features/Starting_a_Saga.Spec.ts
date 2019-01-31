@@ -35,9 +35,9 @@ feature(`Starting a Saga
             given(`a Saga is started with the message 'START_SAGA`, () => {
             });
 
-            when(`sending the start message it results in the following message flow
+            when(`sending the start message results in the following message flow
                 """
-                (start)(started)
+                (!start)(started)
             
                 start: {"type": "START_SAGA", "payload":{"id":"test1"}}
                 started: {"type": "SAGA_STARTED"}
@@ -57,7 +57,7 @@ feature(`Starting a Saga
 
             when(`sending the start message for an already started saga results in the following message flow
                 """
-                (start)(started)(!start-again)(error)
+                (!start)(started)(!start-again)(error)
             
                 start: {"type": "START_SAGA", "payload":{"id":"test1"}}
                 start-again: {"type": "START_SAGA", "payload":{"id":"test1"}}

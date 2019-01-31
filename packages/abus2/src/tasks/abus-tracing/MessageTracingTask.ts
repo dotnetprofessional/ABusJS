@@ -12,7 +12,9 @@ export class MessageTracingTask implements IMessageTask {
 
         // CorrelationId becomes the current message
         metaData.correlationId = metaData.correlationId || (parentMetaData ? parentMetaData.messageId : undefined);
-
+        if (context.parentMessage && !message.metaData.sentBy) {
+            metaData.sentBy = context.parentMessage.metaData.receivedBy;
+        }
         await next();
     }
 }

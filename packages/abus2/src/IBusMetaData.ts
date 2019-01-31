@@ -5,5 +5,6 @@ export interface IBusMetaData {
     messageId?: string;
     replyTo?: string;
     timeToDelay?: TimeSpan | number;
+    sentBy?: string;
     receivedBy?: string;
 }

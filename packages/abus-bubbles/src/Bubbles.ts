@@ -370,6 +370,8 @@ export class Bubbles {
         // make a copy of the message before dispatching it if its an object
         if (typeof message === "object") {
             message = Object.assign({}, message);
+            message.metaData = message.metaData || {};
+            (message.metaData as any).sentBy = "Bubbles";
         }
         switch (bubble.intent) {
             case BubbleIntent.publish:
