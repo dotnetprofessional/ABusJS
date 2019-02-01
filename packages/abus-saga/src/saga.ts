@@ -1,11 +1,11 @@
-import { IPersistSagaData } from './IPersistSagaData';
+import { IPersistKeyValues } from './IPersistSagaData';
 import { InMemoryKeyValueStore } from './InMemoryKeyValueStore';
 import { ISagaData } from './ISagaData';
 import { IMessageHandler, IMessageHandlerContext, IMessage } from 'abus2';
 
 export abstract class Saga<T> {
     private startSagaWithType: string;
-    private storage: IPersistSagaData = new InMemoryKeyValueStore();
+    private storage: IPersistKeyValues = new InMemoryKeyValueStore();
     private sagaData: ISagaData;
 
     public get data(): T {

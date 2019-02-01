@@ -8,8 +8,8 @@
   "ts:main": "src/index.ts",
   "scripts": {
     "prepublishOnly": "npm run release",
-    "watch": "tsc -b --watch -p .",
-    "release": "tsc -b -p ."
+    "watch": "tsc -b --watch",
+    "release": "tsc -b"
   },
   "repository": {
     "type": "git",

@@ -1,7 +1,7 @@
-import { IPersistSagaData } from './IPersistSagaData';
+import { IPersistKeyValues } from './IPersistSagaData';
 import { newGuid } from "abus2";
 
-export class InMemoryKeyValueStore implements IPersistSagaData {
+export class InMemoryKeyValueStore implements IPersistKeyValues {
     static storage = {};
     /**
      * Clears all saga data stored. This is primarily useful when writing
