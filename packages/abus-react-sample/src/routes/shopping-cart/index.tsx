@@ -12,7 +12,7 @@ import reduxAbusMiddleware from "redux-abus";
 import reduxAbusThunkMiddleware from "redux-abus-thunk";
 import { MessageTracingTask } from "../abus-tracing/MessageTracingTask";
 import { MessagePerformanceTask } from "../abus-tracing/MessagePerformanceTask";
-import { DevTools } from "abus-devtools";
+import { DevTools, DevToolsTask } from "abus-devtools";
 
 const bus = new Bus();
 const busDevTools = new Bus();
