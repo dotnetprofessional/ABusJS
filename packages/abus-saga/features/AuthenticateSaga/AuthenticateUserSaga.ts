@@ -1,4 +1,4 @@
-import { Saga } from '../../src/saga';
+import { Saga } from '../../src/Saga';
 import { IMessage, handler, IMessageHandlerContext } from 'abus2';
 import { AuthenticateUserRequest } from './Services/AuthenticateUserRequest';
 import { AuthenticateUserResponse } from './Services/AuthenticateUserResponse';
@@ -9,7 +9,7 @@ import { TwoFactorAuthenticateUserResponse } from './Services/TwoFactorAuthentic
 export class LoginRequest {
     user: string;
 }
-
+ 
 export class UserLoginSaga extends Saga<any>{
 
     constructor() {

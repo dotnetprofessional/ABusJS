@@ -1,5 +1,5 @@
 import { Bus } from "abus2";
-import { InMemoryKeyValueStore } from "../src/InMemoryKeyValueStore";
+import { InMemoryKeyValueStore } from "../../src";
 import { SagaDemo } from "./samples/SagaDemo";
 import { Bubbles } from "abus-bubbles";
 

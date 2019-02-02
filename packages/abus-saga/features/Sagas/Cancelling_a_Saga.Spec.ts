@@ -1,5 +1,5 @@
 import { Bubbles } from "abus-bubbles";
-import { InMemoryKeyValueStore } from "../src/InMemoryKeyValueStore";
+import { InMemoryKeyValueStore } from "../../src";
 import { SagaDemo } from "./samples/SagaDemo";
 import "livedoc-mocha";
 

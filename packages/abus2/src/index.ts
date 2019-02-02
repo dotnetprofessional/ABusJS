@@ -17,3 +17,5 @@ export { MessagePerformanceTask } from "./tasks/abus-tracing/MessagePerformanceT
 export { MessageException } from "./tasks/MessageException";
 export { IMessageTracing } from "./tasks/abus-tracing/IMessageTracing";
 export { IMessageSubscription } from "./IMessageSubscription";
+export { IHashTable } from "./IHashTable";
+export { getTypeNamespace } from "./Utils";

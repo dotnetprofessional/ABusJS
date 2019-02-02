@@ -1,8 +1,4 @@
-import { IBus, Intents, IMessageHandlerContext, IMessage, newGuid, IBusMetaData } from "abus2";
-
-export interface IHashTable<T> {
-    [key: string]: T;
-}
+import { IBus, Intents, IMessageHandlerContext, IMessage, newGuid, IBusMetaData, IHashTable } from "abus2";
 
 interface IThunkMetaData extends IBusMetaData {
     isSynthetic: boolean;
