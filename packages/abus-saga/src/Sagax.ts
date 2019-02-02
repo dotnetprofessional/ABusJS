@@ -1,15 +1,15 @@
-import { IPersistKeyValues } from './IPersistSagaData';
+import { IPersistDocuments } from './IPersistDocuments';
 import { InMemoryKeyValueStore } from './InMemoryKeyValueStore';
-import { ISagaData } from './ISagaData';
+import { IDocument } from './IDocument';
 import { IMessageHandler, IMessageHandlerContext, IMessage } from 'abus2';
 
 export abstract class Saga<T> {
     private startSagaWithType: string;
-    private storage: IPersistKeyValues = new InMemoryKeyValueStore();
-    private sagaData: ISagaData;
+    private storage: IPersistDocuments<T> = new InMemoryKeyValueStore<T>();
+    private sagaDocument: IDocument<T>;
 
     public get data(): T {
-        return this.sagaData.userData;
+        return this.sagaDocument.data;
     }
 
     constructor() {
@@ -23,7 +23,7 @@ export abstract class Saga<T> {
             anyThis[originalHandlerName] = this.sagaMessageHandler(anyThis[originalHandlerName]);
         }
 
-        this.sagaData = { userData: {} };
+        this.sagaDocument = { data: {} as T};
     }
 
     private sagaMessageHandler(originalHandler: IMessageHandler<any>) {
@@ -38,10 +38,10 @@ export abstract class Saga<T> {
                     throw new Error("Saga key not defined for message: " + context.activeMessage.type);
                 }
 
-                if ((await this.getSagaDataAsync(sagaKey)).sagaKey) {
+                if ((await this.getSagaDataAsync(sagaKey)).key) {
                     throw new Error(`Saga with key ${sagaKey} already exists. Can't start saga twice.`);
                 }
-                this.sagaData.sagaKey = sagaKey;
+                this.sagaDocument.key = sagaKey;
                 // save the default version of the data which only has an eTag
                 await this.saveSagaDataAsync();
             }
@@ -54,12 +54,12 @@ export abstract class Saga<T> {
                 return;
             }
             const newSagaInstance = new (Object.getPrototypeOf(sagaInstance).constructor) as Saga<any>;
-            newSagaInstance.sagaData = data;
+            newSagaInstance.sagaDocument = data;
             const handler = originalHandler.bind(newSagaInstance);
             try {
                 await handler(message, context);
                 // now persist the data again
-                if (!this.sagaData.sagaKey) {
+                if (!this.sagaDocument.key) {
                     await newSagaInstance.saveSagaDataAsync();
                 }
             } catch (e) {
@@ -122,28 +122,27 @@ export abstract class Saga<T> {
     public async completeAsync() {
         await this.removeSagaDataAsync();
         // update the local sagaData to signify its been deleted
-        this.sagaData = { userData: {} };
+        this.sagaDocument = { data: {} as T };
     }
 
     public isCompleted(): boolean {
         return false;
     }
 
-    private async getSagaDataAsync(key: string): Promise<ISagaData> {
-        return await this.storage.getAsync(key) as ISagaData;
+    private async getSagaDataAsync(key: string): Promise<IDocument<T>> {
+        return await this.storage.getAsync(key);
     }
 
     private async saveSagaDataAsync(): Promise<void> {
-        return this.storage.saveAsync(this.sagaData.sagaKey, this.sagaData);
+        return this.storage.saveAsync(this.sagaDocument);
     }
 
     private removeSagaDataAsync(): Promise<void> {
-        return this.storage.removeAsync(this.sagaData.sagaKey);
+        return this.storage.removeAsync(this.sagaDocument.key);
     }
 }
 
 // notes
 /*
     auto-correlation for request-response
-    change request/response to cancellation token
 */
