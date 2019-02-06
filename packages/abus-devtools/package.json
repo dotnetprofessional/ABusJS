@@ -13,7 +13,8 @@
     "watch": "tsc -b --watch",
     "release": "rimraf dist && tsc -b",
     "copy-resources": "node -e require('fs').copyFileSync('src/devTools.scss','dist/src/devTools.scss')",
-    "prepack": "npm run copy-resources"
+    "prepack": "npm run copy-resources",
+    "pack": "npm run release && npm pack && cpx *.tgz ../../releases"
   },
   "repository": {
     "type": "git",
@@ -46,6 +47,8 @@
     "redux": "^4.0.1"
   },
   "devDependencies": {
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "rimraf": "2.6.3",
+    "cpx": "1.5.0"
   }
 }

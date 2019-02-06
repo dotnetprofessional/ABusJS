@@ -25,12 +25,15 @@
     "compile-web-minify": "uglifyjs dist/abus.js --output dist/abus.min.js --compress dead_code,drop_debugger,conditionals,booleans,loops,properties,drop_console --mangle --wrap abus",
     "release": "rimraf dist && tsc -b",
     "prepublish": "npm run release",
-    "watch": "tsc --watch -p ."
+    "watch": "tsc --watch -b",
+    "pack": "npm run release && npm pack && cpx *.tgz ../../releases"
   },
   "dependencies": {
     "tslib": "1.9.3"
   },
   "devDependencies": {
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "rimraf": "2.6.3",
+    "cpx": "1.5.0"
   }
 }

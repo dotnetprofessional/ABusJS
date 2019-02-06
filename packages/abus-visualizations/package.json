@@ -11,7 +11,8 @@
     "test-spec": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=spec+summary+list\" --recursive dist/Features/",
     "prepublishOnly": "tsc -b .",
     "watch": "tsc -b --watch",
-    "release": "rimraf dist && tsc -b"
+    "release": "rimraf dist && tsc -b",
+    "pack": "npm run release && npm pack && cpx *.tgz ../../releases"
   },
   "repository": {
     "type": "git",
@@ -35,6 +36,8 @@
     "abus2": "0.6.0-alpha-1"
   },
   "devDependencies": {
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "rimraf": "2.6.3",
+    "cpx": "1.5.0"
   }
 }

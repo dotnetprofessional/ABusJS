@@ -8,3 +8,5 @@ wallaby.js
 *.log
 tsconfig*.json
 *.tgz
+/.idea
+features

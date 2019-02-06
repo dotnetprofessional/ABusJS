@@ -151,3 +151,6 @@ A-->B-->C-->B.reply
 Where the `B` handler sends a message and then also returns a reply back to `A` via `B.reply`. Its envisioned that this can be handled via defining parallel flows.
 
 
+Sample workflows
+https://webhelp.episerver.com/14-1/en/Content/Commerce/IN_WorkingProcedure.htm
+https://webkul.com/blog/wp-content/uploads/2017/04/Shopping-Cart-Customer.png

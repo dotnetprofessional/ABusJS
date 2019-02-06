@@ -4,7 +4,6 @@ import { IDocument } from './IDocument';
 import { IMessageHandler, IMessageHandlerContext, IMessage, getTypeNamespace, newGuid } from 'abus2';
 
 export abstract class Process<T> {
-    private storage: IPersistDocuments<T> = new InMemoryKeyValueStore<T>();
     private document: IDocument<T>;
     private processKey: string;
 
@@ -12,10 +11,13 @@ export abstract class Process<T> {
         return this.document.data;
     }
 
-    constructor() {
+    constructor(private storage?: IPersistDocuments<T>) {
         const anyThis = this as any;
         if (!anyThis.__messageHandlers) {
             throw new Error("Processes must have at least one message handler defined with @handler");
+        }
+        if (!storage) {
+            this.storage = new InMemoryKeyValueStore<T>();
         }
         // wrap the handlers with a process message handler so all messages can be intercepted
         for (let i = 0; i < anyThis.__messageHandlers.length; i++) {
@@ -31,24 +33,22 @@ export abstract class Process<T> {
         const instance = this;
         return async (message: any, context: IMessageHandlerContext) => {
             // dehydrate existing saga instance
-            const data = await this.getSagaDataAsync(this.processKey);
-            if (!data.eTag) {
+            let doc = await this.getSagaDataAsync(this.processKey);
+            if (!doc.eTag) {
                 // this is the first time the process handler has been invoked, so setup the default data
-                this.document = {
+                doc = {
                     key: this.processKey,
-                    data: {} as T
+                    data: this.data || {} as T
                 };
             }
             // create a new instance to ensure isolation
             const newProcessInstance = new (Object.getPrototypeOf(instance).constructor) as Process<any>;
-            newProcessInstance.document = data;
+            newProcessInstance.document = doc;
             const handler = originalHandler.bind(newProcessInstance);
             try {
                 await handler(message, context);
                 // now persist the data again
-                if (!this.document.key) {
-                    await newProcessInstance.saveDocument();
-                }
+                await newProcessInstance.saveDocumentAsync();
             } catch (e) {
                 // handle exception here
                 throw e;
@@ -60,7 +60,7 @@ export abstract class Process<T> {
         return await this.storage.getAsync(key);
     }
 
-    private async saveDocument(): Promise<void> {
+    private async saveDocumentAsync(): Promise<void> {
         return this.storage.saveAsync(this.document);
     }
 }

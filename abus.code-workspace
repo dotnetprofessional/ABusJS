@@ -4,6 +4,9 @@
 			"path": "packages\\abus-react-sample"
 		},
 		{
+			"path": "packages\\abus-sample-logic"
+		},
+		{
 			"path": "packages\\abus"
 		},
 		{

@@ -1,14 +1,16 @@
 {
-  "name": "redux-abus",
+  "name": "abus-sample-logic",
   "version": "0.1.0-alpha-1",
-  "description": "Integrates ABUS with react-redux",
+  "description": "The business logic for the abus-sample. This logic is UI agnostic",
   "author": "Garry McGlennon",
   "ts:main": "src/index.ts",
   "types": "dist/src/index.d.ts",
   "main": "dist/src/index.js",
   "scripts": {
+    "test": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=+summary+list\" --recursive dist/Features/",
+    "test-spec": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=spec+summary+list\" --recursive dist/Features/",
     "prepublishOnly": "tsc -b .",
-    "watch": "tsc -b --watch -b",
+    "watch": "tsc -b --watch",
     "release": "rimraf dist && tsc -b",
     "pack": "npm run release && npm pack && cpx *.tgz ../../releases"
   },
@@ -18,8 +20,9 @@
   },
   "keywords": [
     "abus",
-    "react",
-    "redux",
+    "bubbles",
+    "BDD",
+    "testing",
     "messaging",
     "TypeScript"
   ],
@@ -27,7 +30,11 @@
   "bugs": {
     "url": "https://github.com/dotnetprofessional/ABusJS/issues"
   },
-  "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/redux-abus#readme",
+  "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-sample-logic#readme",
+  "dependencies": {
+    "abus2": "0.6.0-alpha-1",
+    "abus-bubbles": "0.1.0-alpha-1"
+  },
   "peerDependencies": {
     "abus2": "0.6.0-alpha-1"
   },
