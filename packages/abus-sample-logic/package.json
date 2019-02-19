@@ -1,6 +1,6 @@
 {
   "name": "abus-sample-logic",
-  "version": "0.1.0-alpha-1",
+  "version": "0.1.0-alpha.1",
   "description": "The business logic for the abus-sample. This logic is UI agnostic",
   "author": "Garry McGlennon",
   "ts:main": "src/index.ts",
@@ -32,11 +32,11 @@
   },
   "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-sample-logic#readme",
   "dependencies": {
-    "abus2": "0.6.0-alpha-1",
-    "abus-bubbles": "0.1.0-alpha-1"
+    "abus2": "0.6.0-alpha.1",
+    "abus-bubbles": "0.1.0-alpha.1"
   },
   "peerDependencies": {
-    "abus2": "0.6.0-alpha-1"
+    "abus2": "0.6.0-alpha.1"
   },
   "devDependencies": {
     "mocha": "^5.2.0",

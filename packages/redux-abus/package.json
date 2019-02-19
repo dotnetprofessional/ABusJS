@@ -1,6 +1,6 @@
 {
   "name": "redux-abus",
-  "version": "0.1.0-alpha-1",
+  "version": "0.1.0-alpha.1",
   "description": "Integrates ABUS with react-redux",
   "author": "Garry McGlennon",
   "ts:main": "src/index.ts",
@@ -29,10 +29,10 @@
   },
   "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/redux-abus#readme",
   "peerDependencies": {
-    "abus2": "0.6.0-alpha-1"
+    "abus2": "0.6.0-alpha.1"
   },
   "devDependencies": {
-    "abus2": "0.6.0-alpha-1",
+    "abus2": "0.6.0-alpha.1",
     "mocha": "^5.2.0",
     "rimraf": "2.6.3",
     "cpx": "1.5.0"

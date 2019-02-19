@@ -1,6 +1,6 @@
 {
   "name": "abus-devtools",
-  "version": "0.1.0-alpha-1",
+  "version": "0.1.0-alpha.1",
   "description": "Provides a set of tools to visualize a running application based on the Abus library.",
   "author": "Garry McGlennon",
   "ts:main": "src/index.ts",
@@ -40,7 +40,7 @@
     "parse-key": "*"
   },
   "peerDependencies": {
-    "abus2": "0.6.0-alpha-1",
+    "abus2": "0.6.0-alpha.1",
     "react": "*",
     "react-dom": "^16.6.3",
     "react-redux": "^6.0.0",

@@ -1,6 +1,6 @@
 {
   "name": "abus-inversify",
-  "version": "0.1.0-alpha-1",
+  "version": "0.1.0-alpha.1",
   "description": "Provides support for the Inversify IoC when registering class handlers",
   "author": "Garry McGlennon",
   "types": "dist/src/index.d.ts",
@@ -33,12 +33,12 @@
     "mocha": "^5.2.0",
     "rimraf": "2.6.3",
     "cpx": "1.5.0",
-    "abus2": "0.6.0-alpha-1",
+    "abus2": "0.6.0-alpha.1",
     "inversify": "^5.0.1",
     "reflect-metadata": "^0.1.13"
   },
   "peerDependencies": {
-    "abus2": "0.6.0-alpha-1",
+    "abus2": "0.6.0-alpha.1",
     "inversify": "^5.0.1",
     "reflect-metadata": "^0.1.13"
   }

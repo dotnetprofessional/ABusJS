@@ -1,6 +1,6 @@
 {
   "name": "abus-visualizations",
-  "version": "0.1.0-alpha-1",
+  "version": "0.1.0-alpha.1",
   "description": "Provides a set of visualizations/diagrams for the captured abus messages. These can be useful for building devtools.",
   "author": "Garry McGlennon",
   "ts:main": "src/index.ts",
@@ -33,7 +33,7 @@
   "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-visualizations#readme",
   "dependencies": {},
   "peerDependencies": {
-    "abus2": "0.6.0-alpha-1"
+    "abus2": "0.6.0-alpha.1"
   },
   "devDependencies": {
     "mocha": "^5.2.0",
