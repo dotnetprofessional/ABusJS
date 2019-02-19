@@ -8,10 +8,13 @@
             "path": "abus-bubbles"
         },
         {
-            "path": "abus-devtools"
+            "path": "abus-inversify"
         },
         {
             "path": "abus-visualizations"
+        },
+        {
+            "path": "abus-devtools"
         },
         {
             "path": "abus-saga"

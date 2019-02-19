@@ -32,7 +32,6 @@
   },
   "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-bubbles#readme",
   "dependencies": {
-    "abus2": "0.6.0-alpha-1",
     "diff": "^3.5.0",
     "chalk": "^2.4.2"
   },
@@ -41,6 +40,8 @@
     "abus-visualizations": "0.1.0-alpha-1"
   },
   "devDependencies": {
+    "abus2": "0.6.0-alpha-1",
+    "abus-visualizations": "0.1.0-alpha-1",
     "mocha": "^5.2.0",
     "rimraf": "2.6.3",
     "cpx": "1.5.0"

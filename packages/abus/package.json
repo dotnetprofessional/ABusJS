@@ -23,7 +23,8 @@
     "compile-web": "rimraf out && tsc -p tsconfig.web.json",
     "compile-web-minify": "uglifyjs out/abus.js --output out/abus.min.js --compress dead_code,drop_debugger,conditionals,booleans,loops,properties,drop_console --mangle --wrap abus",
     "release": "rimraf release && tsc -d -t ES5 -p tsconfig.npm.json",
-    "prepublish": "npm run release"
+    "prepublish": "npm run release",
+    "pack": "echo not supported"
   },
   "devDependencies": {
     "@types/chai": "^3.4.35",

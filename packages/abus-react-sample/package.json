@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "_test": "echo \"Error: no test specified\" && exit 1",
-    "start": "rimraf ../../.fusebox && rimraf dist && node fuse"
+    "start": "rimraf ../../.fusebox && rimraf dist && node fuse",
+    "pack": "echo not supported"
   },
   "repository": {
     "type": "git",

@@ -31,14 +31,14 @@
     "url": "https://github.com/dotnetprofessional/ABusJS/issues"
   },
   "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-saga#readme",
-  "dependencies": {
+  "dependencies": {},
+  "peerDependencies": {
     "abus2": "0.6.0-alpha-1",
     "abus-bubbles": "0.1.0-alpha-1"
   },
-  "peerDependencies": {
-    "abus2": "0.6.0-alpha-1"
-  },
   "devDependencies": {
+    "abus2": "0.6.0-alpha-1",
+    "abus-bubbles": "0.1.0-alpha-1",
     "mocha": "^5.2.0",
     "rimraf": "2.6.3",
     "cpx": "1.5.0"

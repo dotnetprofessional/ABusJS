@@ -25,7 +25,7 @@
     "compile-web-minify": "uglifyjs dist/abus.js --output dist/abus.min.js --compress dead_code,drop_debugger,conditionals,booleans,loops,properties,drop_console --mangle --wrap abus",
     "release": "rimraf dist && tsc -b",
     "prepublish": "npm run release",
-    "watch": "tsc --watch -b",
+    "watch": "tsc -b --watch",
     "pack": "npm run release && npm pack && cpx *.tgz ../../releases"
   },
   "dependencies": {

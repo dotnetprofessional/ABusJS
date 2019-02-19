@@ -1,0 +1,45 @@
+{
+  "name": "abus-inversify",
+  "version": "0.1.0-alpha-1",
+  "description": "Provides support for the Inversify IoC when registering class handlers",
+  "author": "Garry McGlennon",
+  "types": "dist/src/index.d.ts",
+  "main": "dist/src/index.js",
+  "ts:main": "src/index.ts",
+  "scripts": {
+    "test": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=+summary+list\" --recursive dist/features/",
+    "prepublishOnly": "npm run release",
+    "watch": "tsc -b --watch",
+    "release": "tsc -b",
+    "pack": "npm run release && npm pack && cpx *.tgz ../../releases"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dotnetprofessional/ABusJS.git"
+  },
+  "keywords": [
+    "abus",
+    "inversify",
+    "messaging",
+    "TypeScript"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dotnetprofessional/ABusJS/issues"
+  },
+  "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-inversify#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "^5.2.0",
+    "rimraf": "2.6.3",
+    "cpx": "1.5.0",
+    "abus2": "0.6.0-alpha-1",
+    "inversify": "^5.0.1",
+    "reflect-metadata": "^0.1.13"
+  },
+  "peerDependencies": {
+    "abus2": "0.6.0-alpha-1",
+    "inversify": "^5.0.1",
+    "reflect-metadata": "^0.1.13"
+  }
+}

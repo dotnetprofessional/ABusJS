@@ -7,13 +7,14 @@
     // words - list of words to be always considered correct
     "words": [
         "abus",
-        "Timespan",
-        "Hashtable",
-        "Guid",
-        "Johhny",
-        "yxxx",
         "coverageprocessor",
-        "Glennon"
+        "Glennon",
+        "Guid",
+        "Hashtable",
+        "inversify",
+        "Johhny",
+        "Timespan",
+        "yxxx"
     ],
     // flagWords - list of words to be always considered incorrect
     // This is useful for offensive words and common spelling errors.

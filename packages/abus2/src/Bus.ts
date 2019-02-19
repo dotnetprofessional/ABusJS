@@ -26,12 +26,15 @@ import { CancellationPolicy } from "./CancellationPolicy";
 import * as Exceptions from "./Exceptions";
 import { AutoCancellationTask } from './tasks/AutoCancellationTask';
 import { TimeSpan } from './Timespan';
+import { IDependencyContainer } from './ioc/IDependencyContainer';
+import { DefaultIoC } from './ioc/DefaultIoC';
 
 export class Bus implements IBus {
     private registeredTransports: IHashTable<IRegisteredTransport> = {};
     private registeredMessageTypes: IHashTable<IRegisteredTransport> = {};
     private messageSubscriptions: IMessageSubscription<any>[] = [];
     private messageReplyHandlers: IHashTable<ReplyHandler> = {};
+    private container: IDependencyContainer = new DefaultIoC();
 
     private abusGrammar = new AbusGrammar(this);
 
@@ -48,6 +51,16 @@ export class Bus implements IBus {
 
     public usingTransport(transport: IMessageTransport): TransportGrammar {
         return this.abusGrammar.usingTransport(transport);
+    }
+
+    /**
+     * Have Abus use an IoC container such as Inversify. 
+     *
+     * @param {IDependencyContainer} container
+     * @memberof Bus
+     */
+    public usingIoC(container: IDependencyContainer) {
+        this.container = container;
     }
 
     /**
@@ -155,7 +168,7 @@ export class Bus implements IBus {
         const subscriptions = proto.__messageHandlerSubscriptions;
         let classInstance;
         if (createInstance) {
-            classInstance = new classHandler;
+            classInstance = this.container.resolve(classHandler);
         } else {
             classInstance = classHandler;
         }

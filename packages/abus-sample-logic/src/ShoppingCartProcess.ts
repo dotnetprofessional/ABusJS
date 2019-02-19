@@ -27,8 +27,3 @@ export class AddProductCommand {
 export class RemoveProductCommand extends AddProductCommand { }
 
 export class CheckoutCommand { }
-
-// checkout process
-export class
-
-

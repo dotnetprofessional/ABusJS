@@ -22,6 +22,9 @@
 			"path": "packages\\abus-saga"
 		},
 		{
+			"path": "packages\\abus-inversify"
+		},
+		{
 			"path": "packages\\abus-visualizations"
 		},
 		{
@@ -41,8 +44,78 @@
 			"Guid",
 			"Hashtable",
 			"Timespan",
+			"injectable",
+			"inversify",
 			"livedoc",
 			"yxxx"
-		]
+		],
+		"files.exclude": {
+			"node_modules": true,
+			"dist": true,
+			"lib": true,
+			".fusebox": true
+		}
+	},
+	"launch": {
+		"configurations": [
+			{
+				"type": "chrome",
+				"request": "launch",
+				"name": "Launch Chrome against localhost",
+				"url": "http://localhost:8080",
+				"webRoot": "${workspaceFolder:abus-react-sample}"
+			},
+			{
+				"name": "ABus",
+				"type": "node",
+				"request": "launch",
+				"program": "${workspaceFolder:abus2}/node_modules/mocha/bin/_mocha",
+				"args": [
+					"--ui",
+					"livedoc-mocha",
+					"--reporter",
+					"livedoc-mocha/livedoc-spec",
+					"-O",
+					"detailLevel=summary+list",
+					"--timeout",
+					"999999",
+					"--colors",
+					"${workspaceFolder:abus2}/dist/features/**/*.Spec.js"
+				],
+				"internalConsoleOptions": "openOnSessionStart",
+				"smartStep": true,
+				"sourceMaps": true,
+				"skipFiles": [
+					"node_modules/**/*.js",
+					"lib/**/*.js"
+				]
+			},
+			{
+				"name": "ABus Inversify",
+				"type": "node",
+				"request": "launch",
+				"program": "${workspaceFolder:abus2}/node_modules/mocha/bin/_mocha",
+				"args": [
+					"--ui",
+					"livedoc-mocha",
+					"--reporter",
+					"livedoc-mocha/livedoc-spec",
+					"-O",
+					"detailLevel=summary+list",
+					"--timeout",
+					"999999",
+					"--colors",
+					"${workspaceFolder:abus-inversify}/dist/features/**/*.Spec.js"
+				],
+				"internalConsoleOptions": "openOnSessionStart",
+				"smartStep": true,
+				"sourceMaps": true,
+				"skipFiles": [
+					"node_modules/**/*.js",
+					"lib/**/*.js"
+				]
+			}
+		],
+		"compounds": []
 	}
 }
