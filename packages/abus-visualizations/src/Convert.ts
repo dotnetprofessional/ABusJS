@@ -1,4 +1,4 @@
-import { IMessage, IMessageTracing } from "abus2";
+import { IMessage, IMessageTracing, Intents } from "abus2";
 import { IMessageNode } from "./IMessageNode";
 
 export class Convert {
@@ -9,9 +9,15 @@ export class Convert {
         for (let i: number = 0; i < messages.length; i++) {
             const m: IMessage<any> = messages[i];
             const messageNode: IMessageNode = { message: m, nodes: [] };
-            let parentNode: IMessageNode = nodes[(m.metaData as IMessageTracing).correlationId];
+            let parentNode: IMessageNode;
+            if (m.metaData.intent === Intents.reply) {
+                parentNode = nodes[(m.metaData as IMessageTracing).replyTo];
+            } else {
+                parentNode = nodes[(m.metaData as IMessageTracing).correlationId];
+            }
+
+            nodes[m.metaData.messageId] = messageNode;
             if (!parentNode) {
-                nodes[m.metaData.messageId] = messageNode;
                 rootNodes.push(messageNode);
             } else {
                 parentNode.nodes.push(messageNode);

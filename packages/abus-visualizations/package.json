@@ -1,6 +1,6 @@
 {
   "name": "abus-visualizations",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "Provides a set of visualizations/diagrams for the captured abus messages. These can be useful for building devtools.",
   "author": "Garry McGlennon",
   "ts:main": "src/index.ts",

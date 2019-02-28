@@ -2,6 +2,7 @@ import { ISendMessages } from "./ISendMessages";
 import { IMessageHandler } from "./IMessageHandler";
 import { TransportGrammar } from "./fluent/transportGrammar";
 import { ISubscriptionOptions } from "./ISubscriptionOptions";
+import { IDependencyContainer } from './ioc';
 
 export interface IBus extends ISendMessages {
     /**
@@ -20,6 +21,14 @@ export interface IBus extends ISendMessages {
      * @memberof IBus
      */
     usingRegisteredTransportToMessageType(type: string): TransportGrammar;
+
+    /**
+     * Have Abus use an IoC container such as Inversify. 
+     *
+     * @param {IDependencyContainer} container
+     * @memberof Bus
+     */
+    usingIoC(container: IDependencyContainer)
 
     /**
      * registers the message type with a previously registered transport

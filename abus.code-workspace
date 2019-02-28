@@ -114,6 +114,56 @@
 					"node_modules/**/*.js",
 					"lib/**/*.js"
 				]
+			},
+			{
+				"name": "Bubbles",
+				"type": "node",
+				"request": "launch",
+				"program": "${workspaceFolder:abus-bubbles}/node_modules/mocha/bin/_mocha",
+				"args": [
+					"--ui",
+					"livedoc-mocha",
+					"--reporter",
+					"livedoc-mocha/livedoc-spec",
+					"-O",
+					"detailLevel=summary+list",
+					"--timeout",
+					"999999",
+					"--colors",
+					"${workspaceFolder:abus-bubbles}/dist/features/**/*.Spec.js"
+				],
+				"internalConsoleOptions": "openOnSessionStart",
+				"smartStep": true,
+				"sourceMaps": true,
+				"skipFiles": [
+					"node_modules/**/*.js",
+					"lib/**/*.js"
+				]
+			},
+			{
+				"name": "Visualizations",
+				"type": "node",
+				"request": "launch",
+				"program": "${workspaceFolder:abus-visualizations}/node_modules/mocha/bin/_mocha",
+				"args": [
+					"--ui",
+					"livedoc-mocha",
+					"--reporter",
+					"livedoc-mocha/livedoc-spec",
+					"-O",
+					"detailLevel=summary+list",
+					"--timeout",
+					"999999",
+					"--colors",
+					"${workspaceFolder:abus-visualizations}/dist/features/**/*.Spec.js"
+				],
+				"internalConsoleOptions": "openOnSessionStart",
+				"smartStep": true,
+				"sourceMaps": true,
+				"skipFiles": [
+					"node_modules/**/*.js",
+					"lib/**/*.js"
+				]
 			}
 		],
 		"compounds": []
