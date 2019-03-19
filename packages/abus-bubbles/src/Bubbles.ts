@@ -70,6 +70,12 @@ export class Bubbles {
         return promise;
     }
 
+    /**
+     * Validates the observed messages against the defined message flow and throw and exception
+     * when they do not match.
+     *
+     * @memberof Bubbles
+     */
     public validate(): void {
         // remove all the delay bubbles before comparing
         const bubbleFlow = this.bubbleFlow.filter(b => b.intent !== BubbleIntent.delay);
@@ -101,12 +107,93 @@ export class Bubbles {
         }
     }
 
+    /**
+     * Returns an array of the validation results that were generated when calling the validate method.
+     *
+     * @returns {IBubbleFlowResult[]}
+     * @memberof Bubbles
+     */
     public result(): IBubbleFlowResult[] {
         return this.bubbleFlowResult;
     }
 
-    public observedMessages(): IMessage<any>[] {
+    /**
+     * A collection of the messages that were observed during the execution run.
+     *
+     * @returns {IMessage<any>[]}
+     * @memberof Bubbles
+     */
+    public get observedMessages(): IMessage<any>[] {
         return this.actualMessageFlow;
+    }
+
+    /**
+     * When enabled will output to the console tracing messages which can be helpful when diagnosing issues.
+     *
+     * @memberof Bubbles
+     */
+    public enableTracing(): void {
+        this.tracingEnabled = true;
+    }
+
+    /**
+     * Used to locate an observed message of a particular message type. This is a short cut for processing the
+     * observedMessage collection.
+     *
+     * @param {string} type
+     * @memberof Bubbles
+     */
+    public observedMessageOfType(type: string) {
+        return this.observedMessages.filter(m => m.type === type)[0];
+    }
+
+    public async messageHandlerAsync(message: IMessage<any>, context: IMessageHandlerContext): Promise<boolean> {
+        try {
+            if (this.tracingEnabled) { console.log(`BUBBLES: Received ${message.type}: ${Date.now() - this.offset}ms`); }
+
+            // record that this message was sent to the bus
+            this.actualMessageFlow.push(message);
+            const bubble = this.bubbleFlow[this.bubbleFlowIndex];
+
+            if (this.executionPromise.isComplete) {
+                // flow is complete so
+                return this.hasRegisteredHandler(message);
+            }
+
+            let messageHandled: boolean = false;
+
+            // the bubble flow may not have defined all the bubbles
+            if (bubble) {
+                switch (bubble.source) {
+                    case BubbleSource.substitute:
+                        this.substituteMessage(bubble, context);
+                        messageHandled = true;
+                        break;
+                    case BubbleSource.override:
+                        this.overrideMessage(bubble as IOverrideBubble, context);
+                        messageHandled = true;
+                        break;
+                }
+
+
+                // process the next message without blocking
+                this.bubbleFlowIndex++;
+                this.processNextMessageAsync(this.bubbleFlowIndex, message, context);
+                // if the current message has a handler the bubbles won't handle it
+                messageHandled = messageHandled || this.shouldHandleRequest(bubble, message);
+                if (messageHandled) {
+                    message.metaData = message.metaData || {};
+                    (message.metaData as any).receivedBy = "Bubbles";
+                }
+            } else {
+                messageHandled = false;
+            }
+
+            return messageHandled;
+        } catch (e) {
+            context.DoNotContinueDispatchingCurrentMessageToHandlers();
+            this.executionPromise.reject(e);
+        }
     }
 
     private validateResult(expected: any, message: any, bubble: IBubble): IBubbleResult {
@@ -185,49 +272,6 @@ export class Bubbles {
 
     private offset = Date.now();
 
-    public async messageHandlerAsync(message: IMessage<any>, context: IMessageHandlerContext): Promise<boolean> {
-        try {
-            if (this.tracingEnabled) { console.log(`BUBBLES: Received ${message.type}: ${Date.now() - this.offset}ms`); }
-
-            // record that this message was sent to the bus
-            this.actualMessageFlow.push(message);
-            const bubble = this.bubbleFlow[this.bubbleFlowIndex];
-
-            if (this.executionPromise.isComplete) {
-                // flow is complete so
-                return this.hasRegisteredHandler(message);
-            }
-
-            let messageHandled: boolean = false;
-
-            switch (bubble.source) {
-                case BubbleSource.substitute:
-                    this.substituteMessage(bubble, context);
-                    messageHandled = true;
-                    break;
-                case BubbleSource.override:
-                    this.overrideMessage(bubble as IOverrideBubble, context);
-                    messageHandled = true;
-                    break;
-            }
-
-            // process the next message without blocking
-            this.bubbleFlowIndex++;
-            this.processNextMessageAsync(this.bubbleFlowIndex, message, context);
-            // if the current message has a handler the bubbles won't handle it
-            messageHandled = messageHandled || this.shouldHandleRequest(bubble, message);
-            if (messageHandled) {
-                message.metaData = message.metaData || {};
-                (message.metaData as any).receivedBy = "Bubbles";
-            }
-
-            return messageHandled;
-        } catch (e) {
-            context.DoNotContinueDispatchingCurrentMessageToHandlers();
-            this.executionPromise.reject(e);
-        }
-    }
-
     private async processNextMessageAsync(nextIndex: number, message: IMessage<any>, context: IMessageHandlerContext): Promise<void> {
         // this handles injection scenarios
         let delay: number;
@@ -249,10 +293,6 @@ export class Bubbles {
 
         // this message will come from the system or it could be a final delay in the definition
         this.resolveIfComplete(nextIndex, delay);
-    }
-
-    public enableTracing(): void {
-        this.tracingEnabled = true;
     }
 
     private resolveIfComplete(index: number, delay: number = 10): void {
@@ -406,6 +446,7 @@ export class Bubbles {
         }
 
     }
+
     private initializeBus(): IBus {
         const bus = new Bus();
         bus.start();

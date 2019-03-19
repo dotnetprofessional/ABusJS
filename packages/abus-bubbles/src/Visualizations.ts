@@ -14,16 +14,21 @@ export class Visualizations {
 
     public toProcessDiagram(): string {
         const mermaid: Mermaid = new Mermaid();
-        return mermaid.processFlowDiagram(this.bubbles.observedMessages());
+        return mermaid.processFlowDiagram(this.bubbles.observedMessages);
     }
 
     public toSequenceDiagram(): string {
         const mermaid: Mermaid = new Mermaid();
-        return mermaid.sequenceDiagram(this.bubbles.observedMessages());
+        return mermaid.sequenceDiagram(this.bubbles.observedMessages);
     }
 
     public printAsciiTree(): void {
         const text: TextVisualizations = new TextVisualizations();
-        console.log(text.tree(this.bubbles.observedMessages()));
+        console.log(text.tree(this.bubbles.observedMessages));
+    }
+
+    public asciiTree(): string {
+        const text: TextVisualizations = new TextVisualizations();
+        return text.tree(this.bubbles.observedMessages);
     }
 }
