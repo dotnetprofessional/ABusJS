@@ -233,9 +233,8 @@ The Bubbles API splits the test execution into two parts:
 1. Execute the flow and record the result
 1. Validate the result
 
-The following example assumes that you have your handlers setup ready to receive any messages. For more information on how to register your handlers refer to the ABus documentation.
+The following examples assume that you have your handlers setup ready to receive any messages. For more information on how to register your handlers refer to the ABus documentation. The examples assume the following reasonably complex Bubble Definition:
 
-Assuming the following reasonably complex Bubble Definition:
 ```ts
 const definition = 
     `
@@ -250,13 +249,17 @@ const definition =
     `
 ```
 
-To execute this definition use the following line of code:
+#### __.executeAsync__
+To execute a bubble definition defined above, you call the `.executeAync` function passing in the definition. This initiate the message flow by sending the first message to the bus, which will kick off the message flow. As message are being send to the bus, bubbles will capture them for later comparison.
 
 ```ts
-await bubbles.executeAsync(stepContext.docString);
+await bubbles.executeAsync(definition);
 ```
 
-Its important to `await` the method call to ensure the execution is complete before continuing. Once complete its possible to run various visualizations if that's required. However, typically the next step is to run the validation of the results. The following line of code will validate the expected flow with the actual flow and throw detailed errors if they dont match.
+Its important to `await` the method call to ensure the execution is complete before continuing. Once complete its possible to run various validations or visualizations if that's required.
+
+#### __.validate__
+The validate function compares the observed messages that were captured when executing the `.executeAsync` function. This will validate that the message flow exactly matches the definition, and where it doesn't will throw an error with detailed information about the mismatch.
 
 ```ts
 bubbles.validate();
@@ -288,7 +291,7 @@ bubble: api-request, message index: 1
 {                                                                    
 -     "type": "AgreementProcessStatusEvent",                         
 +     "type": "GetAgreementHeadersRequest",                          
-"payload": {                                                         
+      "payload": {                                                         
 -          "operation": "GetAgreementHeadersCommand",                
 -          "status": "EXECUTING"                                     
 -     },                                                             
@@ -303,6 +306,39 @@ bubble: api-request, message index: 1
 }                                                                    
 ```
 Here its clearly indicating that the `AgreementProcessStatusEvent` should have arrived as the second message (`index 1`). However, instead the `GetAgreementHeadersRequest` message was received. This would let us know that there's either a bug in the code or our definition.
+
+#### __observedMessages__
+Returns a collection of `IMessage<T>` objects that were observed during execution. This can be used to perform various additional validations if required or to understand the actual message flow better.
+
+#### __observedMessageOfType__
+A shortcut way to access a particular message type from the observed message flow. It will return the first occurrence of the message type passed. If not found will throw an error.
+
+```ts
+const message = bubbles.observedMessageOfType("response");
+```
+This is particuarly useful to do additional validation of a particular message.
+
+#### __enableTracing__
+If you're experiencing issues with running Bubbles, you may want to enable the tracing feature. This feature will print out to the console details of how the bubble definitions are being interpreted. As an example you may think that a message should be getting handled or injected. This output will show if that's happening. This is a more advanced feature and not one that's expected to be used often.
+
+```ts
+bubbles.enableTracing();
+await bubbles.executeAsync(...);
+```
+
+_result_
+```
+BUBBLES: injected: request-headers
+BUBBLES: Received GetAgreementHeadersCommand: 11ms
+BUBBLES: Received AgreementProcessStatusEvent: 20ms
+BUBBLES: handled: status-executing
+BUBBLES: Received GetAgreementHeadersRequest: 22ms
+BUBBLES: Received GetAgreementHeadersRequest.reply: 26ms
+BUBBLES: Received ParentCompanyHeadersEvent: 33ms
+BUBBLES: handled: request-headers-event
+BUBBLES: Received AgreementProcessStatusEvent: 36ms
+BUBBLES: handled: status-complete
+```
 
 ### Visualizations
 Bubbles takes advantage of the message tracing that `Abus` supports and allows the auto-generation of several visualizations that can make it easier to understand the systems flow.
@@ -319,12 +355,12 @@ bubbles.visualizations.printAsciiTree();
 _result_
 ```
 start
-├╴ GetAgreementHeadersCommand (1ms)
-│  ├╴ AgreementProcessStatusEvent 
-│  ├╴ GetAgreementHeadersRequest (0ms)
-│  ├╴ ParentCompanyHeadersEvent 
-│  └╴ AgreementProcessStatusEvent 
-└╴ GetAgreementHeadersRequest.reply (0ms)
+└╴ GetAgreementHeadersCommand (0ms)
+   ├╴ AgreementProcessStatusEvent
+   ├╴ GetAgreementHeadersRequest (0ms)
+   │  └╴ GetAgreementHeadersRequest.reply (0ms)
+   ├╴ ParentCompanyHeadersEvent
+   └╴ AgreementProcessStatusEvent
 ```
 
 __Process Diagram__
@@ -363,11 +399,10 @@ _result_
 ```
 sequenceDiagram
 
-participant start
-participant AgreementsProcess
 participant Bubbles
+participant AgreementsProcess
 participant AgreementService
-start->>AgreementsProcess:GetAgreementHeadersCommand
+Bubbles->>AgreementsProcess:GetAgreementHeadersCommand
 AgreementsProcess->>Bubbles:AgreementProcessStatusEvent
 AgreementsProcess->>AgreementService:GetAgreementHeadersRequest
 AgreementService-->>AgreementsProcess:GetAgreementHeadersRequest.reply
@@ -378,25 +413,4 @@ _mermaid render_
 
 <img src="images/sequence-diagram.PNG" alt="drawing" width="800"/>
 
-### Tracing
-If you're experiencing issues with running Bubbles, you may want to enable the tracing feature. This feature will print out to the console details of how the bubble definitions are being interpreted. As an example you may think that a message should be getting handled or injected. This output will show if that's happening. This is a more advanced feature and not one that's expected to be used often.
-
-```ts
-bubbles.enableTracing();
-await bubbles.executeAsync(...);
-```
-
-_result_
-```
-BUBBLES: injected: request-headers
-BUBBLES: Received GetAgreementHeadersCommand: 11ms
-BUBBLES: Received AgreementProcessStatusEvent: 20ms
-BUBBLES: handled: status-executing
-BUBBLES: Received GetAgreementHeadersRequest: 22ms
-BUBBLES: Received GetAgreementHeadersRequest.reply: 26ms
-BUBBLES: Received ParentCompanyHeadersEvent: 33ms
-BUBBLES: handled: request-headers-event
-BUBBLES: Received AgreementProcessStatusEvent: 36ms
-BUBBLES: handled: status-complete
-```
-
+> The mermaid diagrams can be rendered by using the text definition at the [mermaid live editor](https://mermaidjs.github.io/mermaid-live-editor/#)
