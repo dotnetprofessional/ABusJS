@@ -59,7 +59,6 @@ feature(`Register class handlers with dependencies`, () => {
         });
 
         then(`the handler is registered to receive messages with the dependencies`, () => {
-            debugger;
             magicValue.should.eq("One");
         });
     });

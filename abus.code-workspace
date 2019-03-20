@@ -87,7 +87,7 @@
 				"sourceMaps": true,
 				"skipFiles": [
 					"node_modules/**/*.js",
-					"lib/**/*.js"
+					"dist/**/*.js"
 				]
 			},
 			{
@@ -112,7 +112,7 @@
 				"sourceMaps": true,
 				"skipFiles": [
 					"node_modules/**/*.js",
-					"lib/**/*.js"
+					"dist/**/*.js"
 				]
 			},
 			{
@@ -135,9 +135,12 @@
 				"internalConsoleOptions": "openOnSessionStart",
 				"smartStep": true,
 				"sourceMaps": true,
+				"outFiles": [
+					"${workspaceFolder:abus-bubbles}/dist/**/*.js"
+				],
 				"skipFiles": [
 					"node_modules/**/*.js",
-					"lib/**/*.js"
+					"dist/**/*.js"
 				]
 			},
 			{
@@ -162,7 +165,7 @@
 				"sourceMaps": true,
 				"skipFiles": [
 					"node_modules/**/*.js",
-					"lib/**/*.js"
+					"dist/**/*.js"
 				]
 			}
 		],

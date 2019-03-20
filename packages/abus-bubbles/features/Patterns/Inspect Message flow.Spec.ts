@@ -5,7 +5,7 @@ feature(`Inspect Message flow`, () => {
     scenario(`Inspect an observed message of a particular type`, () => {
         let bubbles: Bubbles;
 
-        given(`a message flow contained the message type 'x'`, () => {
+        given(`a message flow contained the message type 'request'`, () => {
             bubbles = new Bubbles();
 
             bubbles.bus.subscribe(stepContext.values[0], async (message: any, context: IMessageHandlerContext) => {
@@ -20,7 +20,7 @@ feature(`Inspect Message flow`, () => {
 
         when(`executing the message flow
             """
-            (!request)-- -
+            (!request)---
 
             request: { "type": "request" }
             """
@@ -28,8 +28,9 @@ feature(`Inspect Message flow`, () => {
                 await bubbles.executeAsync(stepContext.docString);
             });
 
-        then(`the message is able to be inspected`, () => {
-
+        then(`the observed messages is able to be inspected using the 'observedMessageOfType' method`, () => {
+            const message = bubbles.observedMessageOfType("response");
+            (message as any).id.should.be.eq(1)
         });
     });
 });

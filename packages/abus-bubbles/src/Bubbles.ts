@@ -143,8 +143,13 @@ export class Bubbles {
      * @param {string} type
      * @memberof Bubbles
      */
-    public observedMessageOfType(type: string) {
-        return this.observedMessages.filter(m => m.type === type)[0];
+    public observedMessageOfType<T=unknown>(type: string): IMessage<T> {
+        const items = this.observedMessages.filter(m => m.type === type);
+        if (items.length !== 0) {
+            return items[0];
+        } else {
+            throw Error(`Unable to locate message type: ${type}`);
+        }
     }
 
     public async messageHandlerAsync(message: IMessage<any>, context: IMessageHandlerContext): Promise<boolean> {
