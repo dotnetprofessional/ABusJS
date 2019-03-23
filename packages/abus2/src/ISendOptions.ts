@@ -12,7 +12,7 @@ export interface ISendOptions {
 
     /**
      * Provides a finite amount of time for the request to resolve. If the request takes longer
-     * thant the specified timeout, a timeout exception will be thrown.
+     * than the specified timeout, a timeout exception will be thrown.
      * default: 60 seconds
      *
      * @type {TimeSpan}

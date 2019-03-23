@@ -9,5 +9,6 @@
     - [X] cancelExisting
     - [X] ignoreIfDuplicate
     - [X] ignoreIfExisting
-- [ ] Fix bubbles to support request/response model
-- [ ] Fix Saga tests
+- [X] Fix bubbles to support request/response model
+- [X] Fix Saga tests
+- [ ] Docs!

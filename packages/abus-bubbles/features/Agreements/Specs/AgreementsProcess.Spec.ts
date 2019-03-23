@@ -16,17 +16,17 @@ feature(`Agreements Process`, () => {
 
     scenario(`Retrieve agreement headers for TPID`, () => {
         when(`requesting the agreement headers the following flow occurs
-            """
-            (!request-headers)(*status-executing)(>api-request)(@api-response)(*request-headers-event)(*status-complete)
-        
-            request-headers: {"type":"GetAgreementHeadersCommand", "payload": {"tpid": "12345"}}
-            api-request: {"type":"GetAgreementHeadersRequest", "payload": {"tpid": "12345"}}
-            api-response: {"tpid": "12345", "agreementHeaders": [{"id":"1"},{"id":"2"}]}
-            request-headers-event: {"type":"ParentCompanyHeadersEvent", "payload": {"tpid": "12345", "agreementHeaders": [{"id":"1"},{"id":"2"}]}}
-            status-executing: {"type":"AgreementProcessStatusEvent", "payload": {"operation": "GetAgreementHeadersCommand", "status": "EXECUTING"}}
-            status-complete: {"type":"AgreementProcessStatusEvent", "payload": {"operation": "GetAgreementHeadersCommand", "status": "COMPLETE"}}
-            """
-            `, async () => {
+        """
+        (!request-headers)(*status-executing)(>api-request)(@api-response)(*request-headers-event)(*status-complete)
+    
+        request-headers: {"type":"GetAgreementHeadersCommand", "payload": {"tpid": "12345"}}
+        api-request: {"type":"GetAgreementHeadersRequest", "payload": {"tpid": "12345"}}
+        api-response: {"tpid": "12345", "agreementHeaders": [{"id":"1"},{"id":"2"}]}
+        request-headers-event: {"type":"ParentCompanyHeadersEvent", "payload": {"tpid": "12345", "agreementHeaders": [{"id":"1"},{"id":"2"}]}}
+        status-executing: {"type":"AgreementProcessStatusEvent", "payload": {"operation": "GetAgreementHeadersCommand", "status": "EXECUTING"}}
+        status-complete: {"type":"AgreementProcessStatusEvent", "payload": {"operation": "GetAgreementHeadersCommand", "status": "COMPLETE"}}
+        """
+        `, async () => {
                 await bubbles.executeAsync(stepContext.docString);
             });
 

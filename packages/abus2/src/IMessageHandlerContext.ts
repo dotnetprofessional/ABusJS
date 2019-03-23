@@ -40,7 +40,7 @@ export interface IMessageHandlerContext extends ISendMessages {
     activeMessage: IMessage<any>;
 
     /**
-     * The message from the handler that send the active message
+     * The message from the handler that sent the active message
      *
      * @type {IMessage<any>}
      * @memberof IMessageHandlerContext

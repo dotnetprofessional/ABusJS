@@ -47,6 +47,7 @@
 			"injectable",
 			"inversify",
 			"livedoc",
+			"serializable",
 			"yxxx"
 		],
 		"files.exclude": {
