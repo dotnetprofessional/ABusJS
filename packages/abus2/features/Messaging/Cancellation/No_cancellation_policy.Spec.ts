@@ -2,7 +2,7 @@ import { sleep, MessageLogger, waitUntilAsync } from "../../Utils";
 import { IMessageHandlerContext, Bus, IMessage, MessagePerformanceTask } from "../../../src";
 
 feature(`No cancellation policy
-    @link:_Cancellation.md
+    @link:docs/Cancellation.md
 
         `, function () {
         let bus: Bus;

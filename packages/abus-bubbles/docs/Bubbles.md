@@ -1,6 +1,10 @@
 # Bubbles
 Bubbles is a library to make testing message based systems much easier. It allows a test to be defined declaratively by defining the expected message flows. Bubbles will then start the execution. The message flow can then be validated that the actual messages sent on the bus match the definition. It also provides a mocking ability to override some messages, which can be used to inject the results of service call or to inject error conditions.
 
+* [Structure](#Structure) 
+* [Patterns](#Patterns)
+* [API](#API)
+
 ## Structure
 The structure of a Bubbles test consists of two parts:
 * Bubble Flow
@@ -39,12 +43,9 @@ The meaning of the symbols are:.
 
 | symbol | description                                                     |
 | -      | -                                                               |
-| !      | message will be supplied by test ie mocked                      |
+| !      | message will be supplied by test ie injected/mocked             |
 | :      | indicates mocked response                                       |
 | -      | a 1 time period (default 10ms) delay before sending the message |
-
-Types:
-
 
 ### Bubble definition
 Each bubble must have a definition that matches the name used for the bubble. The definitions describe  the message that is expected to arrive on the bus or that will be sent by the Bubbles library. This definition is then used to validate the correctness of the Bubble flow.

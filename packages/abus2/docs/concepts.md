@@ -41,5 +41,3 @@ The Pipeline refers to the series of tasks taken when an incoming message is pro
 
 ## [Idempotence](https://en.wikipedia.org/wiki/Idempotence)
 The ability to call the same message handler more than once without causing inconsistent business results. This concept is especially important when using transports that support queues or tasks that support retries.
-
-> Concepts adapted from the [NServiceBus documentation](https://docs.particular.net/nservicebus/concept-overview)

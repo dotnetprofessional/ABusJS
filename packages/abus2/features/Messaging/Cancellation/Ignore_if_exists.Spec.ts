@@ -3,7 +3,7 @@ import { sleep, MessageLogger, waitUntilAsync } from "../../Utils";
 import { IMessageHandlerContext, Bus, IMessage, MessagePerformanceTask } from "../../../src";
 
 feature(`Ignore if exists
-    @link:_Cancellation.md#ignoreIfExists
+    @link:docs/Cancellation.md#ignoreIfExists
 
     Applying the ignoreIfDuplicate cancellation policy to a subscription
         `, function () {

@@ -1,3 +1,2 @@
-# Pipeline
 
 Coming soon.

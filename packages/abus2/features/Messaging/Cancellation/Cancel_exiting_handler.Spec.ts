@@ -3,7 +3,7 @@ import { sleep, MessageLogger, waitUntilAsync } from "../../Utils";
 import { IMessageHandlerContext, Bus, IMessage, MessagePerformanceTask } from "../../../src";
 
 feature(`Cancel existing handler
-    @link:_Cancellation.md#cancelExisting
+    @link:docs/Cancellation.md#cancelExisting
 
     Applying the cancelExisting cancellation policy to a subscription
         `, function () {

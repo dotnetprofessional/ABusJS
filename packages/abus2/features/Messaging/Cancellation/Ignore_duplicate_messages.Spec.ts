@@ -3,7 +3,7 @@ import { sleep, MessageLogger, waitUntilAsync } from "../../Utils";
 import { IMessageHandlerContext, Bus, IMessage, MessagePerformanceTask } from "../../../src";
 
 feature(`Ignore duplicate messages
-    @link:_Cancellation.md#ignoreIfDuplicate
+    @link:docs/Cancellation.md#ignoreIfDuplicate
 
     Applying the ignoreIfDuplicate cancellation policy to a subscription
         `, function () {

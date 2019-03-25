@@ -64,7 +64,9 @@ context(
 
 		development() {
 			const fuse = this.getConfig();
-			fuse.dev({ fallback: "index.html" });
+			fuse.dev({
+				fallback: "index.html"
+			});
 			fuse
 				.bundle("demo")
 				.hmr()

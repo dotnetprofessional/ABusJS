@@ -1,9 +1,16 @@
 # What is it?
 _A transport agnostic messaging API for javascript_
 
-ABus provides a simplified messaging API that can be used against multiple message transports such as in memory, ws-sockets and signalR etc. It is inspired by server side messaging libraries such as [NServiceBus](https://particular.net/nservicebus). It provides the flexibility to deliver messages to different receivers while maintaining the same api interface. ABus also provides a unified and consistent way of handling the key aspects of an enterprise messaging solution in javascript:
+ABus provides a simplified messaging API that can be used against multiple message transports such as in memory, ws-sockets and signalR etc. It is inspired by server side messaging libraries such as [NServiceBus](https://particular.net/nservicebus) and [MassTransit](https://masstransit-project.com/). It provides the flexibility to deliver messages to different receivers while maintaining the same api interface. ABus also provides a unified and consistent way of handling the key aspects of an enterprise messaging solution in javascript:
 
 > NB: If you are viewing this from npmjs.com, links and images may be broken. Please visit the [project site](#) to view this document.
+
+* [Why yet another messaging library?](#Why-yet-another-messaging-library?)
+* [Goals](#Goals)
+* [Show me the code!](#Show-me-the-code)
+* [Installing](docs/Installing.md)
+* [API reference](docs/API.md)
+* [Tutorial](docs/Tutorial.md) 
 
 ## Why yet another messaging library?
 There are a number of messaging libraries for Javascript. However, most are not much more than simple event emitters. They serve a purpose as they are fast and can provide a decent level of abstraction. Abus is much more than a simple event emitter. Its designed around the same principles you'd find in a server messaging system. So its more about handling your applications whole process flow than it is about handling `click` events.
@@ -24,12 +31,12 @@ This project has the following goals:
 * __Developer Experience__
     * Have a great developer experience and make writing software easy and fun!
 
-If you value these goals then check out the detailed documentation. However, to peak your interest, here are just a few of the awesome things you'll be able to do!
+If you value these goals then check out the detailed [API documentation](docs/api.md). However, to peak your interest, here are just a few of the awesome things you'll be able to do!
 
 ### Visualizations
 With the advanced tracing abilities, its possible to generate visualizations that self document your system.
 
-![x](https://github.com/dotnetprofessional/ABusJS/raw/dnp/abus-2/packages/abus-bubbles/docs/images/sequence-diagram.PNG)
+![Sample Process](https://github.com/dotnetprofessional/ABusJS/raw/dnp/abus-2/packages/abus-bubbles/docs/images/sequence-diagram.PNG)
 
 See the Visualizations docs for more details
 
@@ -69,9 +76,7 @@ If you're writing a front end system, there's a reasonable chance you're using [
 
 See the Redux docs for more details
 
-
-
-## A Simple Example
+## Show me the code
 The following is a simple example of using Abus to send and receive a message.
 
 _imperative style_
@@ -116,7 +121,4 @@ bus.sendAsync({ type: "ORDER-COMPLETE"});
 > The declarative style is only supported with classes. If your project cannot use classes, then the imperative style should be used.
 
 
-* [Installing](#Installing)
-* [API reference](docs/API.md)
-* [Tutorial](docs/Tutorial.md) 
 
