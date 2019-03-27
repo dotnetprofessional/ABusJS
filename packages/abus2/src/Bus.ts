@@ -35,7 +35,7 @@ export class Bus implements IBus {
     private messageSubscriptions: IMessageSubscription<any>[] = [];
     private messageReplyHandlers: IHashTable<ReplyHandler> = {};
     private container: IDependencyContainer = new DefaultIoC();
-
+    private tracingEnabled: boolean = false;
     private abusGrammar = new AbusGrammar(this);
 
     public static instance: Bus = new Bus();
@@ -124,8 +124,10 @@ export class Bus implements IBus {
     }
 
     public start() {
+        this.trace("Initializing Bus instance...");
         // verify if a default transport/message has been defined if not add one
         if (!this.registeredMessageTypes["*"]) {
+            this.trace("transport: ExpressMemoryTransport")
             this.usingTransport(new ExpressMemoryTransport())
                 .withMessageTypes("*").and
                 .outboundPipeline.useLocalMessagesReceivedTasks(new MessageExceptionTask()).andAlso()
@@ -133,7 +135,12 @@ export class Bus implements IBus {
         }
     }
 
+    public enableTracing(): void {
+        this.tracingEnabled = true;
+    }
+
     public registerHandlers(...classHandlers: any[]): void {
+        this.trace("Registering handlers")
         for (let i = 0; i < classHandlers.length; i++) {
             const classHandler = classHandlers[i];
 
@@ -159,6 +166,7 @@ export class Bus implements IBus {
     }
 
     private registerClassHandler(proto: any, classHandler: any, createInstance: boolean = true) {
+        this.trace("└╴ class: " + proto.constructor.name);
         // verify that the handler has used the decorator to register the handlers
         const definedHandlers = proto.__messageHandlers;
         if (!definedHandlers) {
@@ -173,8 +181,9 @@ export class Bus implements IBus {
             classInstance = classHandler;
         }
         definedHandlers.forEach(definition => {
-            const subscriptionId = this.subscribe(definition.type, classInstance[definition.handler].bind(classInstance), { identifier: classInstance.__identifier || classInstance.constructor.name });
-            // classInstance.__messageHandlersSubscriptions.push(subscriptionId);
+            this.trace("   └╴ subscription: " + definition.type);
+            // the dont trace parameter is internal and only to support slightly nicer tracing output
+            const subscriptionId = this.subscribe(definition.type, classInstance[definition.handler].bind(classInstance), { identifier: classInstance.__identifier || classInstance.constructor.name }, true);
             classInstance.__subscriptions__ = classInstance.__subscriptions__ || [];
             classInstance.__subscriptions__.push(subscriptionId);
             subscriptions.push(subscriptionId);
@@ -243,7 +252,7 @@ export class Bus implements IBus {
         return this.processOutboundMessageAsync(Bus.applyIntent(message as IMessage<any>, Intents.send), context, options);
     }
 
-    public subscribe(filter: string, handler: IMessageHandler<any>, options?: ISubscriptionOptions): string {
+    public subscribe(filter: string, handler: IMessageHandler<any>, options?: ISubscriptionOptions, dontTrace: boolean = false): string {
         if (!filter) {
             throw new TypeError("A subscription requires a valid filter, such as a message type.");
         }
@@ -254,6 +263,7 @@ export class Bus implements IBus {
 
         const subscriptionId = newGuid();
 
+        if (!dontTrace) this.trace("bus.subscription: " + filter);
         this.messageSubscriptions.push({ messageFilter: filter, handler, subscriptionId, options, isProcessing: false });
         return subscriptionId;
     }
@@ -461,5 +471,11 @@ export class Bus implements IBus {
         }
 
         return message as IMessage<T>;
+    }
+
+    private trace(message: string): void {
+        if (this.tracingEnabled) {
+            console.log("ABUS: " + message);
+        }
     }
 }

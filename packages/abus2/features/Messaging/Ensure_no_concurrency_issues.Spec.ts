@@ -29,7 +29,7 @@ feature(`Ensure no concurrency issues`, () => {
 
             // configure bus
             bus.start();
-            // Add additional tasks for the defatul pipeline
+            // Add additional tasks for the default pipeline
             bus.usingRegisteredTransportToMessageType("*")
                 .outboundPipeline.useLocalMessagesReceivedTasks(new ValidatePipelineTask).andAlso()
                 .inboundPipeline.useLocalMessagesReceivedTasks(new ValidatePipelineTask);
@@ -38,7 +38,7 @@ feature(`Ensure no concurrency issues`, () => {
             bus.subscribe(type, async (message: any) => {
                 await sleep(10);
                 messagesReceived.push(message);
-                if (message.payload === 99) {
+                if (message === 99) {
                     isDone = true;
                 }
             });
@@ -56,7 +56,7 @@ feature(`Ensure no concurrency issues`, () => {
 
         then(`the registered handler receives the message in its own instance`, async () => {
             // give the system time to process the messages
-            await waitUntilAsync(() => isDone, 200);
+            await waitUntilAsync(() => isDone, 100);
             messagesReceived.length.should.be.eql(100);
         });
     });

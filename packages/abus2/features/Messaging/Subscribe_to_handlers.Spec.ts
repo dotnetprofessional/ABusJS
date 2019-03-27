@@ -9,7 +9,7 @@ feature(`Subscribing to handlers`, () => {
     background(``, () => {
         given(`abus is configured with the ExpressMemoryTransport`, () => {
             bus = new Bus;
-
+            // bus.enableTracing();
             // configure bus
             bus.start();
         });

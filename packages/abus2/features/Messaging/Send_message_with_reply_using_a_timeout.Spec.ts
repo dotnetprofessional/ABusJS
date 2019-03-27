@@ -36,7 +36,7 @@ feature(`Send message with reply using a timeout`, () => {
         });
 
         when(`sending a message with type '${type}'`, async () => {
-            const p = await bus.sendWithReplyAsync<string>({ type: type }, { timeout: TimeSpan.FromMilliseconds(20) });
+            const p = await bus.sendWithReplyAsync<string>({ type: type }, { timeout: TimeSpan.FromMilliseconds(100) });
             result = await p;
         });
 

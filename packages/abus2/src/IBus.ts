@@ -87,4 +87,12 @@ export interface IBus extends ISendMessages {
      * @memberof IBus
      */
     unregisterHandlers(...handlers: any[]): void;
+
+    /**
+     * When enabled will output tracing information to the console. This information can
+     * be used to diagnose potential issues.
+     *
+     * @memberof IBus
+     */
+    enableTracing(): void;
 }

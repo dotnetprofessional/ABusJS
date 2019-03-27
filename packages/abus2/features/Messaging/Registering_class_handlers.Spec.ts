@@ -14,6 +14,7 @@ feature(`Registering class handlers
                 bus = new Bus;
 
                 // configure bus
+                // bus.enableTracing();
                 bus.start();
                 classHandlers.handlerResponse.value = 0;
             });
