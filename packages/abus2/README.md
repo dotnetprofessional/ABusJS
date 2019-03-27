@@ -8,8 +8,8 @@ ABus provides a simplified messaging API that can be used against multiple messa
 * [Why yet another messaging library?](#Why-yet-another-messaging-library?)
 * [Goals](#Goals)
 * [Show me the code!](#Show-me-the-code)
-* [Installing](docs/Installing.md)
-* [API reference](docs/API.md)
+* [Installing](docs/installing.md)
+* [API reference](docs/api.md)
 * [Tutorial](docs/Tutorial.md) 
 
 ## Why yet another messaging library?
