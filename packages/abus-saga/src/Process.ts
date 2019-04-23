@@ -1,66 +1,93 @@
 import { IPersistDocuments } from './IPersistDocuments';
-import { InMemoryKeyValueStore } from './InMemoryKeyValueStore';
 import { IDocument } from './IDocument';
 import { IMessageHandler, IMessageHandlerContext, IMessage, getTypeNamespace, newGuid } from 'abus2';
 
-export abstract class Process<T> {
-    private document: IDocument<T>;
-    private processKey: string;
+export interface IStorage<T> {
+    getValueAsync(): Promise<T>,
+    getDocumentAsync(): Promise<IDocument<T>>,
+    storeAsync(): Promise<void>
+}
 
-    public get data(): T {
-        return this.document.data;
-    }
+export abstract class Process {
+    protected processKey = this.constructor.name;
 
-    constructor(private storage?: IPersistDocuments<T>) {
+    constructor() {
         const anyThis = this as any;
         if (!anyThis.__messageHandlers) {
-            throw new Error("Processes must have at least one message handler defined with @handler");
+            throw new Error("Processes/Sagas must have at least one message handler defined with @handler");
         }
-        if (!storage) {
-            this.storage = new InMemoryKeyValueStore<T>();
-        }
+
         // wrap the handlers with a process message handler so all messages can be intercepted
         for (let i = 0; i < anyThis.__messageHandlers.length; i++) {
             const originalHandlerName = anyThis.__messageHandlers[i].handler;
-            anyThis[originalHandlerName] = this.processMessageHandler(anyThis[originalHandlerName]);
+            anyThis[originalHandlerName] = this.handlerInterceptor(anyThis[originalHandlerName].bind(this));
         }
 
-        this.document = { data: {} as T };
-        this.processKey = getTypeNamespace(this);
     }
 
-    private processMessageHandler(originalHandler: IMessageHandler<any>) {
-        const instance = this;
+    protected handlerInterceptor(originalHandler: IMessageHandler<any>) {
+
         return async (message: any, context: IMessageHandlerContext) => {
-            // dehydrate existing saga instance
-            let doc = await this.getSagaDataAsync(this.processKey);
-            if (!doc.eTag) {
-                // this is the first time the process handler has been invoked, so setup the default data
-                doc = {
-                    key: this.processKey,
-                    data: this.data || {} as T
-                };
-            }
-            // create a new instance to ensure isolation
-            const newProcessInstance = new (Object.getPrototypeOf(instance).constructor) as Process<any>;
-            newProcessInstance.document = doc;
-            const handler = originalHandler.bind(newProcessInstance);
-            try {
-                await handler(message, context);
-                // now persist the data again
-                await newProcessInstance.saveDocumentAsync();
-            } catch (e) {
-                // handle exception here
-                throw e;
-            }
+            const newInstance = new (Object.getPrototypeOf(this).constructor);
+            const handler = originalHandler.bind(newInstance);
+
+            await newInstance.beforeHandlerAsync(context);
+            await handler(message, context);
+            await newInstance.afterHandlerAsync(context);
         };
     }
 
-    private async getSagaDataAsync(key: string): Promise<IDocument<T>> {
-        return await this.storage.getAsync(key);
+    protected beforeHandlerAsync(context: IMessageHandlerContext) {
+
     }
 
-    private async saveDocumentAsync(): Promise<void> {
-        return this.storage.saveAsync(this.document);
+    protected afterHandlerAsync(context: IMessageHandlerContext) {
+    }
+
+
+    protected useStorage<T>(provider: IPersistDocuments<T>, defaultValue?: T, key?: string | { (): string }): IStorage<T> {
+        const _this = this;
+        function getKey(): string {
+            if (typeof key === "string") {
+                return key
+            } else if (typeof key === "function") {
+                return key();
+            } else {
+                return getTypeNamespace(_this);
+            }
+        }
+
+        async function setDocumentAsync() {
+            document = await provider.getAsync(getKey());
+            if (!document.data) {
+                document.data = defaultValue;
+            }
+        }
+
+        let document: IDocument<T>;
+
+        return {
+            getValueAsync: async () => {
+                if (!document) {
+                    await setDocumentAsync();
+                }
+                return document.data;
+            },
+            getDocumentAsync: async () => {
+                if (!document) {
+                    await setDocumentAsync();
+                }
+                return document;
+            },
+            storeAsync: async () => {
+                const existingDocument = await provider.getAsync(getKey());
+                if (existingDocument && existingDocument.data && existingDocument.eTag !== document.eTag) {
+                    throw Error("ETag mismatch");
+                }
+
+                // save the document
+                await provider.saveAsync(document);
+            }
+        };
     }
 }

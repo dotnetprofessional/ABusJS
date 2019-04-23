@@ -60,7 +60,7 @@ feature(`Starting a Saga
                 (!start)(started)(!start-again)(error)
             
                 start: {"type": "START_SAGA", "payload":{"id":"test1"}}
-                start-again: {"type": "START_SAGA", "payload":{"id":"test1"}}
+                start-again: {"type": "START_SAGA", "payload":{"id":"test1", "data":"second"}}
                 started: {"type": "SAGA_STARTED"}
                 error: {"error":"Saga with key SagaDemo:test1 already exists. Can't start saga twice."}
                 """

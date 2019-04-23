@@ -23,8 +23,8 @@ export class SagaDemo extends Saga<any> {
     }
 
     @handler("CANCEL_ORDER")
-    public cancelOrder(message: any, context: IMessageHandlerContext) {
-        this.completeAsync();
+    public async cancelOrder(message: any, context: IMessageHandlerContext) {
+        await this.completeAsync();
     }
 
     public sagaNotFound(message: IMessage<any>, context: IMessageHandlerContext) {

@@ -15,7 +15,7 @@ feature(`Process persists data`, () => {
         given(`a process accepts the message 'PROCESS-ORDER'`, () => {
             storage = new InMemoryKeyValueStore<IOrderProcessModel>();
             InMemoryKeyValueStore.forceClear();
-            process = new OrderProcess(storage);
+            process = new OrderProcess();
 
             bus = new Bus();
             bus.start();

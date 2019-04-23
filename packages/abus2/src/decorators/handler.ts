@@ -15,7 +15,6 @@ export function handler(type: string | Function, options?: ISubscriptionOptions)
             // Will return the full namespace of the type
             type = getTypeNamespace(type);
         }
-
         var handlers = Object.getOwnPropertyDescriptor(target, "__messageHandlers");
         if (!handlers) {
             // First handler so create a property to store all the handlers
@@ -28,9 +27,6 @@ export function handler(type: string | Function, options?: ISubscriptionOptions)
 
         let originalMethod = descriptor.value;
         descriptor.value = function (...args: any[]) {
-            // this is currently to supposed to be used by classes have received a message
-            // but want to access the context from outside the handler. ** Should remove **
-            // this.currentHandlerContext = args[1];
             return originalMethod.apply(this, args);
         }
     }

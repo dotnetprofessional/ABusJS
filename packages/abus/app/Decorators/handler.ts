@@ -14,6 +14,7 @@ export function handler(type: string | Function) {
             type = Bus.instance.getTypeNamespace(type);
         }
 
+        const x = this;
         var handlers = Object.getOwnPropertyDescriptor(target, "__messageHandlers");
         if (!handlers) {
             // First handler so create a property to store all the handlers

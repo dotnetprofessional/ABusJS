@@ -28,7 +28,11 @@ export class InMemoryKeyValueStore<T> implements IPersistDocuments<T> {
     }
     public async getAsync(key: string): Promise<IDocument<T>> {
         // provides a shallow copy of the current data
-        return Object.assign({}, InMemoryKeyValueStore.storage[key]);
+        let document = InMemoryKeyValueStore.storage[key];
+        if (!document) {
+            document = { key }
+        }
+        return document;
     }
     public async removeAsync(key: string): Promise<void> {
         delete InMemoryKeyValueStore.storage[key];

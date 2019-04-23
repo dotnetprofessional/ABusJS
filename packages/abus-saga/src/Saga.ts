@@ -2,65 +2,61 @@ import { IPersistDocuments } from './IPersistDocuments';
 import { InMemoryKeyValueStore } from './InMemoryKeyValueStore';
 import { IDocument } from './IDocument';
 import { IMessageHandler, IMessageHandlerContext, IMessage } from 'abus2';
+import { Process } from './Process';
 
-export abstract class Saga<T> {
+export abstract class Saga<T> extends Process {
     private startSagaWithType: string;
-    private storage: IPersistDocuments<T> = new InMemoryKeyValueStore<T>();
     private sagaDocument: IDocument<T>;
 
     public get data(): T {
         return this.sagaDocument.data;
     }
 
-    constructor() {
-        const anyThis = this as any;
-        if (!anyThis.__messageHandlers) {
-            throw new Error("Sagas must have at least one message handler defined with @handler");
-        }
-        // wrap the handlers with a saga message handler so all messages can be intercepted
-        for (let i = 0; i < anyThis.__messageHandlers.length; i++) {
-            const originalHandlerName = anyThis.__messageHandlers[i].handler;
-            anyThis[originalHandlerName] = this.sagaMessageHandler(anyThis[originalHandlerName]);
-        }
-
-        this.sagaDocument = { data: {} as T};
+    constructor(protected storage: IPersistDocuments<T> = new InMemoryKeyValueStore<T>()) {
+        super();
     }
 
-    private sagaMessageHandler(originalHandler: IMessageHandler<any>) {
-        const sagaInstance = this;
+    protected handlerInterceptor(originalHandler: IMessageHandler<any>) {
+        const instance = this;
         return async (message: any, context: IMessageHandlerContext) => {
             // create a new saga instance
             let sagaKey = this.configureSagaKey(context.activeMessage);
             // To ensure uniqueness for keys add the name of the Saga to the key
             sagaKey = this.constructor.name + ":" + sagaKey;
-            if (sagaInstance.startSagaWithType === context.activeMessage.type) {
+
+            // dehydrate existing saga instance
+            const dataProvider = this.useStorage(this.storage, undefined, sagaKey);
+            this.sagaDocument = await dataProvider.getDocumentAsync();
+            if (instance.startSagaWithType === context.activeMessage.type) {
                 if (!sagaKey) {
                     throw new Error("Saga key not defined for message: " + context.activeMessage.type);
                 }
 
-                if ((await this.getSagaDataAsync(sagaKey)).key) {
+                if (this.sagaDocument.data) {
                     throw new Error(`Saga with key ${sagaKey} already exists. Can't start saga twice.`);
+                } else {
+                    // create an empty object as default
+                    this.sagaDocument.data = {} as T;
                 }
                 this.sagaDocument.key = sagaKey;
                 // save the default version of the data which only has an eTag
-                await this.saveSagaDataAsync();
-            }
-
-            // dehydrate existing saga instance
-            const data = await this.getSagaDataAsync(sagaKey);
-            if (!data.eTag) {
+                // await this.saveSagaDataAsync();
+            } else if (!this.sagaDocument.eTag) {
                 // a message arrived for a saga that doesn't exist
-                sagaInstance.sagaNotFound(message, context);
+                instance.sagaNotFound(message, context);
                 return;
             }
-            const newSagaInstance = new (Object.getPrototypeOf(sagaInstance).constructor) as Saga<any>;
-            newSagaInstance.sagaDocument = data;
+
+            const newSagaInstance = new (Object.getPrototypeOf(instance).constructor) as Saga<any>;
+            newSagaInstance.sagaDocument = this.sagaDocument;
             const handler = originalHandler.bind(newSagaInstance);
             try {
+                await newSagaInstance.beforeHandlerAsync(context);
                 await handler(message, context);
-                // now persist the data again
-                if (!this.sagaDocument.key) {
-                    await newSagaInstance.saveSagaDataAsync();
+                await newSagaInstance.afterHandlerAsync(context);
+                if (this.sagaDocument.key) {
+                    // now persist the data again
+                    await dataProvider.storeAsync();
                 }
             } catch (e) {
                 // handle exception here
@@ -129,13 +125,13 @@ export abstract class Saga<T> {
         return false;
     }
 
-    private async getSagaDataAsync(key: string): Promise<IDocument<T>> {
-        return await this.storage.getAsync(key);
-    }
+    // private async getSagaDataAsync(key: string): Promise<IDocument<T>> {
+    //     return await this.storage.getAsync(key);
+    // }
 
-    private async saveSagaDataAsync(): Promise<void> {
-        return this.storage.saveAsync(this.sagaDocument);
-    }
+    // private async saveSagaDataAsync(): Promise<void> {
+    //     return this.storage.saveAsync(this.sagaDocument);
+    // }
 
     private removeSagaDataAsync(): Promise<void> {
         return this.storage.removeAsync(this.sagaDocument.key);
