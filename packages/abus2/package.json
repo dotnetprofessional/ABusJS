@@ -18,7 +18,7 @@
     "node": "*"
   },
   "scripts": {
-    "test": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=+summary+list\" --recursive dist/Features/",
+    "test": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=+summary+list+headers\" --recursive dist/Features/",
     "test-spec": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=spec+summary+list\" --recursive dist/Features/",
     "release-web": "npm run compile-web && npm run compile-web-minify",
     "compile-web": "rimraf dist && tsc -p tsconfig.web.json",

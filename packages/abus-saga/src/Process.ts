@@ -20,13 +20,11 @@ export abstract class Process {
         // wrap the handlers with a process message handler so all messages can be intercepted
         for (let i = 0; i < anyThis.__messageHandlers.length; i++) {
             const originalHandlerName = anyThis.__messageHandlers[i].handler;
-            anyThis[originalHandlerName] = this.handlerInterceptor(anyThis[originalHandlerName].bind(this));
+            anyThis[originalHandlerName] = this.handlerInterceptor(anyThis[originalHandlerName]);
         }
-
     }
 
     protected handlerInterceptor(originalHandler: IMessageHandler<any>) {
-
         return async (message: any, context: IMessageHandlerContext) => {
             const newInstance = new (Object.getPrototypeOf(this).constructor);
             const handler = originalHandler.bind(newInstance);

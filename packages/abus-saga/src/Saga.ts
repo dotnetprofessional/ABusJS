@@ -17,9 +17,9 @@ export abstract class Saga<T> extends Process {
     }
 
     protected handlerInterceptor(originalHandler: IMessageHandler<any>) {
-        const instance = this;
         return async (message: any, context: IMessageHandlerContext) => {
             // create a new saga instance
+            const instance = new (Object.getPrototypeOf(this).constructor) as Saga<any>;
             let sagaKey = this.configureSagaKey(context.activeMessage);
             // To ensure uniqueness for keys add the name of the Saga to the key
             sagaKey = this.constructor.name + ":" + sagaKey;
@@ -47,13 +47,12 @@ export abstract class Saga<T> extends Process {
                 return;
             }
 
-            const newSagaInstance = new (Object.getPrototypeOf(instance).constructor) as Saga<any>;
-            newSagaInstance.sagaDocument = this.sagaDocument;
-            const handler = originalHandler.bind(newSagaInstance);
+            instance.sagaDocument = this.sagaDocument;
+            const handler = originalHandler.bind(instance);
             try {
-                await newSagaInstance.beforeHandlerAsync(context);
+                await instance.beforeHandlerAsync(context);
                 await handler(message, context);
-                await newSagaInstance.afterHandlerAsync(context);
+                await instance.afterHandlerAsync(context);
                 if (this.sagaDocument.key) {
                     // now persist the data again
                     await dataProvider.storeAsync();
