@@ -11,10 +11,10 @@
     "test-spec": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=spec+summary+list\" --recursive dist/Features/",
     "prepublishOnly": "npm run copy-resources && tsc -b .",
     "watch": "tsc -b --watch",
-    "release": "rimraf dist && tsc -b",
+    "clean": "rimraf dist",
     "copy-resources": "node -e require('fs').copyFileSync('src/devTools.scss','dist/src/devTools.scss')",
     "prepack": "npm run copy-resources",
-    "pack": "npm run release && npm pack && cpx *.tgz ../../releases"
+    "pack": "npm pack && cpx *.tgz ../../releases"
   },
   "repository": {
     "type": "git",

@@ -9,8 +9,8 @@
   "scripts": {
     "prepublishOnly": "tsc -b .",
     "watch": "tsc -b --watch -b",
-    "release": "rimraf dist && tsc -b",
-    "pack": "npm run release && npm pack && cpx *.tgz ../../releases"
+    "clean": "rimraf dist",
+    "pack": "npm pack && cpx *.tgz ../../releases"
   },
   "repository": {
     "type": "git",

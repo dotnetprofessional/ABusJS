@@ -10,7 +10,7 @@
     "prepublishOnly": "npm run release",
     "watch": "tsc -b --watch",
     "release": "tsc -b",
-    "pack": "npm run release && npm pack && cpx *.tgz ../../releases"
+    "pack": "npm pack && cpx *.tgz ../../releases"
   },
   "repository": {
     "type": "git",

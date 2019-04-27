@@ -23,10 +23,9 @@
     "release-web": "npm run compile-web && npm run compile-web-minify",
     "compile-web": "rimraf dist && tsc -p tsconfig.web.json",
     "compile-web-minify": "uglifyjs dist/abus.js --output dist/abus.min.js --compress dead_code,drop_debugger,conditionals,booleans,loops,properties,drop_console --mangle --wrap abus",
-    "release": "rimraf dist && tsc -b",
-    "prepublish": "npm run release",
+    "clean": "rimraf dist",
     "watch": "tsc -b --watch",
-    "pack": "npm run release && npm pack && cpx *.tgz ../../releases"
+    "pack": "npm pack && cpx *.tgz ../../releases"
   },
   "dependencies": {
     "tslib": "1.9.3"
