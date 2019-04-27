@@ -1,4 +1,4 @@
-import { IMessage, IMessageHandlerContext, IBusMetaData, IMessageTask, newGuid } from 'abus2';
+import { IMessage, IMessageHandlerContext, IBusMetaData, IMessageTask, newGuid } from 'abus';
 import { IMessageTracing } from './MessagePerformanceTask';
 
 export class MessageTracingTask implements IMessageTask {

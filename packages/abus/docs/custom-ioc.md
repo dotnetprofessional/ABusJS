@@ -12,7 +12,7 @@ When implementing this function you simply need to delegate the `constructorFunc
 
 __inversifty IoC__
 ```ts
-import { IDependencyContainer } from 'abus2';
+import { IDependencyContainer } from 'abus';
 import { Container } from "inversify";
 
 export class InversifyIoC implements IDependencyContainer {

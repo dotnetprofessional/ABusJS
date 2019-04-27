@@ -1,6 +1,6 @@
 import { IPersistDocuments, InMemoryKeyValueStore } from "../../src";
 import { IOrderProcessModel, OrderProcess, ProcessOrderCommand } from './Samples/OrderProcess';
-import { IBus, Bus, getTypeNamespace } from 'abus2';
+import { IBus, Bus, getTypeNamespace } from 'abus';
 import { expect } from 'chai';
 import { sleep } from '../Utils';
 import { Bubbles } from 'abus-bubbles';

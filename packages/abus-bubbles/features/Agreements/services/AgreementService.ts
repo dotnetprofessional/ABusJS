@@ -1,4 +1,4 @@
-import { handler, IMessageHandlerContext } from 'abus2';
+import { handler, IMessageHandlerContext } from 'abus';
 import { GetAgreementHeadersRequest } from './GetAgreementHeadersRequest';
 import { AgreementHeader } from '../model/AgreementHeader';
 import { GetAgreementHeadersResponse } from './GetAgreementHeadersResponse';

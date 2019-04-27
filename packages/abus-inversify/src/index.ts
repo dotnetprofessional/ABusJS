@@ -1,4 +1,4 @@
-import { IDependencyContainer } from 'abus2';
+import { IDependencyContainer } from 'abus';
 import { Container } from "inversify";
 
 export class InversifyIoC implements IDependencyContainer {

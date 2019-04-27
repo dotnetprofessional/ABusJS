@@ -1,4 +1,4 @@
-import { IMessage, handler, IMessageHandlerContext } from 'abus2';
+import { IMessage, handler, IMessageHandlerContext } from 'abus';
 import { Saga } from '../../../src';
 
 export class SagaDemo extends Saga<any> {

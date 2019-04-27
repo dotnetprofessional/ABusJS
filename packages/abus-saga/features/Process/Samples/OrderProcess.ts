@@ -1,5 +1,5 @@
 import { Process, IPersistDocuments, InMemoryKeyValueStore } from "../../../src";
-import { handler, IMessageHandlerContext } from "abus2";
+import { handler, IMessageHandlerContext } from "abus";
 import { IStorage } from '../../../src/Process';
 
 export class ProcessOrderCommand {

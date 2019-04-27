@@ -1,4 +1,4 @@
-import { IMessage, Intents, IMessageTracing } from "abus2";
+import { IMessage, Intents, IMessageTracing } from "abus";
 
 /**
  * Provides a set of diagrams based on the mermaid diagramming language

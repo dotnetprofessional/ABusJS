@@ -1,6 +1,6 @@
 import { IPersistDocuments } from './IPersistDocuments';
 import { IDocument } from './IDocument';
-import { IMessageHandler, IMessageHandlerContext, IMessage, getTypeNamespace, newGuid } from 'abus2';
+import { IMessageHandler, IMessageHandlerContext, IMessage, getTypeNamespace, newGuid } from 'abus';
 
 export interface IStorage<T> {
     getValueAsync(): Promise<T>,

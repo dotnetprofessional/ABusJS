@@ -1,6 +1,6 @@
 import "chai";
 import { Bubbles } from "../src";
-import { IBus, Bus, IMessageHandlerContext } from "abus2";
+import { IBus, Bus, IMessageHandlerContext } from "abus";
 
 feature.skip(`Validate bubbles works with more complex workflows`, () => {
     scenarioOutline(`Authorize user form an API

@@ -1,6 +1,6 @@
 import "livedoc-mocha";
 import "reflect-metadata";
-import { Bus, IMessageHandlerContext, handler } from 'abus2';
+import { Bus, IMessageHandlerContext, handler } from 'abus';
 import { injectable, Container, inject } from 'inversify';
 import { InversifyIoC } from '../src';
 import * as chai from "chai";

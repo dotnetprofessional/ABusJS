@@ -33,7 +33,7 @@
   "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-visualizations#readme",
   "dependencies": {},
   "peerDependencies": {
-    "abus2": "0.6.0-alpha.1"
+    "abus": "0.6.0-alpha.1"
   },
   "devDependencies": {
     "mocha": "^5.2.0",

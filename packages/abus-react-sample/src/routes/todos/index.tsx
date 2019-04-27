@@ -5,7 +5,7 @@ import { Provider } from 'react-redux'
 import rootReducer from './reducers'
 import { App } from "./components/App";
 import { composeWithDevTools } from 'redux-devtools-extension';
-import { Bus, IMessageHandlerContext } from "abus2";
+import { Bus, IMessageHandlerContext } from "abus";
 import reduxAbusMiddleware from "redux-abus";
 
 import * as actions from "./actions";

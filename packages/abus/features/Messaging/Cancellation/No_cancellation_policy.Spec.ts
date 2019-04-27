@@ -60,7 +60,7 @@ feature(`No cancellation policy
                 ]
                 """        
                 `, async () => {
-                    await waitUntilAsync(() => outboundLogger.messages.length >= 10, 100);
+                    await waitUntilAsync(() => outboundLogger.messages.length >= 10, 200);
                     await sleep(10); // provide a little buffer to ensure additional messages don't arrive unexpectedly
                     const messages = outboundLogger.messages;
                     messageToSend = stepContext.docStringAsEntity;

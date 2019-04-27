@@ -1,4 +1,4 @@
-import { IBus, Bus, MessageException } from "abus2";
+import { IBus, Bus, MessageException } from "abus";
 import { GetAgreementHeadersResponse } from "../services/GetAgreementHeadersResponse";
 import { AgreementService } from "../services/AgreementService";
 import { GetAgreementHeadersRequest } from "../services/GetAgreementHeadersRequest";

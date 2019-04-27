@@ -1,4 +1,4 @@
-import { IMessage } from "abus2";
+import { IMessage } from "abus";
 import { IBubble } from './IBubble';
 import { IBubbleResult } from "./IBubbleResult";
 export interface IBubbleFlowResult {

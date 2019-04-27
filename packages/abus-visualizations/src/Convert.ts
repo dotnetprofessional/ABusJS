@@ -1,4 +1,4 @@
-import { IMessage, IMessageTracing, Intents } from "abus2";
+import { IMessage, IMessageTracing, Intents } from "abus";
 import { IMessageNode } from "./IMessageNode";
 
 export class Convert {

@@ -1,5 +1,5 @@
 import { IPersistDocuments } from './IPersistDocuments';
-import { newGuid, TimeSpan } from "abus2";
+import { newGuid, TimeSpan } from "abus";
 import { IDocument } from './IDocument';
 
 export class InMemoryKeyValueStore<T> implements IPersistDocuments<T> {

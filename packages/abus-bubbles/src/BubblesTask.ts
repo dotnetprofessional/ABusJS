@@ -1,5 +1,5 @@
-import { IMessageTask, IMessageHandlerContext } from "../../abus2/src";
-import { IMessage } from "../../abus2/src/IMessage";
+import { IMessageTask, IMessageHandlerContext } from "../../abus/src";
+import { IMessage } from "../../abus/src/IMessage";
 import { Bubbles } from './Bubbles';
 export class BubblesTask implements IMessageTask {
     constructor(private bubbles: Bubbles) {

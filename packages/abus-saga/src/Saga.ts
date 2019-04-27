@@ -1,7 +1,7 @@
 import { IPersistDocuments } from './IPersistDocuments';
 import { InMemoryKeyValueStore } from './InMemoryKeyValueStore';
 import { IDocument } from './IDocument';
-import { IMessageHandler, IMessageHandlerContext, IMessage } from 'abus2';
+import { IMessageHandler, IMessageHandlerContext, IMessage } from 'abus';
 import { Process } from './Process';
 
 export abstract class Saga<T> extends Process {

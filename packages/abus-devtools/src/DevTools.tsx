@@ -6,7 +6,7 @@ import { toggleVisibility, changeMonitor, changePosition, changeSize } from "./a
 import reducer from "./reducers";
 const parseKey = require("parse-key");
 import { POSITIONS } from "./constants";
-import { IBus } from "abus2";
+import { IBus } from "abus";
 import { ABusMonitor } from "./Abus-Monitor";
 
 export class DevTools extends React.PureComponent<{ bus: IBus }> {

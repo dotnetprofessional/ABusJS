@@ -1,4 +1,4 @@
-import { IMessage, IMessageTracing } from "abus2";
+import { IMessage, IMessageTracing } from "abus";
 import { Convert } from "./Convert";
 import { IMessageNode } from "./IMessageNode";
 

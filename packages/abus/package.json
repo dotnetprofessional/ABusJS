@@ -1,5 +1,5 @@
 {
-  "name": "abus2",
+  "name": "abus",
   "version": "0.6.0-alpha.1",
   "author": "Garry McGlennon",
   "description": "A service bus implementation for javascript.",

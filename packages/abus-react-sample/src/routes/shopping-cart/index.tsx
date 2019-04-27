@@ -5,7 +5,7 @@ import { createLogger } from "redux-logger";
 import thunk from "redux-thunk";
 import reducer from "./reducers";
 import { getAllProducts } from "./actions";
-import { Bus } from "abus2";
+import { Bus } from "abus";
 import App from "./containers/App";
 import { composeWithDevTools } from "redux-devtools-extension";
 import reduxAbusMiddleware from "redux-abus";

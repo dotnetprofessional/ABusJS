@@ -1,5 +1,5 @@
 import { Bubbles } from "../../src";
-import { IMessageHandlerContext } from 'abus2';
+import { IMessageHandlerContext } from 'abus';
 
 feature(`Inspect Message flow`, () => {
     scenario(`Inspect an observed message of a particular type`, () => {

@@ -1,7 +1,7 @@
 import { AuthenticateUserRequest } from "./AuthenticateUserRequest";
 import { AuthenticateUserResponse } from "./AuthenticateUserResponse";
 import { AuthenticationStatus } from "./AuthenticationStatus";
-import { handler, IMessageHandlerContext } from 'abus2';
+import { handler, IMessageHandlerContext } from 'abus';
 
 
 export class AuthenticateService {

@@ -27,7 +27,7 @@
     "rimraf": "^2.6.2"
   },
   "dependencies": {
-    "abus2": "0.6.0-alpha.1",
+    "abus": "0.6.0-alpha.1",
     "abus-devtools": "0.1.0-alpha.1",
     "redux-abus": "0.1.0-alpha.2",
     "redux-abus-thunk": "0.1.0-alpha.1",

@@ -1,5 +1,5 @@
 import { Saga } from '../../src/Saga';
-import { IMessage, handler, IMessageHandlerContext } from 'abus2';
+import { IMessage, handler, IMessageHandlerContext } from 'abus';
 import { AuthenticateUserRequest } from './Services/AuthenticateUserRequest';
 import { AuthenticateUserResponse } from './Services/AuthenticateUserResponse';
 import { AuthenticationStatus } from './Services/AuthenticationStatus';

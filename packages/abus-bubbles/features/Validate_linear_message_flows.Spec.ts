@@ -1,7 +1,7 @@
 import "livedoc-mocha";
 import { Bubbles } from "../src/Bubbles";
 import { IBubbleFlowResult } from "../src/IBubbleFlowResult";
-import { IBus, Bus, IMessageHandlerContext } from 'abus2';
+import { IBus, Bus, IMessageHandlerContext } from 'abus';
 
 require("chai").should();
 

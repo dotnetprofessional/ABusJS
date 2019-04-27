@@ -40,7 +40,7 @@
     "parse-key": "*"
   },
   "peerDependencies": {
-    "abus2": "0.6.0-alpha.1",
+    "abus": "0.6.0-alpha.1",
     "react": "*",
     "react-dom": "^16.6.3",
     "react-redux": "^6.0.0",

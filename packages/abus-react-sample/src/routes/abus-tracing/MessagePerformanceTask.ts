@@ -1,4 +1,4 @@
-import { IMessage, IMessageHandlerContext, IBusMetaData, IMessageTask } from 'abus2';
+import { IMessage, IMessageHandlerContext, IBusMetaData, IMessageTask } from 'abus';
 
 
 export interface IMessageTracing extends IBusMetaData {

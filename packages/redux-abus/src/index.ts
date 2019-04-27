@@ -1,4 +1,4 @@
-import { IBus, IMessageHandlerContext } from "abus2";
+import { IBus, IMessageHandlerContext } from "abus";
 
 export default function reduxAbusMiddleware(bus: IBus) {
     return (store: any) => (next: any) => {

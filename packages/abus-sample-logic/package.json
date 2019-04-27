@@ -32,11 +32,11 @@
   },
   "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-sample-logic#readme",
   "dependencies": {
-    "abus2": "0.6.0-alpha.1",
+    "abus": "0.6.0-alpha.1",
     "abus-bubbles": "0.1.0-alpha.2"
   },
   "peerDependencies": {
-    "abus2": "0.6.0-alpha.1"
+    "abus": "0.6.0-alpha.1"
   },
   "devDependencies": {
     "mocha": "^5.2.0",

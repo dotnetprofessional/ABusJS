@@ -7,7 +7,7 @@
 			"path": "packages\\abus-sample-logic"
 		},
 		{
-			"path": "packages\\abus2"
+			"path": "packages\\abus"
 		},
 		{
 			"path": "packages\\abus-bubbles"
@@ -67,7 +67,7 @@
 				"name": "ABus",
 				"type": "node",
 				"request": "launch",
-				"program": "${workspaceFolder:abus2}/node_modules/mocha/bin/_mocha",
+				"program": "${workspaceFolder:abus}/node_modules/mocha/bin/_mocha",
 				"args": [
 					"--ui",
 					"livedoc-mocha",
@@ -78,7 +78,7 @@
 					"--timeout",
 					"999999",
 					"--colors",
-					"${workspaceFolder:abus2}/dist/features/**/*.Spec.js"
+					"${workspaceFolder:abus}/dist/features/**/*.Spec.js"
 				],
 				"internalConsoleOptions": "openOnSessionStart",
 				"smartStep": true,
@@ -92,7 +92,7 @@
 				"name": "ABus Inversify",
 				"type": "node",
 				"request": "launch",
-				"program": "${workspaceFolder:abus2}/node_modules/mocha/bin/_mocha",
+				"program": "${workspaceFolder:abus}/node_modules/mocha/bin/_mocha",
 				"args": [
 					"--ui",
 					"livedoc-mocha",

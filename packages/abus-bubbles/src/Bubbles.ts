@@ -3,7 +3,7 @@ import { IBubbleFlowResult } from "./IBubbleFlowResult";
 import {
     IMessage, IBus, MessageTracingTask, Intents, IMessageHandlerContext, MessageHandlerContext,
     SendOptions, TimeSpan, Bus, MessageException, IMessageSubscription, MessagePerformanceTask
-} from "abus2";
+} from "abus";
 import { IBubble } from "./IBubble";
 import { IColorTheme } from "./IColorTheme";
 import chalk from "chalk";

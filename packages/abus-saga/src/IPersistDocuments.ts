@@ -1,5 +1,5 @@
 import { IDocument } from "./IDocument";
-import { TimeSpan } from 'abus2';
+import { TimeSpan } from 'abus';
 
 /**
  * Provides an interface for persisting a document aka object
