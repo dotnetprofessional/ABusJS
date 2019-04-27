@@ -255,7 +255,7 @@ export class Bubbles {
                     result = secondary;
                 } else {
 
-                    result = {};
+                    result = primary ? {} : primary;
 
                     for (let key in primary) {
                         if (typeof primary[key] === "object") {

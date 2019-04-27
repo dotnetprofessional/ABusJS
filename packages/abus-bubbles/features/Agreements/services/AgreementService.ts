@@ -41,7 +41,7 @@ export class AgreementService {
                 foundAgreements.push({ id: agreement.id, name: agreement.name, tpid: agreement.tpid });
             }
         }
-        const result: GetAgreementHeadersResponse = { tpid: message.tpid, agreementHeaders: foundAgreements, lastPageKey: (toIndex + 1).toString() };
+        const result: GetAgreementHeadersResponse = { id: null, tpid: message.tpid, agreementHeaders: foundAgreements, lastPageKey: (toIndex + 1).toString() };
         // send result back to caller
         context.replyAsync(result);
     }

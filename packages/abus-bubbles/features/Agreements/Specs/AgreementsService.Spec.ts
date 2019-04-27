@@ -81,7 +81,7 @@ feature(`Agreements Service`, () => {
 
     scenario(`Alternative#2: Retrieve agreements for existing TPID from AgreementsService`, () => {
         let bubbles: Bubbles;
-        let response = { "tpid": "12345", "agreementHeaders": [{ "id": "1", "name": "Agreement 1", "tpid": "12345" }, { "id": "2", "name": "Agreement 2", "tpid": "12345" }] }
+        let response = { "tpid": "12345", "id": null, "agreementHeaders": [{ "id": "1", "name": "Agreement 1", "tpid": "12345" }, { "id": "2", "name": "Agreement 2", "tpid": "12345" }] }
 
         given(`AgreementService is running`, () => {
             bus.registerHandlers(AgreementService);
