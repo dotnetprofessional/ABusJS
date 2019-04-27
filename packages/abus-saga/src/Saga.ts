@@ -53,7 +53,7 @@ export abstract class Saga<T> extends Process {
                 await instance.beforeHandlerAsync(context);
                 await handler(message, context);
                 await instance.afterHandlerAsync(context);
-                if (this.sagaDocument.key) {
+                if (instance.sagaDocument.key) {
                     // now persist the data again
                     await dataProvider.storeAsync();
                 }
