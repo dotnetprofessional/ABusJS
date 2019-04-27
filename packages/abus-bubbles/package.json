@@ -37,7 +37,7 @@
   },
   "peerDependencies": {
     "abus2": "0.6.0-alpha.1",
-    "abus-visualizations": "0.1.0-alpha.1"
+    "abus-visualizations": "0.1.0-alpha.2"
   },
   "devDependencies": {
     "abus2": "0.6.0-alpha.1",

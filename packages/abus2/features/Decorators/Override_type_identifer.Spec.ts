@@ -47,18 +47,18 @@ feature("Override type identifier", () => {
 
             });
 
-            when("a message of that type is sent", () => {
+            when("a message of that type is sent", async () => {
                 // using publish as there is more than one receiver of the message
-                bus.publishAsync(new SampleMessageForMangling());
+                await bus.publishAsync(new SampleMessageForMangling());
+                // provide sufficient time for handler to execute
+                await sleep(40);
             });
 
-            then("the received message has the identifier 'SampleMessageOverride' when registering by class type", async () => {
-                await sleep(10);
+            then("the received message has the identifier 'SampleMessageOverride' when registering by class type", () => {
                 handler.messageidentifier.should.be.equal(stepContext.values[0]);
             });
 
-            and("the received message has the identifier 'SampleMessageOverride' when registering by string identifier", async () => {
-                await sleep(10);
+            and("the received message has the identifier 'SampleMessageOverride' when registering by string identifier", () => {
                 handler.messageidentifierUsingString.should.be.equal("SampleMessageOverride");
             });
         });

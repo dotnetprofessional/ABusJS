@@ -30,7 +30,7 @@ feature(`Simply capture message flow
                 the amount of time that would be expected for the flow to complete. This is done using the '-' which represents
                 a 10ms delay.
                 """
-                (!request)---
+                (!request)-----
 
                 request: {"type":"request"}
                 """

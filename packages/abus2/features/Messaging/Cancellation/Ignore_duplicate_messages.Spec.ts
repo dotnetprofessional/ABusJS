@@ -125,7 +125,7 @@ feature(`Ignore duplicate messages
                 """
                 `, async () => {
                     messageToSend = stepContext.docStringAsEntity;
-                    await waitUntilAsync(() => outboundLogger.messages.length >= messageToSend.length, 100);
+                    await waitUntilAsync(() => outboundLogger.messages.length >= messageToSend.length, 200);
                     await sleep(10); // provide a little buffer to ensure additional messages don't arrive unexpectedly
 
                     const messages = outboundLogger.messages;
