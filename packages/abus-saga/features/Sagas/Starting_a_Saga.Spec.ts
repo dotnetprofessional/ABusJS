@@ -12,22 +12,14 @@ feature(`Starting a Saga
     as an orderId.
 
     `, () => {
-        let bus: Bus;
         let bubbles: Bubbles;
 
         background(``, () => {
             given(`initialize bus`, () => {
                 InMemoryKeyValueStore.forceClear();
-                bus = new Bus();
-                // configure bus
-                bus.start();
-                // bus.usingRegisteredTransportToMessageType("*")
-                //     .inboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("inbound:")).andAlso()
-                //     .outboundPipeline.useTransportMessageReceivedTasks(new DebugLoggingTask("outbound:"));
 
-                bus.registerHandlers(SagaDemo);
-
-                bubbles = new Bubbles(bus);
+                bubbles = new Bubbles();
+                bubbles.bus.registerHandlers(SagaDemo);
             });
         });
 
@@ -62,7 +54,7 @@ feature(`Starting a Saga
                 start: {"type": "START_SAGA", "payload":{"id":"test1"}}
                 start-again: {"type": "START_SAGA", "payload":{"id":"test1", "data":"second"}}
                 started: {"type": "SAGA_STARTED"}
-                error: {"error":"Saga with key SagaDemo:test1 already exists. Can't start saga twice."}
+                error: {"error":"Saga with key Saga.SagaDemo.test1 already exists. Can't start saga twice."}
                 """
                 `, async () => {
                     await bubbles.executeAsync(stepContext.docString);

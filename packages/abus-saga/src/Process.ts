@@ -43,16 +43,23 @@ export abstract class Process {
     }
 
 
-    protected useStorage<T>(provider: IPersistDocuments<T>, defaultValue?: T, key?: string | { (): string }): IStorage<T> {
+    protected useStorage<T>(provider: IPersistDocuments<T>, defaultValue?: T, key?: string | { (): string }, scope?: string): IStorage<T> {
         const _this = this;
         function getKey(): string {
-            if (typeof key === "string") {
-                return key
-            } else if (typeof key === "function") {
-                return key();
-            } else {
-                return getTypeNamespace(_this);
+            let keyValue = "";
+            if (!scope) {
+                scope = getTypeNamespace(_this);
+                if (scope.startsWith("Process.Saga")) {
+                    scope = scope.substr(8);
+                }
             }
+            if (typeof key === "string") {
+                keyValue = "." + key
+            } else if (typeof key === "function") {
+                keyValue = "." + key();
+            }
+
+            return `${scope}${keyValue}`;
         }
 
         async function setDocumentAsync() {
@@ -78,10 +85,10 @@ export abstract class Process {
                 return document;
             },
             storeAsync: async () => {
-                const existingDocument = await provider.getAsync(getKey());
-                if (existingDocument && existingDocument.data && existingDocument.eTag !== document.eTag) {
-                    throw Error("ETag mismatch");
-                }
+                // const existingDocument = await provider.getAsync(getKey());
+                // if (existingDocument && existingDocument.data && existingDocument.eTag !== document.eTag) {
+                //     throw Error("ETag mismatch");
+                // }
 
                 // save the document
                 await provider.saveAsync(document);

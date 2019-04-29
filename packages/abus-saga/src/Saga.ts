@@ -21,8 +21,6 @@ export abstract class Saga<T> extends Process {
             // create a new saga instance
             const instance = new (Object.getPrototypeOf(this).constructor) as Saga<any>;
             let sagaKey = this.configureSagaKey(context.activeMessage);
-            // To ensure uniqueness for keys add the name of the Saga to the key
-            sagaKey = this.constructor.name + ":" + sagaKey;
 
             // dehydrate existing saga instance
             const dataProvider = this.useStorage(this.storage, undefined, sagaKey);
@@ -33,14 +31,11 @@ export abstract class Saga<T> extends Process {
                 }
 
                 if (this.sagaDocument.data) {
-                    throw new Error(`Saga with key ${sagaKey} already exists. Can't start saga twice.`);
+                    throw new Error(`Saga with key ${this.sagaDocument.key} already exists. Can't start saga twice.`);
                 } else {
                     // create an empty object as default
                     this.sagaDocument.data = {} as T;
                 }
-                this.sagaDocument.key = sagaKey;
-                // save the default version of the data which only has an eTag
-                // await this.saveSagaDataAsync();
             } else if (!this.sagaDocument.eTag) {
                 // a message arrived for a saga that doesn't exist
                 instance.sagaNotFound(message, context);
