@@ -84,8 +84,7 @@
 				"smartStep": true,
 				"sourceMaps": true,
 				"skipFiles": [
-					"node_modules/**/*.js",
-					"dist/**/*.js"
+					"node_modules/**/*.js"
 				]
 			},
 			{
@@ -109,8 +108,7 @@
 				"smartStep": true,
 				"sourceMaps": true,
 				"skipFiles": [
-					"node_modules/**/*.js",
-					"dist/**/*.js"
+					"node_modules/**/*.js"
 				]
 			},
 			{
@@ -137,8 +135,7 @@
 					"${workspaceFolder:abus-bubbles}/dist/**/*.js"
 				],
 				"skipFiles": [
-					"node_modules/**/*.js",
-					"dist/**/*.js"
+					"node_modules/**/*.js"
 				]
 			},
 			{
@@ -162,8 +159,7 @@
 				"smartStep": true,
 				"sourceMaps": true,
 				"skipFiles": [
-					"node_modules/**/*.js",
-					"dist/**/*.js"
+					"node_modules/**/*.js"
 				]
 			}
 		],

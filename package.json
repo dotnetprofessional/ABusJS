@@ -2,7 +2,7 @@
   "name": "abus-root",
   "scripts": {
     "watch": "tsc -b --watch packages",
-    "test": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=+summary+list+headers\" --recursive packages/**/*.Spec.js",
+    "test": "mocha --exit --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=+summary+list+headers\" --recursive packages/**/*.Spec.js",
     "test-spec": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=spec+summary+list\" --recursive packages/**/*.Spec.js",
     "release": "yarn clean && yarn build && yarn release-no-build",
     "release-no-build": "lerna run pack",

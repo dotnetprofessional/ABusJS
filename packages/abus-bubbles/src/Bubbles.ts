@@ -19,6 +19,7 @@ import { IOverrideBubble } from "./IOverrideBubble";
 
 export class Bubbles {
     private messages: IBubbleMessage[];
+    private terminateOnMessageType: string;
     private bubbleFlowResult: IBubbleFlowResult[] = [];
     private actualMessageFlow: IMessage<any>[] = [];
     private bubbleFlow: IBubble[];
@@ -47,6 +48,14 @@ export class Bubbles {
 
     }
 
+    /**
+     * executes the bubbles workflow and captures any messages that are sent to the bus
+     *
+     * @param {string} workflow
+     * @param {IBubbleMessage[]} [messages=[]]
+     * @returns {Promise<void>}
+     * @memberof Bubbles
+     */
     public async executeAsync(workflow: string, messages: IBubbleMessage[] = []): Promise<void> {
         // ensure we have a workflow being passed in
         if (!workflow) {
@@ -62,6 +71,38 @@ export class Bubbles {
 
                 // 3. Execute workflow/bubble flow
                 this.executeBubbleFlowAsync();
+            } catch (e) {
+                reject(e);
+            }
+        });
+
+        return promise;
+    }
+
+    /**
+     * executes the request and waits until the defined message is received on the bus before completing.
+     *
+     * @param {string} workflow
+     * @param {IBubbleMessage[]} [messages=[]]
+     * @returns {Promise<void>}
+     * @memberof Bubbles
+     */
+    public async executeUntilAsync(intent: BubbleIntent, request: IMessage<any>, terminateOnMessageType: string): Promise<void> {
+        // ensure we have two defined messages
+        if (!request.type) {
+            throw new Error("A request message must be passed in.");
+        }
+        if (!terminateOnMessageType) {
+            throw new Error("A message type to terminate on must be passed in.");
+        }
+
+        this.terminateOnMessageType = terminateOnMessageType;
+
+        const promise: Promise<void> = new Promise(async (resolve, reject) => {
+            try {
+                this.executionPromise = { resolve, reject, isComplete: false };
+
+                this.dispatchMessage(intent, request, {});
             } catch (e) {
                 reject(e);
             }
@@ -143,12 +184,20 @@ export class Bubbles {
      * @param {string} type
      * @memberof Bubbles
      */
-    public observedMessageOfType<T=unknown>(type: string): IMessage<T> {
+    public observedMessageOfType<T = unknown>(type: string): IMessage<T> {
         const items = this.observedMessages.filter(m => m.type === type);
         if (items.length !== 0) {
             return items[0];
         } else {
             throw Error(`Unable to locate message type: ${type}`);
+        }
+    }
+
+    public lastObservedMessage<T = unknown>(): IMessage<T> {
+        if (this.observedMessages.length === 0) {
+            throw new Error("No messages were observed");
+        } else {
+            return this.observedMessages[this.observedMessages.length - 1];
         }
     }
 
@@ -158,14 +207,19 @@ export class Bubbles {
 
             // record that this message was sent to the bus
             this.actualMessageFlow.push(message);
-            const bubble = this.bubbleFlow[this.bubbleFlowIndex];
+            const bubble = this.bubbleFlow && this.bubbleFlow[this.bubbleFlowIndex];
 
-            if (this.executionPromise.isComplete) {
+            let messageHandled: boolean = false;
+
+            if (message.type === this.terminateOnMessageType) {
+                // flow is complete so
+                this.completeFlow(10);
+            }
+
+            if (this.executionPromise.isComplete || message.type === this.terminateOnMessageType) {
                 // flow is complete so
                 return this.hasRegisteredHandler(message);
             }
-
-            let messageHandled: boolean = false;
 
             // the bubble flow may not have defined all the bubbles
             if (bubble) {
@@ -237,6 +291,14 @@ export class Bubbles {
             diff = this.createUnifiedDiff(actual, expected);
         }
         return { isValid: match, diff };
+    }
+
+    public partialMatch(actual: any, expected: any): void {
+        const actualToValidate = this.trimToExpected(expected, actual);
+        const match: boolean = JSON.stringify(expected) === JSON.stringify(actualToValidate);
+        if (!match) {
+            throw new Error(this.createUnifiedDiff(actualToValidate, expected));
+        }
     }
 
     private trimToExpected(expected: Object, actual: Object): Object {
@@ -382,7 +444,7 @@ export class Bubbles {
         if (this.tracingEnabled) console.log(`BUBBLES: injected: ${bubble.name}`);
         const bubbleMessage = this.getBubbleMessage(bubble.name).message;
 
-        this.dispatchMessage(bubble, bubbleMessage, context);
+        this.dispatchBubbleMessage(bubble, bubbleMessage, context);
     }
 
     private overrideMessage(bubble: IOverrideBubble, context: IMessageHandlerContext): void {
@@ -392,7 +454,7 @@ export class Bubbles {
             if (this.tracingEnabled) console.log(`BUBBLES: overridden: ${bubble.name} with ${override.name}`);
             const bubbleMessage = this.getBubbleMessage(override.name).message;
             // as this is being handled by the bubbles library add an identifier proving that
-            this.dispatchMessage(override, bubbleMessage, context);
+            this.dispatchBubbleMessage(override, bubbleMessage, context);
         });
     }
 
@@ -401,12 +463,10 @@ export class Bubbles {
         bubble = this.bubbleFlow[this.bubbleFlowIndex + 1];
         const bubbleMessage = this.getBubbleMessage(bubble.name).message;
 
-        this.dispatchMessage(bubble, bubbleMessage, context);
+        this.dispatchBubbleMessage(bubble, bubbleMessage, context);
     }
 
-    private dispatchMessage(bubble: IBubble, message: any, context: IMessageHandlerContext): void {
-        context = context || new MessageHandlerContext(this.bus, null, null);
-
+    private dispatchBubbleMessage(bubble: IBubble, message: any, context: IMessageHandlerContext): void {
         let options: SendOptions;
         if (bubble.delay) {
             options = { timeToDelay: new TimeSpan(bubble.delay) };
@@ -418,7 +478,14 @@ export class Bubbles {
             message.metaData = message.metaData || {};
             (message.metaData as any).sentBy = "Bubbles";
         }
-        switch (bubble.intent) {
+
+        this.dispatchMessage(bubble.intent, message, options, context);
+    }
+
+    private dispatchMessage(intent: BubbleIntent, message: IMessage<any>, options: SendOptions, context?: IMessageHandlerContext): void {
+        context = context || new MessageHandlerContext(this.bus, null, null);
+
+        switch (intent) {
             case BubbleIntent.publish:
                 this.executeWithDelay(() => context.publishAsync(message), options);
                 break;
@@ -439,8 +506,9 @@ export class Bubbles {
                 this.executeWithDelay(() => context.replyAsync(message), options);
                 break;
             default:
-                throw new Error("Unsupported bubble intent: " + bubble.intent);
+                throw new Error("Unsupported intent: " + intent);
         }
+
     }
 
     private executeWithDelay(f: Function, options: SendOptions): void {

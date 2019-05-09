@@ -47,6 +47,7 @@ feature(`Cancel existing handler
                 }
             });
 
+            // this test is fairly flaky due to the timing of messages running the test 3x typically gets a success run :(
             then(`the handler will only send a response for the last message
                 """
                 [{"type":"FAST-AND-FURIOUS",  "id":1},
@@ -60,7 +61,7 @@ feature(`Cancel existing handler
                 `, async () => {
                     messageToSend = stepContext.docStringAsEntity;
                     await waitUntilAsync(() => outboundLogger.messages.length >= messageToSend.length, 200);
-                    await sleep(10); // provide a little buffer to ensure additional messages don't arrive unexpectedly
+                    await sleep(500); // provide a little buffer to ensure additional messages don't arrive unexpectedly
 
                     const messages = outboundLogger.messages;
                     messages.length.should.eq(messageToSend.length);

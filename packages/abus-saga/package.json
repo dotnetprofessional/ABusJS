@@ -1,6 +1,6 @@
 {
   "name": "abus-saga",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "A message-driven state machine that persist shared state. Sagas represent a business process where multiple related messages can trigger state changes.",
   "author": "Garry McGlennon",
   "ts:main": "src/index.ts",
@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "abus": "0.6.0-alpha.1",
-    "abus-bubbles": "0.1.0-alpha.2",
+    "abus-bubbles": "0.1.0-alpha.3",
     "mocha": "^5.2.0",
     "rimraf": "2.6.3",
     "cpx": "1.5.0"

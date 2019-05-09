@@ -27,7 +27,7 @@ feature(`Process persists data`, () => {
         when(`creating an order`, async () => {
             bus.sendAsync(new ProcessOrderCommand("12345"));
             // message needs time to execute
-            await sleep(10);
+            await sleep(50);
         });
 
         then(`the order count is incremented`, async () => {

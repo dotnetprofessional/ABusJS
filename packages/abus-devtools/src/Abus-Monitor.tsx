@@ -161,7 +161,7 @@ export class ABusMonitor extends React.PureComponent<{ bus: IBus }, { isVisible:
             verticalGridlines: gridlines
           }}
           click={(args) => {
-            debugger;
+            // debugger;
           }}
           //Configures data source
           dataSourceSettings={
