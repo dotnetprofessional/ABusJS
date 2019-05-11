@@ -85,11 +85,6 @@ export abstract class Process {
                 return document;
             },
             storeAsync: async () => {
-                // const existingDocument = await provider.getAsync(getKey());
-                // if (existingDocument && existingDocument.data && existingDocument.eTag !== document.eTag) {
-                //     throw Error("ETag mismatch");
-                // }
-
                 // save the document
                 await provider.saveAsync(document);
             }

@@ -7,6 +7,8 @@ import { Intents } from "./Intents";
 import { Bus } from "./Bus";
 import { MessageException } from "./tasks/MessageException";
 import * as Exceptions from "./Exceptions";
+import { ISubscriptionOptions } from './ISubscriptionOptions';
+import { TimeSpan } from './Timespan';
 
 export class MessageHandlerContext implements IMessageHandlerContext {
     public wasCancelled: boolean;
@@ -40,6 +42,10 @@ export class MessageHandlerContext implements IMessageHandlerContext {
         msg.metaData.replyTo = this.activeMessage.metaData.messageId;
         await (this.bus as Bus).sendAsync(msg, null, this.activeMessage);
         return;
+    }
+
+    public waitForEventAsync<T>(filter: string, options: ISubscriptionOptions & { timeout?: TimeSpan }): Promise<T> {
+        return (this.bus as Bus).waitForEventAsync(filter, options, this);
     }
 
     public DoNotContinueDispatchingCurrentMessageToHandlers() {

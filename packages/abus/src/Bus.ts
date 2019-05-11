@@ -279,6 +279,38 @@ export class Bus implements IBus {
         throw new Error(`No subscription with Id: ${subscriptionId} found.`);
     }
 
+    public waitForEventAsync<T>(filter: string, options?: ISubscriptionOptions & { timeout?: TimeSpan }, context?: IMessageHandlerContext): Promise<T> {
+        if (!options) {
+            options = {};
+        }
+
+        if (!options.timeout) {
+            // set a default timeout
+            options.timeout = TimeSpan.FromSeconds(30);
+        }
+
+        if (context && !options.identifier) {
+            // use the active message to assign the identifier if one wasn't specified
+            options.identifier = context.activeMessage.metaData.receivedBy;
+        }
+
+        const replyHandlerPromise = new Promise<T>((resolve, reject) => {
+            // setup a timer to reject if the event doesn't return in time
+            const timeoutId = setTimeout(() => {
+                reject(new Exceptions.TimeoutException(`The waitForEventAsync ${filter} has timed out`));
+            }, options.timeout.totalMilliseconds);
+            const subscription = this.subscribe(filter, (message: T, context: IMessageHandlerContext) => {
+                // cancel timeout
+                clearTimeout(timeoutId);
+                // remove this temporary subscription
+                this.unsubscribe(subscription);
+                resolve(message);
+            }, options);
+        });
+
+        return replyHandlerPromise;
+    }
+
     private getTransport(messageType: string): IRegisteredTransport {
         let transport: IRegisteredTransport = this.registeredMessageTypes[messageType];
         if (!transport) {

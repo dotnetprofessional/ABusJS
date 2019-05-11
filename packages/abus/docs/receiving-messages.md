@@ -79,7 +79,7 @@ When a message arrives that matches the filter used which subscribing, it will b
 * message: the payload of the message
 * context: an instance of the `IMessageHandlerContext` providing access to the bus and the current message context.
 
-Handlers are stateless, even when using class handlers. This means that if you set any state on a class it will be lost between handler calls. [Sagas](saga.md) are the recommended way to maintain state between handler calls.
+Handlers when used within a class, are `not stateless`, which means if a handler sets any class level state that will be visible for any other handler that is executed within that class. While this may be advantageous in some scenarios, care must be taken that you don't encounter race conditions. Using a [Saga](saga.md) or [Process](process.md) however, will create a new instance of the class before executing the handler. If state needs to be maintained between handler calls its recommended that the `useStorage` of a process or saga be used.
 
 The context object has the same methods as the bus for sending and publishing messages. However, it also has other features. Refer to the section on [context](context.md) for more details.
 

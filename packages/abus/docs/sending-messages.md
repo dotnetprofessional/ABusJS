@@ -35,6 +35,19 @@ Use this method when you need to get a response/reply to the command being sent.
 ```ts
 const result = await bus.sendWithReply(message);
 ```
+### waitForEventAsync\<T>(filter: string, options?: ISubscriptionOptions): Promise\<T>;
+Use this method when you need to send a command that results in a message being published and you need to process the response of the event. While its easy to setup a new handler for this event and process it there, it may make the code harder to follow. Using this method will provide the same logic flow as using `sendWithReplyAsync` but for events. Note this method will only work with events not commands. By default a `TimeoutException` will be thrown if the event does not return within 30 seconds. This can be changed via the options.
+
+```ts
+await bus.sendAsync(message);
+const result = await bus.waitForEventAsync("messageEvent");
+```
+
+from within a handler
+```ts
+await context.sendAsync(message);
+const result = await context.waitForEventAsync("messageEvent");
+```
 
 ### replyAsync\<T>(reply: T): Promise\<void>
 The `replyAsync` method unlike the other send methods, is not available directly on the bus. Its only available from within a [handlers](receiving-messages.md) [message handler context](context.md). That's because it must be sent within the context of the current message, as that's what is being replied to.
