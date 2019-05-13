@@ -36,11 +36,15 @@
   "dependencies": {
     "react-dock": "*",
     "@syncfusion/ej2-react-diagrams": "*",
+    "@syncfusion/ej2-react-navigations": "",
     "react-json-tree": "*",
-    "parse-key": "*"
+    "parse-key": "*",
+    "typesafe-actions": "4.2.1",
+    "debounce": "1.2.0",
+    "react-jss": "8.6.1"
   },
   "peerDependencies": {
-    "abus": "0.6.0-alpha.1",
+    "abus": "0.6.0-alpha.2",
     "react": "*",
     "react-dom": "^16.6.3",
     "react-redux": "^6.0.0",

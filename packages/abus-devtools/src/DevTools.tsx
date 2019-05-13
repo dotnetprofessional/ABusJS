@@ -3,7 +3,6 @@ import { cloneElement, Children, Component } from "react";
 import * as PropTypes from "prop-types";
 import Dock from "react-dock";
 import { toggleVisibility, changeMonitor, changePosition, changeSize } from "./actions";
-import reducer from "./reducers";
 const parseKey = require("parse-key");
 import { POSITIONS } from "./constants";
 import { IBus } from "abus";
@@ -35,7 +34,6 @@ export class DevTools extends React.PureComponent<{ bus: IBus }> {
 
 
 export class DockMonitor extends React.PureComponent<{ toggleVisibilityKey: string, changePositionKey: string, changeMonitorKey: string, fluid: boolean }, { isVisible: boolean }> {
-    static update = reducer;
 
     static propTypes = {
         // defaultPosition: PropTypes.oneOf(POSITIONS),

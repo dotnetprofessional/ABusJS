@@ -693,6 +693,13 @@
   resolved "https://registry.yarnpkg.com/@syncfusion/ej2-base/-/ej2-base-16.4.42.tgz#f47b2738e2ab20dc269a78f82e921e7a18bcfccb"
   integrity sha512-ft5zjNCoibUrSioWTTGp7nerifxuP0LYi8Wq6CJRra9smcNYIpOfNq0dRkt97HzDPTrFf6Cy1sziULTkIlijlA==
 
+"@syncfusion/ej2-base@~17.1.42", "@syncfusion/ej2-base@~17.1.43":
+  version "17.1.43"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-base/-/ej2-base-17.1.43.tgz#f415c23afd78f33fb71ac2feb0a6a85c1610a9f2"
+  integrity sha512-YG90ArQns5qdrhuCUDVchsCSdYbZyQODdkg2nj9oVqs+Y5dy87hRBaOyhshX/RO/evTexMDfH0y21XESnQj2Fw==
+  dependencies:
+    "@syncfusion/ej2-icons" "~17.1.42"
+
 "@syncfusion/ej2-buttons@~16.4.42":
   version "16.4.42"
   resolved "https://registry.yarnpkg.com/@syncfusion/ej2-buttons/-/ej2-buttons-16.4.42.tgz#cfb1de0b3f0fb193b7aee819a3f8a01c7a5a2b8b"
@@ -700,12 +707,26 @@
   dependencies:
     "@syncfusion/ej2-base" "~16.4.42"
 
+"@syncfusion/ej2-buttons@~17.1.42":
+  version "17.1.42"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-buttons/-/ej2-buttons-17.1.42.tgz#4cca177356a63058e52fc545736738490ef9ed11"
+  integrity sha512-74J4kUQqxa0jD/YN7w537viT0hbZN301lukqJLhtc4KiKkOA+BEXKLk6ARSnEcRi9nZbrzVPFerTEjlbTMOuHg==
+  dependencies:
+    "@syncfusion/ej2-base" "~17.1.42"
+
 "@syncfusion/ej2-data@~16.4.42":
   version "16.4.42"
   resolved "https://registry.yarnpkg.com/@syncfusion/ej2-data/-/ej2-data-16.4.42.tgz#82c99f2d48028df9c4d68271101138c8f4d50532"
   integrity sha512-RspuFVKqLlW7r4UBu/aYjs37PJkTbyQNR8YXA7A56mdAQoleBEwG/5SvHxhI6BZEZbg0w6vuGuD25GEJWtXrUQ==
   dependencies:
     "@syncfusion/ej2-base" "~16.4.42"
+
+"@syncfusion/ej2-data@~17.1.42":
+  version "17.1.42"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-data/-/ej2-data-17.1.42.tgz#9de5447620f3a5e29b7626a9f7248acee7017486"
+  integrity sha512-IiR16Zsq7kSvTLjuNnalcaaTjigcQ2CklABU1rv30AuYEUUIO8o96y4HKeGnva6eVuNpqUHNFkvC0RLvYKYXfw==
+  dependencies:
+    "@syncfusion/ej2-base" "~17.1.42"
 
 "@syncfusion/ej2-diagrams@16.4.42":
   version "16.4.42"
@@ -720,6 +741,11 @@
     "@syncfusion/ej2-navigations" "~16.4.42"
     "@syncfusion/ej2-popups" "~16.4.42"
 
+"@syncfusion/ej2-icons@~17.1.42":
+  version "17.1.42"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-icons/-/ej2-icons-17.1.42.tgz#7ebfe32111f2268b983edddc448f8edc026e5cc9"
+  integrity sha512-xOQxx7zBjPxv0kLknPyObdShscV8Ut3vi3sdYjnNZPcv4JwyhvJjaHVrbdWGSVZ2RiX8YECXQPLxF22HijHe9Q==
+
 "@syncfusion/ej2-inputs@~16.4.42":
   version "16.4.42"
   resolved "https://registry.yarnpkg.com/@syncfusion/ej2-inputs/-/ej2-inputs-16.4.42.tgz#b088702f92cfc24430f5567d0c74a3f97940f75f"
@@ -730,6 +756,16 @@
     "@syncfusion/ej2-popups" "~16.4.42"
     "@syncfusion/ej2-splitbuttons" "~16.4.42"
 
+"@syncfusion/ej2-inputs@~17.1.42":
+  version "17.1.44"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-inputs/-/ej2-inputs-17.1.44.tgz#cf231ec69412bf92e3880aa5d0e3f14616234f97"
+  integrity sha512-cKEUK/CtiRHrg2tYKVpEPR8NtgpccbsVZnAJG8BFZGWQPS10Mn6M/wMBjdPTedtYED19YL+0BDzrWb6W084fzA==
+  dependencies:
+    "@syncfusion/ej2-base" "~17.1.43"
+    "@syncfusion/ej2-buttons" "~17.1.42"
+    "@syncfusion/ej2-popups" "~17.1.42"
+    "@syncfusion/ej2-splitbuttons" "~17.1.42"
+
 "@syncfusion/ej2-lists@~16.4.42":
   version "16.4.42"
   resolved "https://registry.yarnpkg.com/@syncfusion/ej2-lists/-/ej2-lists-16.4.42.tgz#cfe48c55a89be47366df0d876d08f35396648d7e"
@@ -738,6 +774,27 @@
     "@syncfusion/ej2-base" "~16.4.42"
     "@syncfusion/ej2-buttons" "~16.4.42"
     "@syncfusion/ej2-data" "~16.4.42"
+
+"@syncfusion/ej2-lists@~17.1.43":
+  version "17.1.43"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-lists/-/ej2-lists-17.1.43.tgz#0da4f228f11bd629ea059d35742858f5567ccddc"
+  integrity sha512-Kibot9I6DcA0xpoPWg0Z6iVwT+sfKtCpHBf5XkNxLqh0GLHPfzUnq/YeoXwY/c8oYvyHuBA3HIPMAN6FzkF8nA==
+  dependencies:
+    "@syncfusion/ej2-base" "~17.1.43"
+    "@syncfusion/ej2-buttons" "~17.1.42"
+    "@syncfusion/ej2-data" "~17.1.42"
+
+"@syncfusion/ej2-navigations@17.1.43":
+  version "17.1.43"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-navigations/-/ej2-navigations-17.1.43.tgz#e76d48d933191b58b534ec3a6f0db20289b6f35c"
+  integrity sha512-tWMs59XzmTY4FLLVVsN4rqP4t9Is9OZ7eOE7/oEcl92ExzG9PsIdoSYIDU7T3gBI1IXHMxVsFm+Twx5iE17t6w==
+  dependencies:
+    "@syncfusion/ej2-base" "~17.1.43"
+    "@syncfusion/ej2-buttons" "~17.1.42"
+    "@syncfusion/ej2-data" "~17.1.42"
+    "@syncfusion/ej2-inputs" "~17.1.42"
+    "@syncfusion/ej2-lists" "~17.1.43"
+    "@syncfusion/ej2-popups" "~17.1.42"
 
 "@syncfusion/ej2-navigations@~16.4.42":
   version "16.4.42"
@@ -759,12 +816,27 @@
     "@syncfusion/ej2-base" "~16.4.42"
     "@syncfusion/ej2-buttons" "~16.4.42"
 
+"@syncfusion/ej2-popups@~17.1.42":
+  version "17.1.42"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-popups/-/ej2-popups-17.1.42.tgz#c3ff5c3b0609ffdba6bd0c7d15714b087975b0a3"
+  integrity sha512-DOnavCvm+gdaCL88GGx1hVGq7dlwcVdyDRzIVwQK3NSPFkYKh6nB4KvgAXMNi3NnNhHbyky/GQ1x9nmGLZLkSg==
+  dependencies:
+    "@syncfusion/ej2-base" "~17.1.42"
+    "@syncfusion/ej2-buttons" "~17.1.42"
+
 "@syncfusion/ej2-react-base@~16.4.42":
   version "16.4.42"
   resolved "https://registry.yarnpkg.com/@syncfusion/ej2-react-base/-/ej2-react-base-16.4.42.tgz#12ae7ed693d6cc823599c071080bcf691c8dcb23"
   integrity sha512-1PrzKXr+4cOgOKnZjO4d2tq/d8mT3Ut0L9TqD5bK5kWimZb1K78NWnIbnLK4KgN0TnbZbeNQnhJFst4NY0l+Dw==
   dependencies:
     "@syncfusion/ej2-base" "~16.4.42"
+
+"@syncfusion/ej2-react-base@~17.1.42":
+  version "17.1.44"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-react-base/-/ej2-react-base-17.1.44.tgz#6240b18e5d0f7d156a617f6f06b0348993f6b7b6"
+  integrity sha512-DhABGDTK1LJa467nL+EWDTjftBs5LTYKFKjya/0JYUFCNNs5x1390wRmlxIy0mKlby+8hN+v8r2qs60jxWFWvg==
+  dependencies:
+    "@syncfusion/ej2-base" "~17.1.43"
 
 "@syncfusion/ej2-react-diagrams@*":
   version "16.4.42"
@@ -775,6 +847,15 @@
     "@syncfusion/ej2-diagrams" "16.4.42"
     "@syncfusion/ej2-react-base" "~16.4.42"
 
+"@syncfusion/ej2-react-navigations@":
+  version "17.1.43"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-react-navigations/-/ej2-react-navigations-17.1.43.tgz#30b33aa905c8450114f81daad67ec88d1d63469e"
+  integrity sha512-gX2ExBvYOdUiwJBBSpr+IObDTrDJ4lJFH4AZNsTBy+yBkm8MOWnu6PnlNGUXIZqG+Vo3+F5YKIyDdHsBasbEMA==
+  dependencies:
+    "@syncfusion/ej2-base" "~17.1.43"
+    "@syncfusion/ej2-navigations" "17.1.43"
+    "@syncfusion/ej2-react-base" "~17.1.42"
+
 "@syncfusion/ej2-splitbuttons@~16.4.42":
   version "16.4.42"
   resolved "https://registry.yarnpkg.com/@syncfusion/ej2-splitbuttons/-/ej2-splitbuttons-16.4.42.tgz#81cee8f09419be154c7b785d59d07981df4957e6"
@@ -782,6 +863,14 @@
   dependencies:
     "@syncfusion/ej2-base" "~16.4.42"
     "@syncfusion/ej2-popups" "~16.4.42"
+
+"@syncfusion/ej2-splitbuttons@~17.1.42":
+  version "17.1.42"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-splitbuttons/-/ej2-splitbuttons-17.1.42.tgz#13470bc6c88e3a3d3416b33d00ce30ab89b0e238"
+  integrity sha512-5hiLNtup53YuPeYm1xBg0kOrZqN3PCcktKT1CqCWa4HbLW6XGdGo175FZYaVXlvBXmyvSsgdPek/5O6qMxbyQQ==
+  dependencies:
+    "@syncfusion/ej2-base" "~17.1.42"
+    "@syncfusion/ej2-popups" "~17.1.42"
 
 "@types/chai@^4.1.7":
   version "4.1.7"
@@ -1265,6 +1354,11 @@ braces@^2.3.1:
     snapdragon-node "^2.0.1"
     split-string "^3.0.2"
     to-regex "^3.0.1"
+
+brcast@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/brcast/-/brcast-3.0.1.tgz#6256a8349b20de9eed44257a9b24d71493cd48dd"
+  integrity sha512-eI3yqf9YEqyGl9PCNTR46MGvDylGtaHjalcz6Q3fAPnP/PhpKkkve52vFdfGpwp4VUvK6LUr4TQN+2stCrEwTg==
 
 browser-stdout@1.3.1:
   version "1.3.1"
@@ -1895,6 +1989,13 @@ cross-spawn@^6.0.0:
     shebang-command "^1.2.0"
     which "^1.2.9"
 
+css-vendor@^0.3.8:
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/css-vendor/-/css-vendor-0.3.8.tgz#6421cfd3034ce664fe7673972fd0119fc28941fa"
+  integrity sha1-ZCHP0wNM5mT+dnOXL9ARn8KJQfo=
+  dependencies:
+    is-in-browser "^1.0.2"
+
 csstype@^2.2.0:
   version "2.5.8"
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.5.8.tgz#4ce5aa16ea0d562ef9105fa3ae2676f199586a35"
@@ -1935,6 +2036,11 @@ dateformat@^3.0.0:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/dateformat/-/dateformat-3.0.3.tgz#a6e37499a4d9a9cf85ef5872044d62901c9889ae"
   integrity sha512-jyCETtSl3VMZMWeRo7iY1FL19ges1t55hMo5yaam4Jrsm5EPL89UQkoQRyiI+Yf4k8r2ZpdngkV8hr1lIdjb3Q==
+
+debounce@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/debounce/-/debounce-1.2.0.tgz#44a540abc0ea9943018dc0eaa95cce87f65cd131"
+  integrity sha512-mYtLl1xfZLi1m4RtQYlZgJUNQjl4ZxVnHzIR8nLLgi4q1YT8o/WM+MK/f8yfcc9s5Ir5zRaPZyZU6xs1Syoocg==
 
 debug@2.6.9, debug@^2.1.2, debug@^2.2.0, debug@^2.3.3:
   version "2.6.9"
@@ -3245,6 +3351,11 @@ humps@^2.0.0:
   resolved "https://registry.yarnpkg.com/humps/-/humps-2.0.1.tgz#dd02ea6081bd0568dc5d073184463957ba9ef9aa"
   integrity sha1-3QLqYIG9BWjcXQcxhEY5V7qe+ao=
 
+hyphenate-style-name@^1.0.2:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/hyphenate-style-name/-/hyphenate-style-name-1.0.3.tgz#097bb7fa0b8f1a9cf0bd5c734cf95899981a9b48"
+  integrity sha512-EcuixamT82oplpoJ2XU4pDtKGWQ7b00CD9f1ug9IaQ3p1bkHMiKCZ9ut9QDI6qsa6cpUuB+A/I+zLtdNK4n2DQ==
+
 iconv-lite@0.4.23:
   version "0.4.23"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.23.tgz#297871f63be507adcfbfca715d0cd0eed84e9a63"
@@ -3567,6 +3678,11 @@ is-fullwidth-code-point@^2.0.0:
   resolved "https://registry.yarnpkg.com/is-fullwidth-code-point/-/is-fullwidth-code-point-2.0.0.tgz#a3b30a5c4f199183167aaab93beefae3ddfb654f"
   integrity sha1-o7MKXE8ZkYMWeqq5O+764937ZU8=
 
+is-function@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/is-function/-/is-function-1.0.1.tgz#12cfb98b65b57dd3d193a3121f5f6e2f437602b5"
+  integrity sha1-Es+5i2W1fdPRk6MSH19uL0N2ArU=
+
 is-glob@^2.0.0, is-glob@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/is-glob/-/is-glob-2.0.1.tgz#d096f926a3ded5600f3fdfd91198cb0888c2d863"
@@ -3587,6 +3703,11 @@ is-glob@^4.0.0:
   integrity sha1-lSHHaEXMJhCoUgPd8ICpWML/q8A=
   dependencies:
     is-extglob "^2.1.1"
+
+is-in-browser@^1.0.2, is-in-browser@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/is-in-browser/-/is-in-browser-1.1.3.tgz#56ff4db683a078c6082eb95dad7dc62e1d04f835"
+  integrity sha1-Vv9NtoOgeMYILrldrX3GLh0E+DU=
 
 is-number@^2.0.2, is-number@^2.1.0:
   version "2.1.0"
@@ -3805,6 +3926,93 @@ jsprim@^1.2.2:
     extsprintf "1.3.0"
     json-schema "0.2.3"
     verror "1.10.0"
+
+jss-camel-case@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/jss-camel-case/-/jss-camel-case-6.1.0.tgz#ccb1ff8d6c701c02a1fed6fb6fb6b7896e11ce44"
+  integrity sha512-HPF2Q7wmNW1t79mCqSeU2vdd/vFFGpkazwvfHMOhPlMgXrJDzdj9viA2SaHk9ZbD5pfL63a8ylp4++irYbbzMQ==
+  dependencies:
+    hyphenate-style-name "^1.0.2"
+
+jss-compose@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/jss-compose/-/jss-compose-5.0.0.tgz#ce01b2e4521d65c37ea42cf49116e5f7ab596484"
+  integrity sha512-YofRYuiA0+VbeOw0VjgkyO380sA4+TWDrW52nSluD9n+1FWOlDzNbgpZ/Sb3Y46+DcAbOS21W5jo6SAqUEiuwA==
+  dependencies:
+    warning "^3.0.0"
+
+jss-default-unit@^8.0.2:
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/jss-default-unit/-/jss-default-unit-8.0.2.tgz#cc1e889bae4c0b9419327b314ab1c8e2826890e6"
+  integrity sha512-WxNHrF/18CdoAGw2H0FqOEvJdREXVXLazn7PQYU7V6/BWkCV0GkmWsppNiExdw8dP4TU1ma1dT9zBNJ95feLmg==
+
+jss-expand@^5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/jss-expand/-/jss-expand-5.3.0.tgz#02be076efe650125c842f5bb6fb68786fe441ed6"
+  integrity sha512-NiM4TbDVE0ykXSAw6dfFmB1LIqXP/jdd0ZMnlvlGgEMkMt+weJIl8Ynq1DsuBY9WwkNyzWktdqcEW2VN0RAtQg==
+
+jss-extend@^6.2.0:
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/jss-extend/-/jss-extend-6.2.0.tgz#4af09d0b72fb98ee229970f8ca852fec1ca2a8dc"
+  integrity sha512-YszrmcB6o9HOsKPszK7NeDBNNjVyiW864jfoiHoMlgMIg2qlxKw70axZHqgczXHDcoyi/0/ikP1XaHDPRvYtEA==
+  dependencies:
+    warning "^3.0.0"
+
+jss-global@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/jss-global/-/jss-global-3.0.0.tgz#e19e5c91ab2b96353c227e30aa2cbd938cdaafa2"
+  integrity sha512-wxYn7vL+TImyQYGAfdplg7yaxnPQ9RaXY/cIA8hawaVnmmWxDHzBK32u1y+RAvWboa3lW83ya3nVZ/C+jyjZ5Q==
+
+jss-nested@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/jss-nested/-/jss-nested-6.0.1.tgz#ef992b79d6e8f63d939c4397b9d99b5cbbe824ca"
+  integrity sha512-rn964TralHOZxoyEgeq3hXY8hyuCElnvQoVrQwKHVmu55VRDd6IqExAx9be5HgK0yN/+hQdgAXQl/GUrBbbSTA==
+  dependencies:
+    warning "^3.0.0"
+
+jss-preset-default@^4.3.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/jss-preset-default/-/jss-preset-default-4.5.0.tgz#d3a457012ccd7a551312014e394c23c4b301cadd"
+  integrity sha512-qZbpRVtHT7hBPpZEBPFfafZKWmq3tA/An5RNqywDsZQGrlinIF/mGD9lmj6jGqu8GrED2SMHZ3pPKLmjCZoiaQ==
+  dependencies:
+    jss-camel-case "^6.1.0"
+    jss-compose "^5.0.0"
+    jss-default-unit "^8.0.2"
+    jss-expand "^5.3.0"
+    jss-extend "^6.2.0"
+    jss-global "^3.0.0"
+    jss-nested "^6.0.1"
+    jss-props-sort "^6.0.0"
+    jss-template "^1.0.1"
+    jss-vendor-prefixer "^7.0.0"
+
+jss-props-sort@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/jss-props-sort/-/jss-props-sort-6.0.0.tgz#9105101a3b5071fab61e2d85ea74cc22e9b16323"
+  integrity sha512-E89UDcrphmI0LzmvYk25Hp4aE5ZBsXqMWlkFXS0EtPkunJkRr+WXdCNYbXbksIPnKlBenGB9OxzQY+mVc70S+g==
+
+jss-template@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/jss-template/-/jss-template-1.0.1.tgz#09aed9d86cc547b07f53ef355d7e1777f7da430a"
+  integrity sha512-m5BqEWha17fmIVXm1z8xbJhY6GFJxNB9H68GVnCWPyGYfxiAgY9WTQyvDAVj+pYRgrXSOfN5V1T4+SzN1sJTeg==
+  dependencies:
+    warning "^3.0.0"
+
+jss-vendor-prefixer@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/jss-vendor-prefixer/-/jss-vendor-prefixer-7.0.0.tgz#0166729650015ef19d9f02437c73667231605c71"
+  integrity sha512-Agd+FKmvsI0HLcYXkvy8GYOw3AAASBUpsmIRvVQheps+JWaN892uFOInTr0DRydwaD91vSSUCU4NssschvF7MA==
+  dependencies:
+    css-vendor "^0.3.8"
+
+jss@^9.7.0:
+  version "9.8.7"
+  resolved "https://registry.yarnpkg.com/jss/-/jss-9.8.7.tgz#ed9763fc0f2f0260fc8260dac657af61e622ce05"
+  integrity sha512-awj3XRZYxbrmmrx9LUSj5pXSUfm12m8xzi/VKeqI1ZwWBtQ0kVPTs3vYs32t4rFw83CgFDukA8wKzOE9sMQnoQ==
+  dependencies:
+    is-in-browser "^1.1.3"
+    symbol-observable "^1.1.0"
+    warning "^3.0.0"
 
 keypress@0.1.x:
   version "0.1.0"
@@ -5211,6 +5419,15 @@ prop-types@^15.0.0, prop-types@^15.5.7, prop-types@^15.5.8, prop-types@^15.6.1, 
     loose-envify "^1.3.1"
     object-assign "^4.1.1"
 
+prop-types@^15.6.0:
+  version "15.7.2"
+  resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
+  integrity sha512-8QQikdH7//R2vurIJSutZ1smHYTcLpRWEOlHnzcWHmBYrOGUysKwSsrC89BCiFj3CbrfJ/nXFdJepOVrY1GCHQ==
+  dependencies:
+    loose-envify "^1.4.0"
+    object-assign "^4.1.1"
+    react-is "^16.8.1"
+
 proto-list@~1.2.1:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/proto-list/-/proto-list-1.2.4.tgz#212d5bfe1318306a420f6402b8e26ff39647a849"
@@ -5368,6 +5585,11 @@ react-is@^16.3.2, react-is@^16.6.3:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.7.0.tgz#c1bd21c64f1f1364c6f70695ec02d69392f41bfa"
   integrity sha512-Z0VRQdF4NPDoI0tsXVMLkJLiwEBa+RP66g0xDHxgxysxSoCUccSten4RTF/UFvZF1dZvZ9Zu1sx+MDXwcOR34g==
 
+react-is@^16.8.1:
+  version "16.8.6"
+  resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.8.6.tgz#5bbc1e2d29141c9fbdfed456343fe2bc430a6a16"
+  integrity sha512-aUk3bHfZ2bRSVFFbbeVS4i+lNPZr3/WM5jT2J5omUVV1zzcs1nAaf3l51ctA5FFvCRbhrH0bdAsRRQddFJZPtA==
+
 react-json-tree@*:
   version "0.11.1"
   resolved "https://registry.yarnpkg.com/react-json-tree/-/react-json-tree-0.11.1.tgz#81c789ce95e9982dc09e234c7c83f34f160c106c"
@@ -5385,6 +5607,17 @@ react-json-tree@^0.11.0:
     babel-runtime "^6.6.1"
     prop-types "^15.5.8"
     react-base16-styling "^0.5.1"
+
+react-jss@8.6.1:
+  version "8.6.1"
+  resolved "https://registry.yarnpkg.com/react-jss/-/react-jss-8.6.1.tgz#a06e2e1d2c4d91b4d11befda865e6c07fbd75252"
+  integrity sha512-SH6XrJDJkAphp602J14JTy3puB2Zxz1FkM3bKVE8wON+va99jnUTKWnzGECb3NfIn9JPR5vHykge7K3/A747xQ==
+  dependencies:
+    hoist-non-react-statics "^2.5.0"
+    jss "^9.7.0"
+    jss-preset-default "^4.3.0"
+    prop-types "^15.6.0"
+    theming "^1.3.0"
 
 react-pure-render@^1.0.2:
   version "1.0.2"
@@ -6365,7 +6598,7 @@ supports-color@^5.3.0, supports-color@^5.4.0:
   dependencies:
     has-flag "^3.0.0"
 
-symbol-observable@^1.0.2, symbol-observable@^1.2.0:
+symbol-observable@^1.0.2, symbol-observable@^1.1.0, symbol-observable@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.2.0.tgz#c22688aed4eab3cdc2dfeacbb561660560a00804"
   integrity sha512-e900nM8RRtGhlV36KGEU9k65K3mPb1WV70OdjfxlG2EAuM1noi/E/BaW/uMhL7bPEssK8QV57vN3esixjUvcXQ==
@@ -6413,6 +6646,16 @@ text-extensions@^1.0.0:
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/text-extensions/-/text-extensions-1.9.0.tgz#1853e45fee39c945ce6f6c36b2d659b5aabc2a26"
   integrity sha512-wiBrwC1EhBelW12Zy26JeOUkQ5mRu+5o8rpsJk5+2t+Y5vE7e842qtZDQ2g1NpX/29HdyFeJ4nSIhI47ENSxlQ==
+
+theming@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/theming/-/theming-1.3.0.tgz#286d5bae80be890d0adc645e5ca0498723725bdc"
+  integrity sha512-ya5Ef7XDGbTPBv5ENTwrwkPUexrlPeiAg/EI9kdlUAZhNlRbCdhMKRgjNX1IcmsmiPcqDQZE6BpSaH+cr31FKw==
+  dependencies:
+    brcast "^3.0.1"
+    is-function "^1.0.1"
+    is-plain-object "^2.0.1"
+    prop-types "^15.5.8"
 
 through2@^2.0.0, through2@^2.0.2:
   version "2.0.5"
@@ -6562,6 +6805,11 @@ typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
+
+typesafe-actions@4.2.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/typesafe-actions/-/typesafe-actions-4.2.1.tgz#b794e141abcc05195df20ee340038fbd60ad2262"
+  integrity sha512-a+HpDcVl+hRxQS3u83vh3X2ga967b/3TwiFbcqlDOkMSsJTFwzahObsGWuTiSISjSvLKrx0ckeYheLUzti4kYw==
 
 typescript@*:
   version "3.2.2"

@@ -59,8 +59,8 @@
 			{
 				"type": "chrome",
 				"request": "launch",
-				"name": "Launch Chrome against localhost",
-				"url": "http://localhost:8080",
+				"name": "Sample App",
+				"url": "http://localhost:4444",
 				"webRoot": "${workspaceFolder:abus-react-sample}"
 			},
 			{

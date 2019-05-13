@@ -2,7 +2,6 @@ import * as React from "react";
 import { createStore, applyMiddleware } from "redux";
 import { Provider } from "react-redux";
 import { createLogger } from "redux-logger";
-import thunk from "redux-thunk";
 import reducer from "./reducers";
 import { getAllProducts } from "./actions";
 import { Bus } from "abus";
@@ -12,20 +11,19 @@ import reduxAbusMiddleware from "redux-abus";
 import reduxAbusThunkMiddleware from "redux-abus-thunk";
 import { MessageTracingTask } from "../abus-tracing/MessageTracingTask";
 import { MessagePerformanceTask } from "../abus-tracing/MessagePerformanceTask";
-import { DevTools, DevToolsTask } from "abus-devtools";
+import { DevTools2, DevToolsTask, AbusMonitorTask } from "abus-devtools";
 
 const bus = new Bus();
-const busDevTools = new Bus();
-busDevTools.start();
+const busForDevTools = new Bus();
+busForDevTools.start();
 bus.start();
 bus.usingRegisteredTransportToMessageType("*")
   .outboundPipeline.useLocalMessagesReceivedTasks(new MessageTracingTask()).andAlso()
-  .inboundPipeline.useTransportMessageReceivedTasks(new DevToolsTask(busDevTools)).andAlso()
+  // .inboundPipeline.useTransportMessageReceivedTasks(new DevToolsTask(busForDevTools)).andAlso()
+  .inboundPipeline.useTransportMessageReceivedTasks(new AbusMonitorTask(busForDevTools)).andAlso()
   .inboundPipeline.useLocalMessagesReceivedTasks(new MessagePerformanceTask());
 
-debugger;
-const devTools = <DevTools bus={busDevTools} />;
-
+const devTools = <DevTools2 bus={busForDevTools} toggleVisibilityKey="ctrl-h" />;
 
 const middleWareTest = store => next => action => {
   action.before = "x";
