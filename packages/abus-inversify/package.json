@@ -1,6 +1,6 @@
 {
   "name": "abus-inversify",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "Provides support for the Inversify IoC when registering class handlers",
   "author": "Garry McGlennon",
   "types": "dist/src/index.d.ts",

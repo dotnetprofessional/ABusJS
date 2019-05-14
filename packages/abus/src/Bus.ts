@@ -153,7 +153,7 @@ export class Bus implements IBus {
                     for (let key in classHandler) {
                         const handlers = classHandler[key];
                         if (typeof handlers === "function" &&
-                            handlers.prototype.__messageHandlers) {
+                            handlers.prototype && handlers.prototype.__messageHandlers) {
                             this.registerClassHandler(handlers.prototype, classHandler[key]);
                         }
                     }
