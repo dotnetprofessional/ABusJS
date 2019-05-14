@@ -1,6 +1,6 @@
 {
   "name": "abus-devtools",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.3",
   "description": "Provides a set of tools to visualize a running application based on the Abus library.",
   "author": "Garry McGlennon",
   "ts:main": "src/index.ts",
@@ -34,26 +34,26 @@
   },
   "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-devtools#readme",
   "dependencies": {
-    "react-dock": "*",
     "@syncfusion/ej2-react-diagrams": "*",
     "@syncfusion/ej2-react-navigations": "",
-    "react-json-tree": "*",
-    "parse-key": "*",
-    "typesafe-actions": "4.2.1",
     "debounce": "1.2.0",
-    "react-jss": "8.6.1"
+    "parse-key": "*",
+    "react-dock": "*",
+    "react-json-tree": "*",
+    "react-jss": "8.6.1",
+    "typesafe-actions": "4.2.1"
   },
   "peerDependencies": {
-    "abus": "0.6.0-alpha.2",
-    "redux-abus": "0.1.0-alpha.3",
+    "abus": "0.6.0-alpha.4",
     "react": "*",
     "react-dom": "^16.6.3",
     "react-redux": "^6.0.0",
-    "redux": "^4.0.1"
+    "redux": "^4.0.1",
+    "redux-abus": "0.1.0-alpha.4"
   },
   "devDependencies": {
+    "cpx": "1.5.0",
     "mocha": "^5.2.0",
-    "rimraf": "2.6.3",
-    "cpx": "1.5.0"
+    "rimraf": "2.6.3"
   }
 }

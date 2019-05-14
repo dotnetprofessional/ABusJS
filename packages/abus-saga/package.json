@@ -1,6 +1,6 @@
 {
   "name": "abus-saga",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.3",
   "description": "A message-driven state machine that persist shared state. Sagas represent a business process where multiple related messages can trigger state changes.",
   "author": "Garry McGlennon",
   "ts:main": "src/index.ts",
@@ -31,16 +31,15 @@
     "url": "https://github.com/dotnetprofessional/ABusJS/issues"
   },
   "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-saga#readme",
-  "dependencies": {},
   "peerDependencies": {
-    "abus": "0.6.0-alpha.2",
+    "abus": "0.6.0-alpha.4",
     "abus-bubbles": "0.1.0-alpha.2"
   },
   "devDependencies": {
-    "abus": "0.6.0-alpha.2",
-    "abus-bubbles": "0.1.0-alpha.3",
+    "abus": "0.6.0-alpha.4",
+    "abus-bubbles": "^0.1.0-alpha.4",
+    "cpx": "1.5.0",
     "mocha": "^5.2.0",
-    "rimraf": "2.6.3",
-    "cpx": "1.5.0"
+    "rimraf": "2.6.3"
   }
 }

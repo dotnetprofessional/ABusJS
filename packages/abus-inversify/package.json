@@ -1,6 +1,6 @@
 {
   "name": "abus-inversify",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.3",
   "description": "Provides support for the Inversify IoC when registering class handlers",
   "author": "Garry McGlennon",
   "types": "dist/src/index.d.ts",
@@ -28,17 +28,16 @@
     "url": "https://github.com/dotnetprofessional/ABusJS/issues"
   },
   "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-inversify#readme",
-  "dependencies": {},
   "devDependencies": {
-    "mocha": "^5.2.0",
-    "rimraf": "2.6.3",
+    "abus": "0.6.0-alpha.4",
     "cpx": "1.5.0",
-    "abus": "0.6.0-alpha.2",
     "inversify": "^5.0.1",
-    "reflect-metadata": "^0.1.13"
+    "mocha": "^5.2.0",
+    "reflect-metadata": "^0.1.13",
+    "rimraf": "2.6.3"
   },
   "peerDependencies": {
-    "abus": "0.6.0-alpha.2",
+    "abus": "0.6.0-alpha.4",
     "inversify": "^5.0.1",
     "reflect-metadata": "^0.1.13"
   }
