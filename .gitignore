@@ -3,6 +3,7 @@ dist
 typings
 coverage
 compile
+release
 out
 /.vs
 *.user
@@ -10,3 +11,4 @@ npm-debug.log
 *.tgz
 *.log
 /build
+.fusebox

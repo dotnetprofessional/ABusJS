@@ -1,13 +1,14 @@
 {
   "name": "abus",
-  "version": "0.4.1",
+  "version": "0.6.0-alpha.4",
   "author": "Garry McGlennon",
   "description": "A service bus implementation for javascript.",
   "repository": {
     "url": ""
   },
-  "main": "release/index.js",
-  "typings": "release/index.d.ts",
+  "main": "dist/src/index.js",
+  "typings": "dist/src/index.d.ts",
+  "ts:main": "src/index.ts",
   "keywords": [
     "abus",
     "service bus",
@@ -17,28 +18,21 @@
     "node": "*"
   },
   "scripts": {
-    "pretest": "tsc -p .",
-    "test": "mocha --recursive compile/Tests/",
+    "test": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=+summary+list+headers\" --recursive dist/Features/",
+    "test-spec": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=spec+summary+list\" --recursive dist/Features/",
     "release-web": "npm run compile-web && npm run compile-web-minify",
-    "compile-web": "rimraf out && tsc -p tsconfig.web.json",
-    "compile-web-minify": "uglifyjs out/abus.js --output out/abus.min.js --compress dead_code,drop_debugger,conditionals,booleans,loops,properties,drop_console --mangle --wrap abus",
-    "release": "rimraf release && tsc -d -t ES5 -p tsconfig.npm.json",
-    "prepublish": "npm run release"
-  },
-  "devDependencies": {
-    "@types/chai": "^3.4.35",
-    "@types/mocha": "^2.2.40",
-    "@types/node": "^7.0.5",
-    "@types/sinon": "^1.16.35",
-    "chai": "^3.5.0",
-    "mocha": "^3.2.0",
-    "rimraf": "^2.6.1",
-    "sinon": "^2.0.0",
-    "tslint": "^4.4.2",
-    "uglify-js": "^2.8.7"
+    "compile-web": "rimraf dist && tsc -p tsconfig.web.json",
+    "compile-web-minify": "uglifyjs dist/abus.js --output dist/abus.min.js --compress dead_code,drop_debugger,conditionals,booleans,loops,properties,drop_console --mangle --wrap abus",
+    "clean": "rimraf dist",
+    "watch": "tsc -b --watch",
+    "pack": "npm pack && cpx *.tgz ../../releases"
   },
   "dependencies": {
-    "tslib": "^1.6.0",
-    "typescript": "2.2.2"
+    "tslib": "1.9.3"
+  },
+  "devDependencies": {
+    "cpx": "1.5.0",
+    "mocha": "^5.2.0",
+    "rimraf": "2.6.3"
   }
 }

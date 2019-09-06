@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig.settings.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "jsx": "react"
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "features/**/*.ts",
+    "features/**/*.tsx"
+  ],
+  "references": [
+    {
+      "path": "../abus"
+    },
+    {
+      "path": "../redux-abus"
+    }
+  ]
+}

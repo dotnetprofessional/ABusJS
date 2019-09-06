@@ -1,0 +1,29 @@
+{
+    "files": [],
+    "references": [
+        {
+            "path": "abus"
+        },
+        {
+            "path": "abus-bubbles"
+        },
+        {
+            "path": "abus-inversify"
+        },
+        {
+            "path": "abus-visualizations"
+        },
+        {
+            "path": "abus-devtools"
+        },
+        {
+            "path": "abus-saga"
+        },
+        {
+            "path": "redux-abus"
+        },
+        {
+            "path": "redux-abus-thunk"
+        }
+    ]
+}

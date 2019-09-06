@@ -1,14 +1,17 @@
 {
-    "extends": "./tsconfig.base.json",
+    "extends": "../tsconfig.settings.json",
     "compilerOptions": {
         "target": "es5",
         "lib": [
             "es5",
-            "ES2015.Promise"
+            "es2015.promise",
+            "es2015.core"
         ],
         "module": "System",
-        "outFile": "out/abus.js",
-        "importHelpers": false,
-        "declaration": false
-    }
+        "outFile": "dist/abus.js",
+        "importHelpers": false
+    },
+    "include": [
+        "src/**/*.ts"
+    ]
 }

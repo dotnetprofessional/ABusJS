@@ -1,5 +1,0 @@
-[
-    "StartOrderCommand_Handler with data.orderId = 123 and message.orderId = 123",
-    "PaymentTransactionCompletedCommand_Handler with data.orderId = 123 and message.paymentTransactionId true",
-    "CompleteOrderCommand_Handler with data.orderId = 123 and message.orderId = 123"
-]

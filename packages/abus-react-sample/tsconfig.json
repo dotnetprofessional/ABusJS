@@ -1,0 +1,21 @@
+{
+    "extends": "../tsconfig.settings.json",
+    "compilerOptions": {},
+    "include": [
+        "src/**/*.ts"
+    ],
+    "references": [
+        {
+            "path": "../abus"
+        },
+        {
+            "path": "../abus-devtools"
+        },
+        {
+            "path": "../redux-abus"
+        },
+        {
+            "path": "../redux-abus-thunk"
+        }
+    ]
+}

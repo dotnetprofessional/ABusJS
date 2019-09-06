@@ -1,0 +1,59 @@
+{
+  "name": "abus-devtools",
+  "version": "0.1.0-alpha.3",
+  "description": "Provides a set of tools to visualize a running application based on the Abus library.",
+  "author": "Garry McGlennon",
+  "ts:main": "src/index.ts",
+  "types": "dist/src/index.d.ts",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "_test": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=+summary+list\" --recursive dist/Features/",
+    "test-spec": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=spec+summary+list\" --recursive dist/Features/",
+    "prepublishOnly": "npm run copy-resources && tsc -b .",
+    "watch": "tsc -b --watch",
+    "clean": "rimraf dist",
+    "copy-resources": "node -e require('fs').copyFileSync('src/devTools.scss','dist/src/devTools.scss')",
+    "prepack": "npm run copy-resources",
+    "pack": "npm pack && cpx *.tgz ../../releases"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dotnetprofessional/ABusJS.git"
+  },
+  "keywords": [
+    "abus",
+    "visualizations",
+    "BDD",
+    "testing",
+    "messaging",
+    "TypeScript"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dotnetprofessional/ABusJS/issues"
+  },
+  "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-devtools#readme",
+  "dependencies": {
+    "@syncfusion/ej2-react-diagrams": "*",
+    "@syncfusion/ej2-react-navigations": "",
+    "debounce": "1.2.0",
+    "parse-key": "*",
+    "react-dock": "*",
+    "react-json-tree": "*",
+    "react-jss": "8.6.1",
+    "typesafe-actions": "4.2.1"
+  },
+  "peerDependencies": {
+    "abus": "0.6.0-alpha.4",
+    "react": "*",
+    "react-dom": "^16.6.3",
+    "react-redux": "^6.0.0",
+    "redux": "^4.0.1",
+    "redux-abus": "0.1.0-alpha.4"
+  },
+  "devDependencies": {
+    "cpx": "1.5.0",
+    "mocha": "^5.2.0",
+    "rimraf": "2.6.3"
+  }
+}

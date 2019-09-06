@@ -1,7 +1,0 @@
-
-
-0.4.0   *** BREAKING CHANGE ***
-        * Existing code will need to change @iHandleMessages to @iHandleMessages()
-        Added ability to handle mangling. When mangling code like is done in React-Native release builds, you need to add the
-        @namespace decorator to all your messages when defining them as classes.
-        Issues: #26, 25

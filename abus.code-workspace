@@ -1,0 +1,168 @@
+{
+	"folders": [
+		{
+			"path": "packages\\abus-react-sample"
+		},
+		{
+			"path": "packages\\abus-sample-logic"
+		},
+		{
+			"path": "packages\\abus"
+		},
+		{
+			"path": "packages\\abus-bubbles"
+		},
+		{
+			"path": "packages\\abus-devtools"
+		},
+		{
+			"path": "packages\\abus-saga"
+		},
+		{
+			"path": "packages\\abus-inversify"
+		},
+		{
+			"path": "packages\\abus-visualizations"
+		},
+		{
+			"path": "packages\\redux-abus"
+		},
+		{
+			"path": "packages\\redux-abus-thunk"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"typescript.tsdk": "./node_modules/typescript/lib",
+		"cSpell.words": [
+			"Abus",
+			"Guid",
+			"Hashtable",
+			"Timespan",
+			"injectable",
+			"inversify",
+			"livedoc",
+			"serializable",
+			"yxxx"
+		],
+		"files.exclude": {
+			"node_modules": true,
+			"dist": true,
+			"lib": true,
+			".fusebox": true
+		}
+	},
+	"launch": {
+		"configurations": [
+			{
+				"type": "chrome",
+				"request": "launch",
+				"name": "Sample App",
+				"url": "http://localhost:4444",
+				"webRoot": "${workspaceFolder:abus-react-sample}"
+			},
+			{
+				"name": "ABus",
+				"type": "node",
+				"request": "launch",
+				"program": "${workspaceFolder:abus}/node_modules/mocha/bin/_mocha",
+				"args": [
+					"--ui",
+					"livedoc-mocha",
+					"--reporter",
+					"livedoc-mocha/livedoc-spec",
+					"-O",
+					"detailLevel=summary+list",
+					"--timeout",
+					"999999",
+					"--colors",
+					"${workspaceFolder:abus}/dist/features/**/*.Spec.js"
+				],
+				"internalConsoleOptions": "openOnSessionStart",
+				"smartStep": true,
+				"sourceMaps": true,
+				"skipFiles": [
+					"node_modules/**/*.js"
+				]
+			},
+			{
+				"name": "ABus Inversify",
+				"type": "node",
+				"request": "launch",
+				"program": "${workspaceFolder:abus}/node_modules/mocha/bin/_mocha",
+				"args": [
+					"--ui",
+					"livedoc-mocha",
+					"--reporter",
+					"livedoc-mocha/livedoc-spec",
+					"-O",
+					"detailLevel=summary+list",
+					"--timeout",
+					"999999",
+					"--colors",
+					"${workspaceFolder:abus-inversify}/dist/features/**/*.Spec.js"
+				],
+				"internalConsoleOptions": "openOnSessionStart",
+				"smartStep": true,
+				"sourceMaps": true,
+				"skipFiles": [
+					"node_modules/**/*.js"
+				]
+			},
+			{
+				"name": "Bubbles",
+				"type": "node",
+				"request": "launch",
+				"program": "${workspaceFolder:abus-bubbles}/node_modules/mocha/bin/_mocha",
+				"args": [
+					"--ui",
+					"livedoc-mocha",
+					"--reporter",
+					"livedoc-mocha/livedoc-spec",
+					"-O",
+					"detailLevel=summary+list",
+					"--timeout",
+					"999999",
+					"--colors",
+					"${workspaceFolder:abus-bubbles}/dist/features/**/*.Spec.js"
+				],
+				"internalConsoleOptions": "openOnSessionStart",
+				"smartStep": true,
+				"sourceMaps": true,
+				"outFiles": [
+					"${workspaceFolder:abus-bubbles}/dist/**/*.js"
+				],
+				"skipFiles": [
+					"node_modules/**/*.js"
+				]
+			},
+			{
+				"name": "Visualizations",
+				"type": "node",
+				"request": "launch",
+				"program": "${workspaceFolder:abus-visualizations}/node_modules/mocha/bin/_mocha",
+				"args": [
+					"--ui",
+					"livedoc-mocha",
+					"--reporter",
+					"livedoc-mocha/livedoc-spec",
+					"-O",
+					"detailLevel=summary+list",
+					"--timeout",
+					"999999",
+					"--colors",
+					"${workspaceFolder:abus-visualizations}/dist/features/**/*.Spec.js"
+				],
+				"internalConsoleOptions": "openOnSessionStart",
+				"smartStep": true,
+				"sourceMaps": true,
+				"skipFiles": [
+					"node_modules/**/*.js"
+				]
+			}
+		],
+		"compounds": []
+	}
+}

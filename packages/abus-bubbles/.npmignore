@@ -1,0 +1,6 @@
+/.idea
+features
+.vscode
+wallaby.js
+*.tgz
+/images

@@ -1,0 +1,40 @@
+{
+  "name": "redux-abus-thunk",
+  "version": "0.1.0-alpha.2",
+  "description": "A replacement for redux-thunk when using the ABus messaging library",
+  "author": "Garry McGlennon",
+  "types": "dist/src/index.d.ts",
+  "main": "dist/src/index.js",
+  "ts:main": "src/index.ts",
+  "scripts": {
+    "prepublishOnly": "npm run release",
+    "watch": "tsc -b --watch",
+    "release": "tsc -b",
+    "pack": "npm pack && cpx *.tgz ../../releases"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dotnetprofessional/ABusJS.git"
+  },
+  "keywords": [
+    "abus",
+    "react",
+    "redux",
+    "redux-thunk",
+    "messaging",
+    "TypeScript"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dotnetprofessional/ABusJS/issues"
+  },
+  "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/redux-abus-thunk#readme",
+  "devDependencies": {
+    "mocha": "^5.2.0"
+  },
+  "peerDependencies": {
+    "abus": "0.6.0-alpha.4",
+    "cpx": "1.5.0",
+    "rimraf": "2.6.3"
+  }
+}

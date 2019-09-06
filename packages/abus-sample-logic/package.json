@@ -1,0 +1,46 @@
+{
+  "name": "abus-sample-logic",
+  "version": "0.1.0-alpha.2",
+  "description": "The business logic for the abus-sample. This logic is UI agnostic",
+  "author": "Garry McGlennon",
+  "ts:main": "src/index.ts",
+  "types": "dist/src/index.d.ts",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "test": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=+summary+list\" --recursive dist/Features/",
+    "test-spec": "mocha --colors --ui livedoc-mocha --reporter livedoc-mocha/livedoc-spec -O \"detailLevel=spec+summary+list\" --recursive dist/Features/",
+    "prepublishOnly": "tsc -b .",
+    "watch": "tsc -b --watch",
+    "clean": "rimraf dist",
+    "pack": "npm pack && cpx *.tgz ../../releases"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dotnetprofessional/ABusJS.git"
+  },
+  "keywords": [
+    "abus",
+    "bubbles",
+    "BDD",
+    "testing",
+    "messaging",
+    "TypeScript"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dotnetprofessional/ABusJS/issues"
+  },
+  "homepage": "https://github.com/dotnetprofessional/ABusJS/tree/master/packages/abus-sample-logic#readme",
+  "dependencies": {
+    "abus": "0.6.0-alpha.4",
+    "abus-bubbles": "^0.1.0-alpha.4"
+  },
+  "peerDependencies": {
+    "abus": "0.6.0-alpha.4"
+  },
+  "devDependencies": {
+    "cpx": "1.5.0",
+    "mocha": "^5.2.0",
+    "rimraf": "2.6.3"
+  }
+}

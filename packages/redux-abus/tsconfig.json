@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.settings.json",
+  "compilerOptions": {
+    "outDir": "dist"
+  },
+  "include": [
+    "src/**/*.ts",
+    "Features/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../abus"
+    }
+  ]
+}
