@@ -1,3 +1,17 @@
+> These docs reference the updated abus-0.6.0-alpha.4 release. This has not yet been published to npm. This version is a complete rewrite of the original. This version is mostly backward compatable, but adds a lot more features.
+
+# ABus components
+
+* [Abus](/packages/abus): Core library for message based communication.
+* [Redux Thunk](/packages/redux-abus-thunk): Provides a drop in replacement for the redux-thunk library to integrate Abus with redux.
+* [Redux](/packages/redux-abus): Provides support to power redux reducers via Abus messaging. This is a drop in replacement requiring no changes to existing applications.
+* [Dev Tools](/packages/abus-devtools): Adds visualizations of message flows in real time. See sample project too.
+* [Inversify IoC Support](/packages/abus-inversify): Adds Inversify IoC support.
+* [Bubbles](/packages/abus-bubbles): A declarative way to test message based systems inspired by marble diagrams.
+* [Sagas](/packages/abus-saga): An implementation of the Saga pattern aka Process Manager.
+* [Visualizations](/packages/abus-visualizations): Provides ability to visualize message flows as Sequence Diagrams, Process Flows and Message Flows.
+* [Sample](/packages/abus-react-sample): Provides samples on how Abus can be integrated into existing react redux applications.
+
 # ABus
 _A transport agnostic messaging API for javascript_
 
